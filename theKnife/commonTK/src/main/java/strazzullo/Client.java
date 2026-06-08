@@ -86,11 +86,11 @@ public class Client extends User {
     /**
      * Returns the specific role of this user.
      *
-     * @return "Client"
+     * @return "Cliente"
      */
     @Override
-    public String getRuolo() {
-        return "Client";
+    public String getRole() {
+        return "Cliente";
     }
 
     /**

@@ -252,7 +252,7 @@ public abstract class User implements Serializable {
      *
      * @return
      */
-    public abstract String getRuolo();
+    public abstract String getRole();
 
     /**
      * Function to see user details

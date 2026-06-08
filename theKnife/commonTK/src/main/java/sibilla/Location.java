@@ -21,11 +21,6 @@ public class Location implements java.io.Serializable {
     @Serial // Compiler annotation
     private static final long serialVersionUID = 1L;
 
-    // Enum visible only in the Location class, used by the hashmap that indicates the opening times.
-    public enum Day {
-        monday, tuesday, wednesday, thursday, friday, saturday, sunday
-    }
-
     private String id;
     private String country, city, address;
     private Float latitude, longitude;

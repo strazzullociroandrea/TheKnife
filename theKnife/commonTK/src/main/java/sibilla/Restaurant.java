@@ -26,23 +26,24 @@ public class Restaurant implements Serializable {
     /**
      * An empty constructor for a restaurant. Nothing is passed to it.
      */
-    public Restaurant(){
-         id = UUID.randomUUID().toString();
-         name = "";
-         cuisine = null;
-         owners = new ArrayList<>();
-         locations = new ArrayList<>();
+    public Restaurant() {
+        id = UUID.randomUUID().toString();
+        name = "";
+        cuisine = null;
+        owners = new ArrayList<>();
+        locations = new ArrayList<>();
     }
 
     /**
      * Declares a restaurant.
+     *
      * @param id        restaurant's id
      * @param name      restaurant's name
      * @param cuisine   restaurant's type of cuisine
      * @param owners    list of owners
      * @param locations list of various locations of a restaurant
      */
-    public Restaurant(String id, String name, Cuisine cuisine, List<User> owners, List<Location> locations){
+    public Restaurant(String id, String name, Cuisine cuisine, List<User> owners, List<Location> locations) {
         this.id = id;
         this.name = name;
         this.cuisine = cuisine;
@@ -52,13 +53,14 @@ public class Restaurant implements Serializable {
 
     /**
      * Declares a restaurant with only one owner
+     *
      * @param id        restaurant's id
      * @param name      restaurant's name
      * @param cuisine   restaurant's type of cuisine
      * @param owner     initializes the list and adds owner
      * @param locations list of locations
      */
-    public Restaurant(String id, String name, Cuisine cuisine, User owner, List<Location> locations){
+    public Restaurant(String id, String name, Cuisine cuisine, User owner, List<Location> locations) {
         this.id = id;
         this.name = name;
         this.cuisine = cuisine;
@@ -69,6 +71,7 @@ public class Restaurant implements Serializable {
 
     /**
      * getId
+     *
      * @return returns id
      */
     public String getId() {
@@ -77,6 +80,7 @@ public class Restaurant implements Serializable {
 
     /**
      * setId
+     *
      * @param id sets id
      */
     public void setId(String id) {
@@ -85,6 +89,7 @@ public class Restaurant implements Serializable {
 
     /**
      * getName
+     *
      * @return returns name
      */
     public String getName() {
@@ -93,6 +98,7 @@ public class Restaurant implements Serializable {
 
     /**
      * setName
+     *
      * @param name sets name
      */
     public void setName(String name) {
@@ -101,6 +107,7 @@ public class Restaurant implements Serializable {
 
     /**
      * getCuisine
+     *
      * @return returns cuisine
      */
     public Cuisine getCuisine() {
@@ -109,6 +116,7 @@ public class Restaurant implements Serializable {
 
     /**
      * setCuisine
+     *
      * @param cuisine sets cuisine
      */
     public void setCuisine(Cuisine cuisine) {
@@ -117,6 +125,7 @@ public class Restaurant implements Serializable {
 
     /**
      * getOwners
+     *
      * @return returns owners
      */
     public List<User> getOwners() {
@@ -125,6 +134,7 @@ public class Restaurant implements Serializable {
 
     /**
      * setOwners
+     *
      * @param owners sets owners
      */
     public void setOwners(List<User> owners) {
@@ -133,6 +143,7 @@ public class Restaurant implements Serializable {
 
     /**
      * getLocations
+     *
      * @return returns locations
      */
     public List<Location> getLocations() {
@@ -141,6 +152,7 @@ public class Restaurant implements Serializable {
 
     /**
      * setLocations
+     *
      * @param locations sets locations
      */
     public void setLocations(List<Location> locations) {

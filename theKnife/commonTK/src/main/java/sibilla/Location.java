@@ -1,4 +1,10 @@
 /**
+ *
+ * Represents a physical location of a restaurant in the TheKnife system.
+ *
+ * Each location contains geographical and operational information for a
+ * specific restaurant branch, including address details and capacity.
+ *
  * @author Sibilla
  * @version 1.0
  */
@@ -10,13 +16,6 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
 
-/*
- * This class can be serialized while connecting from the server to the client
- */
-
-/**
- * Location model, entity of a restaurant location
- */
 public class Location implements java.io.Serializable {
     @Serial // Compiler annotation
     private static final long serialVersionUID = 1L;

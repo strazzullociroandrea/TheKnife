@@ -1,4 +1,14 @@
 /**
+ * Represents a restaurant entity within the TheKnife system.
+ *
+ * This class manages the core information about a restaurant including its name,
+ * type of cuisine, owners, and physical locations. Each restaurant is uniquely
+ * identified by an auto-generated UUID.
+ *
+ * @see User
+ * @see Cuisine
+ * @see Location
+ *
  * @author Sibilla
  * @version 1.0
  */
@@ -11,9 +21,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
-/**
- * Restaurant model, entity of a restaurant
- */
 public class Restaurant implements Serializable {
     @Serial
     private static final long serialVersionUID = 1L;

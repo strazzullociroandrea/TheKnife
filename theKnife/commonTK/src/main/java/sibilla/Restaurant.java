@@ -35,6 +35,43 @@ public class Restaurant {
         this.locations = new ArrayList<>();
     }
 
+    public String getId() {
+        return id;
+    }
 
+    public void setId(String id) {
+        this.id = id;
+    }
 
+    public String getName() {
+        return name;
+    }
+
+    public void setName(String name) {
+        this.name = name;
+    }
+
+    public Cuisine getCuisine() {
+        return cuisine;
+    }
+
+    public void setCuisine(Cuisine cuisine) {
+        this.cuisine = cuisine;
+    }
+
+    public List<User> getOwners() {
+        return owners;
+    }
+
+    public void setOwners(List<User> owners) {
+        this.owners = owners;
+    }
+
+    public List<Venues> getLocations() {
+        return locations;
+    }
+
+    public void setLocations(List<Venues> locations) {
+        this.locations = locations;
+    }
 }

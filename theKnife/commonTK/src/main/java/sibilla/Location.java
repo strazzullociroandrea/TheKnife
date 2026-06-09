@@ -5,7 +5,10 @@
  * Each location contains geographical and operational information for a
  * specific restaurant branch, including address details and capacity.
  *
- * @author Sibilla
+ * @Author Marocco Stefano, 762192, VA
+ * @Author Marin Marco, 760622, VA
+ * @author Sibilla Ginevra, 76114 - author of this file
+ * @Author Strazzullo Ciro Andrea, 763603, VA
  * @version 1.0
  */
 
@@ -20,13 +23,20 @@ public class Location implements java.io.Serializable {
     @Serial // Compiler annotation
     private static final long serialVersionUID = 1L;
 
+    /** Unique identifier for the location */
     private String id;
     private String country, city, address;
     private Float latitude, longitude;
     private int priceRange;
-    private boolean delivery, takeaway;
+    /** Indicates whether delivery service is available at this location */
+    private boolean delivery;
+    /** Indicates whether takeaway service is available at this location */
+    private boolean takeaway;
+    /** Maximum seating capacity at this location */
     private int maxCapacity;
+    /** Indicates whether vegetarian, vegan, gluten-free menu options are available */
     private boolean vegetarianMenu, veganMenu, glutenFreeMenu;
+    /** Map of opening hours for each day of the week */
     private Map<Day, String> openingTimes;
 
     /**

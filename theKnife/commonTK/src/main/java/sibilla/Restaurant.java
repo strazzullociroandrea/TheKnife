@@ -9,7 +9,10 @@
  * @see Cuisine
  * @see Location
  *
- * @author Sibilla
+ * @Author Marocco Stefano, 762192, VA
+ * @Author Marin Marco, 760622, VA
+ * @author Sibilla Ginevra, 76114 - author of this file
+ * @Author Strazzullo Ciro Andrea, 763603, VA
  * @version 1.0
  */
 
@@ -24,10 +27,15 @@ import java.util.UUID;
 public class Restaurant implements Serializable {
     @Serial
     private static final long serialVersionUID = 1L;
+    /** Unique identifier for the restaurant */
     private String id;
+    /** Name of the restaurant */
     private String name;
+    /** Type of cuisine offered by the restaurant */
     private Cuisine cuisine;
+    /** List of owners managing the restaurant */
     private List<User> owners;
+    /** List of physical locations where the restaurant operates */
     private List<Location> locations;
 
     /**

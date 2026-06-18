@@ -13,12 +13,12 @@ import java.time.LocalDateTime;
  */
 public class ReviewReply {
     /** Reply text content. */
-    private Stirng text;
+    private String text;
     /** Date and time the reply was submitted. */
     private LocalDateTime replyDate;
 
     /** Reply empty constructor. */
-    public Reply(){
+    public ReviewReply(){
         text = "";
         replyDate = null;
     }
@@ -27,7 +27,7 @@ public class ReviewReply {
      *
      * @param text
      */
-    public Reply(String text){
+    public ReviewReply(String text){
         this.text = text;
         replyDate = LocalDateTime.now();
     }

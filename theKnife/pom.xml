@@ -17,10 +17,9 @@
     <packaging>pom</packaging>
 
     <modules>
+        <module>commonTK</module>
         <module>clientTK</module>
         <module>serverTK</module>
-        <module>commonTK</module>
-
     </modules>
 
 

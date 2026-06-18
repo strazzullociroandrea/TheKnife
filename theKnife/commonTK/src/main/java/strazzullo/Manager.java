@@ -1,4 +1,7 @@
+package strazzullo;
+
 import sibilla.Restaurant;
+import strazzullo.User;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -14,87 +17,29 @@ import java.util.List;
  */
 public class Manager extends User {
 
-    /**
-     * List of favorite restaurants of the manager. This list can be modified by the manager to add or remove restaurants.
-     */
+
     private List<Restaurant> restaurants;
 
-    /**
-     * Manager constructor to create a Manager with all parameters, without date of birth and id
-     *
-     * @param name
-     * @param surname
-     * @param email
-     * @param password
-     * @param domicile
-     */
-    public Manager(String name, String surname, String email, String password, String domicile) {
-        super(name, surname, email, password, domicile);
+    public Manager(String id, String name, String surname, String email, String password, String domicile, String dateOfBirth, boolean isPasswordHashed) {
+        super(id, name, surname, email, password, domicile, dateOfBirth, isPasswordHashed);
         this.restaurants = new ArrayList<>();
     }
 
-    /**
-     * Manager constructor to create a Manager with all parameters, including date of birth, without id
-     *
-     * @param name
-     * @param surname
-     * @param email
-     * @param password
-     * @param domicile
-     * @param dateOfBirth
-     */
-    public Manager(String name, String surname, String email, String password, String domicile, String dateOfBirth) {
-        super(name, surname, email, password, domicile, dateOfBirth);
-        this.restaurants = new ArrayList<>();
+    public Manager(String id, String name, String surname, String email, String password, String domicile, boolean isPasswordHashed) {
+        this(id, name, surname, email, password, domicile, null, isPasswordHashed);
     }
 
-    /**
-     * Manager constructor to create a Manager with all parameters, including date of birth and id
-     *
-     * @param id
-     * @param name
-     * @param surname
-     * @param email
-     * @param password
-     * @param domicile
-     * @param dateOfBirth
-     */
-    public Manager(String id, String name, String surname, String email, String password, String domicile, String dateOfBirth) {
-        super(id, name, surname, email, password, domicile, dateOfBirth);
-        this.restaurants = new ArrayList<>();
+
+    public Manager(String name, String surname, String email, String password, String domicile, boolean isPasswordHashed) {
+        this(null, name, surname, email, password, domicile, null, isPasswordHashed);
     }
 
-    /**
-     * Manager constructor to create a Manager with all parameters, without date of birth, including id
-     *
-     * @param id
-     * @param name
-     * @param surname
-     * @param email
-     * @param password
-     * @param domicile
-     */
-    public Manager(String id, String name, String surname, String email, String password, String domicile) {
-        super(id, name, surname, email, password, domicile);
-        this.restaurants = new ArrayList<>();
-    }
-
-    /**
-     * Returns the specific role of this user.
-     *
-     * @return "Gestore"
-     */
     @Override
     public String getRole() {
         return "Gestore";
     }
 
 
-    /**
-     * Function to add a restaurant to the list of restaurants of the manager. This function is used when the manager creates a new restaurant.
-     *
-     * @param restaurant
-     */
     public void addRestaurant(Restaurant restaurant) {
         this.restaurants.add(restaurant);
     }

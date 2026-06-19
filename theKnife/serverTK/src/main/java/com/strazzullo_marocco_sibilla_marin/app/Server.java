@@ -1,9 +1,16 @@
 package com.strazzullo_marocco_sibilla_marin.app;
 
+import com.strazzullo_marocco_sibilla_marin.app.service.CustomerServiceImpl;
+
+import java.rmi.registry.LocateRegistry;
+import java.rmi.registry.Registry;
 import java.util.Scanner;
 
 
 public class Server {
+
+    public static final int RMI_PORT = 1099;
+    public static final String CUSTOMER_SERVICE_NAME = "CustomerService";
 
     private static String getData(String message, Scanner s) {
         System.out.println(message);
@@ -30,6 +37,10 @@ public class Server {
             String password = getData("Inserisci la password: ", s);
 
             DBConnectionPool.getInstance(url, username, password);
+
+            Registry registry = LocateRegistry.createRegistry(RMI_PORT);
+            registry.rebind(CUSTOMER_SERVICE_NAME, new CustomerServiceImpl());
+            System.out.println("CustomerService bound on RMI registry, port " + RMI_PORT);
 
         } catch (Exception e) {
             System.err.println(e.getMessage());

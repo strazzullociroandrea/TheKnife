@@ -2,8 +2,8 @@ package com.strazzullo_marocco_sibilla_marin.app.dao.impl;
 
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
+import com.strazzullo_marocco_sibilla_marin.app.DBConnectionPool;
 import com.strazzullo_marocco_sibilla_marin.app.dao.LocationDAO;
-import com.strazzullo_marocco_sibilla_marin.app.db.DBConnectionPool;
 import marocco.SearchFilter;
 import sibilla.Cuisine;
 import sibilla.Day;
@@ -63,7 +63,7 @@ public class LocationDAOImpl implements LocationDAO {
             conn = DBConnectionPool.getInstance().getConnection();
 
             StringBuilder query = new StringBuilder();
-            query.append("SELECT l.*, r.name AS restaurant_name, r.cuisine AS restaurant_cuisine, ")
+            query.append("SELECT l.*, r.name AS restaurant_name, r.cuisine_type AS restaurant_cuisine, ")
                  .append("v.avg_rating, v.review_count ");
 
             boolean hasDistance = filter.hasDistanceFilter();
@@ -76,8 +76,8 @@ public class LocationDAOImpl implements LocationDAO {
             }
 
             query.append("FROM location l ")
-                 .append("JOIN restaurant r ON l.restaurant_id = r.id ")
-                 .append("LEFT JOIN view_location_rating v ON l.id = v.location_id ")
+                 .append("JOIN restaurant r ON l.restaurant_id = r.restaurant_id ")
+                 .append("LEFT JOIN view_location_rating v ON l.location_id = v.location_id ")
                  .append("WHERE 1=1 ");
 
             List<Object> params = new ArrayList<>();
@@ -115,7 +115,7 @@ public class LocationDAOImpl implements LocationDAO {
 
             // 6. Cuisine filter
             if (filter.getCuisineType() != null) {
-                query.append("AND r.cuisine = ? ");
+                query.append("AND r.cuisine_type = ? ");
                 params.add(filter.getCuisineType().name());
             }
 
@@ -210,9 +210,6 @@ public class LocationDAOImpl implements LocationDAO {
             if (stmt != null) {
                 try { stmt.close(); } catch (SQLException e) { /* ignored */ }
             }
-            if (conn != null) {
-                DBConnectionPool.getInstance().releaseConnection(conn);
-            }
         }
 
         return results;
@@ -227,7 +224,7 @@ public class LocationDAOImpl implements LocationDAO {
      * @throws SQLException if a database mapping error occurs
      */
     private Location mapRowToLocation(ResultSet rs) throws SQLException {
-        String id = rs.getString("id");
+        String id = rs.getString("location_id");
         String country = rs.getString("country");
         String city = rs.getString("city");
         String address = rs.getString("address");

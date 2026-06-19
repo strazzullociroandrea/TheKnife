@@ -1,7 +1,7 @@
 package com.strazzullo_marocco_sibilla_marin.app.dao.impl;
 
-import com.strazzullo_marocco_sibilla_marin.app.db.UserDAO;
-import com.strazzullo_marocco_sibilla_marin.app.db.DBConnectionPool;
+import com.strazzullo_marocco_sibilla_marin.app.dao.UserDAO;
+import com.strazzullo_marocco_sibilla_marin.app.DBConnectionPool;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -45,21 +45,21 @@ public class UserDAOImpl implements UserDAO {
             conn = DBConnectionPool.getInstance().getConnection();
             stmt = conn.prepareStatement(query);
             stmt.setString(1, email);
-            ResultSet rs = pstmt.executeQuery();
+            rs = stmt.executeQuery();
 
             if (rs.next()) {
                 String id = rs.getString("user_id"),
                         name = rs.getString("first_name"),
                         surname = rs.getString("last_name"),
-                        email = rs.getString("email"),
+                        emailTmp = rs.getString("email"),
                         password = rs.getString("password_hash"),
                         dateOfBirth = rs.getString("date_of_birth"),
                         city = rs.getString("city"),
                         role = rs.getString("role");
                 if (role.equalsIgnoreCase("cliente")) {
-                    u = new Client(id, name, surname, email, password, city, dateOfBirth, true);
+                    u = new Client(id, name, surname, emailTmp, password, city, dateOfBirth, true);
                 } else if (role.equalsIgnoreCase("gestore")) {
-                    u = new Manager(id, name, surname, email, password, city, dateOfBirth, true);
+                    u = new Manager(id, name, surname, emailTmp, password, city, dateOfBirth, true);
                 }
                 return u;
             } else {
@@ -104,10 +104,10 @@ public class UserDAOImpl implements UserDAO {
             conn = DBConnectionPool.getInstance().getConnection();
             stmt = conn.prepareStatement(query);
             stmt.setString(1, id);
-            ResultSet rs = pstmt.executeQuery();
+            rs = stmt.executeQuery();
 
             if (rs.next()) {
-                String id = rs.getString("user_id"),
+                String idTmp = rs.getString("user_id"),
                         name = rs.getString("first_name"),
                         surname = rs.getString("last_name"),
                         email = rs.getString("email"),
@@ -116,9 +116,9 @@ public class UserDAOImpl implements UserDAO {
                         city = rs.getString("city"),
                         role = rs.getString("role");
                 if (role.equalsIgnoreCase("cliente")) {
-                    u = new Client(id, name, surname, email, password, city, dateOfBirth, true);
+                    u = new Client(idTmp, name, surname, email, password, city, dateOfBirth, true);
                 } else if (role.equalsIgnoreCase("gestore")) {
-                    u = new Manager(id, name, surname, email, password, city, dateOfBirth, true);
+                    u = new Manager(idTmp, name, surname, email, password, city, dateOfBirth, true);
                 }
                 return u;
             } else {
@@ -215,9 +215,7 @@ public class UserDAOImpl implements UserDAO {
      *
      * @param u the updated user
      */
-    public void update(User u) throw
-
-    SQLException {
+    public void update(User u) throws SQLException {
         if (u == null) {
             throw new SQLException("urser is null.");
         }
@@ -245,12 +243,6 @@ public class UserDAOImpl implements UserDAO {
             stmt.executeUpdate();
 
         } finally {
-            if (rs != null) {
-                try {
-                    rs.close();
-                } catch (SQLException e) {
-                }
-            }
             if (stmt != null) {
                 try {
                     stmt.close();

@@ -46,6 +46,6 @@ public interface UserDAO {
      *
      * @param u the updated user
      */
-    void update(User u) throw SQLException;
+    void update(User u) throws SQLException;
 
 }

@@ -1,6 +1,7 @@
 package com.strazzullo_marocco_sibilla_marin.app;
 
 import com.strazzullo_marocco_sibilla_marin.app.service.CustomerServiceImpl;
+import com.strazzullo_marocco_sibilla_marin.app.config.DotEnv;
 
 import java.rmi.registry.LocateRegistry;
 import java.rmi.registry.Registry;
@@ -32,10 +33,14 @@ public class Server {
 
         try (Scanner s = new Scanner(System.in)) {
 
+            /*
             String url = getData("Inserisci l'url di connessione: ", s);
             String username = getData("Inserisci l'utente: ", s);
             String password = getData("Inserisci la password: ", s);
-
+            */
+            String url = DotEnv.get("DATABASE_URL");
+            String username = DotEnv.get("USER_DB");
+            String password = DotEnv.get("PASS_DB");
             DBConnectionPool.getInstance(url, username, password);
 
             Registry registry = LocateRegistry.createRegistry(RMI_PORT);

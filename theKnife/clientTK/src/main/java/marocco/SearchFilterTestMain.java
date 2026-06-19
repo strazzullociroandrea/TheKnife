@@ -1,0 +1,58 @@
+package marocco;
+
+import com.strazzullo_marocco_sibilla_marin.app.remote.CustomerService;
+import sibilla.Cuisine;
+import sibilla.Location;
+
+import java.rmi.registry.LocateRegistry;
+import java.rmi.registry.Registry;
+import java.util.List;
+
+/**
+ * Manual test entry point for the location search filters.
+ * Connects to the RMI registry exposed by the server and runs a few
+ * {@link SearchFilter} scenarios against {@link CustomerService#searchLocations}.
+ *
+ * @version 1.0
+ * @Author Strazzullo Ciro Andrea, 763603, VA
+ * @Author Marocco Stefano, 762192, VA - author of this file
+ * @Author Sibilla Ginevra, 761114, VA
+ * @Author Marin Marco, 760622, VA
+ */
+public class SearchFilterTestMain {
+
+    private static final String HOST = "localhost";
+    private static final int PORT = 1099;
+    private static final String SERVICE_NAME = "CustomerService";
+
+    /**
+     * Function to run the search filter test scenarios.
+     *
+     * @param args unused
+     * @throws Exception if the RMI lookup or a remote call fails
+     */
+    public static void main(String[] args) throws Exception {
+        Registry registry = LocateRegistry.getRegistry(HOST, PORT);
+        CustomerService customerService = (CustomerService) registry.lookup(SERVICE_NAME);
+
+        runScenario("no filter", customerService, new SearchFilter.Builder().build());
+        runScenario("city = Varese", customerService, new SearchFilter.Builder().city("Varese").build());
+        runScenario("cuisine = italian", customerService, new SearchFilter.Builder().cuisineType(Cuisine.italian).build());
+        runScenario("delivery = true", customerService, new SearchFilter.Builder().delivery(true).build());
+        runScenario("min rating = 4.0", customerService, new SearchFilter.Builder().minRating(4.0).build());
+        runScenario("distance 10km from coordinates 45.8,8.8 (auto position case)", customerService,
+                new SearchFilter.Builder().distance(45.8, 8.8, 10.0).build());
+        runScenario("distance 10km from address (manual address case)", customerService,
+                new SearchFilter.Builder().distanceFromAddress("Varese, Italy", 10.0).build());
+    }
+
+    private static void runScenario(String label, CustomerService customerService, SearchFilter filter) throws Exception {
+        System.out.println("=== " + label + " ===");
+        List<Location> results = customerService.searchLocations(filter);
+        System.out.println("results: " + results.size());
+        for (Location location : results) {
+            System.out.println(" - " + location.getId() + " | " + location.getCity() + " | " + location.getAddress());
+        }
+        System.out.println();
+    }
+}

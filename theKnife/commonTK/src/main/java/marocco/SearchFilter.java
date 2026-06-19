@@ -107,6 +107,11 @@ public class SearchFilter implements Serializable {
     private final Double radiusKm;
 
     /**
+     * The address to geocode for distance search, used when the caller has no coordinates at hand.
+     */
+    private final String addressRef;
+
+    /**
      * The minimum rating filter score.
      */
     private final Double minRating;
@@ -133,6 +138,7 @@ public class SearchFilter implements Serializable {
         this.latRef = builder.latRef;
         this.lonRef = builder.lonRef;
         this.radiusKm = builder.radiusKm;
+        this.addressRef = builder.addressRef;
         this.minRating = builder.minRating;
     }
 
@@ -281,6 +287,15 @@ public class SearchFilter implements Serializable {
     }
 
     /**
+     * Function to return the address to geocode for distance search.
+     *
+     * @return the address, or null if coordinates were supplied directly
+     */
+    public String getAddressRef() {
+        return addressRef;
+    }
+
+    /**
      * Function to return the minimum rating.
      *
      * @return the minimum rating
@@ -290,12 +305,32 @@ public class SearchFilter implements Serializable {
     }
 
     /**
-     * Function to check if distance-based filters are active.
+     * Function to check if distance-based filters are active, either via
+     * direct coordinates or via an address to geocode.
+     *
+     * @return true if a distance filter of either kind is specified
+     */
+    public boolean hasDistanceFilter() {
+        return hasCoordinatesDistanceFilter() || hasAddressDistanceFilter();
+    }
+
+    /**
+     * Function to check if the distance filter was supplied as direct coordinates,
+     * typically the caller's own GPS position.
      *
      * @return true if latitude, longitude, and radius are all specified
      */
-    public boolean hasDistanceFilter() {
+    public boolean hasCoordinatesDistanceFilter() {
         return latRef != null && lonRef != null && radiusKm != null;
+    }
+
+    /**
+     * Function to check if the distance filter was supplied as an address to geocode.
+     *
+     * @return true if an address and radius are specified
+     */
+    public boolean hasAddressDistanceFilter() {
+        return addressRef != null && !addressRef.trim().isEmpty() && radiusKm != null;
     }
 
     /**
@@ -322,6 +357,7 @@ public class SearchFilter implements Serializable {
                 ", latRef=" + latRef +
                 ", lonRef=" + lonRef +
                 ", radiusKm=" + radiusKm +
+                ", addressRef='" + addressRef + '\'' +
                 ", minRating=" + minRating +
                 '}';
     }
@@ -410,6 +446,11 @@ public class SearchFilter implements Serializable {
          * The search radius.
          */
         private Double radiusKm;
+
+        /**
+         * The address to geocode for distance search.
+         */
+        private String addressRef;
 
         /**
          * The minimum rating.
@@ -575,6 +616,21 @@ public class SearchFilter implements Serializable {
         public Builder distance(Double latRef, Double lonRef, Double radiusKm) {
             this.latRef = latRef;
             this.lonRef = lonRef;
+            this.radiusKm = radiusKm;
+            return this;
+        }
+
+        /**
+         * Function to set an address and radius for distance search, used when the
+         * caller has no coordinates at hand (the server resolves the address to
+         * coordinates via geocoding before running the search).
+         *
+         * @param address the address to geocode
+         * @param radiusKm the radius in km
+         * @return this builder instance
+         */
+        public Builder distanceFromAddress(String address, Double radiusKm) {
+            this.addressRef = address;
             this.radiusKm = radiusKm;
             return this;
         }

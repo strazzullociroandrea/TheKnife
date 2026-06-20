@@ -12,16 +12,14 @@ import marocco.SearchFilter;
 import sibilla.Cuisine;
 import sibilla.Day;
 import sibilla.Location;
+import sibilla.Restaurant;
 
 import java.lang.reflect.Type;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 /**
  * Concrete JDBC implementation of the {@link LocationDAO} interface.
@@ -32,7 +30,7 @@ import java.util.Map;
  * @version 1.0
  * @Author Strazzullo Ciro Andrea, 763603, VA
  * @Author Marocco Stefano, 762192, VA - author of this file
- * @Author Sibilla Ginevra, 761114, VA
+ * @Author Sibilla Ginevra, 761114, VA - author of this file
  * @Author Marin Marco, 760622, VA
  */
 public class LocationDAOImpl implements LocationDAO {
@@ -280,4 +278,258 @@ public class LocationDAOImpl implements LocationDAO {
         return new Location(name, id, country, city, address, latitude, longitude,
                 priceRange, delivery, takeaway, maxCapacity, vegetarianMenu, veganMenu, glutenFreeMenu, openingTimes);
     }
+
+    /**
+     * Serializes a map of opening times (Day -> time string) into a JSON string for storage in JSONB.
+     *
+     * @param openingTimes the map of day to opening hours string (e.g., "09:00-22:00")
+     * @return the JSON string representation of opening times, or "{}" if null or empty
+     */
+    private String serializeOpeningTimes(Map<Day, String> openingTimes) {
+        if (openingTimes == null || openingTimes.isEmpty()) {
+            return "{}";
+        }
+        Map<String, String> rawMap = new HashMap<>();
+        for (Map.Entry<Day, String> entry : openingTimes.entrySet()) {
+            rawMap.put(entry.getKey().name().toLowerCase(), entry.getValue());
+        }
+        return gson.toJson(rawMap);
+    }
+
+    /**
+     * Creates a new location in the database for a specific restaurant.
+     * Uses a transaction to ensure atomic insertion.
+     *
+     * @param location the location object to create
+     * @param restaurantId the id of the restaurant this location belongs to
+     * @throws SQLException if a database operation error occurs, or if location/restaurantId is null
+     */
+    @Override
+    public void create(Location location, String restaurantId) throws SQLException {
+        if(location == null) throw new SQLException("location is null");
+        if(restaurantId == null) throw new SQLException("restaurant id is null");
+
+        String query = "INSERT INTO location(name, id, country, city, address, " +
+                "latitude, longitude, price_range, delivery, takeaway, " +
+                "max_capacity, vegetarian_menu, vegan_menu, gluten_free_Menu," +
+                "opening_hours) VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?::jsonb);";
+        Connection conn = null;
+        PreparedStatement stmt = null;
+        boolean autoCommit = true;
+
+        try {
+            conn = DBConnectionPool.getInstance().getConnection();
+            autoCommit = conn.getAutoCommit();
+            conn.setAutoCommit(false);
+
+            stmt = conn.prepareStatement(query);
+            stmt.setString(1, location.getName());
+            stmt.setString(2, location.getId());
+            stmt.setString(3, location.getCountry());
+            stmt.setString(4, location.getCity());
+            stmt.setString(5, location.getAddress());
+            stmt.setFloat(6, location.getLatitude());
+            stmt.setFloat(7, location.getLongitude());
+            stmt.setInt(8, location.getPriceRange());
+            stmt.setBoolean(9, location.isDelivery());
+            stmt.setBoolean(10, location.isTakeaway());
+            stmt.setInt(11, location.getMaxCapacity());
+            stmt.setBoolean(12, location.isVegetarianMenu());
+            stmt.setBoolean(13, location.isVeganMenu());
+            stmt.setBoolean(14, location.isGlutenFreeMenu());
+            stmt.setString(15, serializeOpeningTimes(location.getOpeningTimes()));
+
+            stmt.executeUpdate();
+            conn.commit();
+
+        } catch (SQLException e) {
+            if (conn != null) {
+                try {
+                    conn.rollback();
+                } catch (SQLException rollbackEx) {
+                    // ignore rollback exception
+                }
+            }
+            throw e;
+        } finally {
+            if(stmt != null) {
+                try {
+                    stmt.close();
+                } catch (SQLException e) {
+                }
+            }
+            if (conn != null) {
+                try {
+                    conn.setAutoCommit(autoCommit);
+                } catch (SQLException e) {
+                    // ignore
+                }
+            }
+        }
+    }
+
+    /**
+     * Retrieves a location by its unique identifier.
+     *
+     * @param id the unique identifier of the location
+     * @return an Optional containing the location if found, or empty if not found
+     * @throws SQLException if a database query error occurs or the id is null/empty
+     */
+    @Override
+    public Optional<Location> findById(String id) throws SQLException {
+        if (id == null || id.isEmpty()) {
+            throw new SQLException("id is null or empty");
+        }
+        String query = "SELECT * FROM location WHERE location_id = ?";
+        Connection conn = null;
+        PreparedStatement stmt = null;
+        ResultSet rs = null;
+
+        try{
+            conn = DBConnectionPool.getInstance().getConnection();
+            stmt = conn.prepareStatement(query);
+            stmt.setString(1, id);
+            rs = stmt.executeQuery();
+            if (rs.next()) {
+                return Optional.of(mapRowToLocation(rs));
+            }
+            return Optional.empty();
+        } finally {
+            if(stmt != null) {
+                try {
+                    stmt.close();
+                }  catch (SQLException e) {}
+            }
+            if (stmt != null) {
+                try {
+                    stmt.close();
+                } catch (SQLException e) {
+                }
+            }
+        }
+    }
+
+    /**
+     * Retrieves all locations belonging to a specific restaurant.
+     *
+     * @param restaurant the restaurant whose locations are to be retrieved
+     * @return a list of Location objects associated with the specified restaurant
+     * @throws SQLException if a database query error occurs or the restaurant is null
+     */
+    @Override
+    public List<Location> findByRestaurant(Restaurant restaurant) throws SQLException {
+        if(restaurant == null) throw new SQLException("restaurant is null");
+
+        String query = "SELECT * FROM location WHERE restaurant_id = ?";
+        Connection conn = null;
+        PreparedStatement stmt = null;
+        ResultSet rs = null;
+
+        try{
+            conn = DBConnectionPool.getInstance().getConnection();
+            stmt = conn.prepareStatement(query);
+            stmt.setString(1, restaurant.getId());
+            rs = stmt.executeQuery();
+
+            List<Location> locations = new ArrayList<>();
+            while (rs.next()) {
+                locations.add(mapRowToLocation(rs));
+            }
+            return locations;
+        }  finally {
+            if(rs != null) {
+                try {
+                    rs.close();
+                }  catch (SQLException e) {}
+            }
+            if (stmt != null) {
+                try {
+                    stmt.close();
+                }  catch (SQLException e) {}
+            }
+        }
+    }
+
+    /**
+     * Updates an existing location's information in the database.
+     *
+     * @param location the location object with updated values
+     * @return the updated location object
+     * @throws SQLException if a database operation error occurs, if no location was updated,
+     *         or if the location/id is null/empty
+     */
+    @Override
+    public Location update(Location location) throws SQLException {
+        if (location == null) throw new SQLException("location is null");
+        if (location.getId() == null || location.getId().isEmpty()) throw new SQLException("location id is null or empty");
+
+        String query = "UPDATE location SET name = ?, country = ?, city = ?, address = ?, " +
+                "latitude = ?, longitude = ?, price_range = ?, delivery = ?, takeaway = ?, " +
+                "max_capacity = ?, vegetarian_menu = ?, vegan_menu = ?, gluten_free_menu = ?, " +
+                "opening_hours = ?::jsonb WHERE location_id = ?;";
+        Connection conn = null;
+        PreparedStatement stmt = null;
+
+        try {
+            conn = DBConnectionPool.getInstance().getConnection();
+            stmt = conn.prepareStatement(query);
+            stmt.setString(1, location.getName());
+            stmt.setString(2, location.getCountry());
+            stmt.setString(3, location.getCity());
+            stmt.setString(4, location.getAddress());
+            stmt.setFloat(5, location.getLatitude());
+            stmt.setFloat(6, location.getLongitude());
+            stmt.setInt(7, location.getPriceRange());
+            stmt.setBoolean(8, location.isDelivery());
+            stmt.setBoolean(9, location.isTakeaway());
+            stmt.setInt(10, location.getMaxCapacity());
+            stmt.setBoolean(11, location.isVegetarianMenu());
+            stmt.setBoolean(12, location.isVeganMenu());
+            stmt.setBoolean(13, location.isGlutenFreeMenu());
+            stmt.setString(14, serializeOpeningTimes(location.getOpeningTimes()));
+            stmt.setString(15, location.getId());
+
+            int updated = stmt.executeUpdate();
+            if (updated == 0) {
+                throw new SQLException("No location updated, id may not exist: " + location.getId());
+            }
+            return location;
+        } finally {
+            if (stmt != null) {
+                try { stmt.close(); } catch (SQLException e) {}
+            }
+        }
+    }
+
+    /**
+     * Deletes a location from the database by its id.
+     *
+     * @param location the location object to delete (id is used)
+     * @throws SQLException if a database operation error occurs, if no location was deleted,
+     *         or if the location/id is null/empty
+     */
+    @Override
+    public void delete(Location location) throws SQLException {
+        if (location == null) throw new SQLException("location is null");
+        if (location.getId() == null || location.getId().isEmpty()) throw new SQLException("location id is null or empty");
+
+        String query = "DELETE FROM location WHERE location_id = ?;";
+        Connection conn = null;
+        PreparedStatement stmt = null;
+
+        try {
+            conn = DBConnectionPool.getInstance().getConnection();
+            stmt = conn.prepareStatement(query);
+            stmt.setString(1, location.getId());
+            int deleted = stmt.executeUpdate();
+            if (deleted == 0) {
+                throw new SQLException("No location deleted, id may not exist: " + location.getId());
+            }
+        } finally {
+            if (stmt != null) {
+                try { stmt.close(); } catch (SQLException e) {}
+            }
+        }
+    }
+
 }

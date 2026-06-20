@@ -18,6 +18,8 @@
 
 package sibilla;
 
+import strazzullo.User;
+
 import java.io.Serial;
 import java.io.Serializable;
 import java.util.ArrayList;

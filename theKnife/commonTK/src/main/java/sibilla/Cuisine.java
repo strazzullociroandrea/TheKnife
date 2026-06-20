@@ -14,5 +14,5 @@
 package sibilla;
 
 public enum Cuisine {
-    italian
+    italian, chinese, thai, mexican, indian, healthy, japanese
 }

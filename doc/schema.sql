@@ -74,6 +74,7 @@ CREATE TABLE location (
     location_id         CHAR(36)        PRIMARY KEY,
     restaurant_id       CHAR(36)        NOT NULL
         REFERENCES restaurant (restaurant_id) ON DELETE CASCADE,
+    name                VARCHAR(255)    NOT NULL,
     country             VARCHAR(100)    NOT NULL,
     city                VARCHAR(150)    NOT NULL,
     address             VARCHAR(255)    NOT NULL,

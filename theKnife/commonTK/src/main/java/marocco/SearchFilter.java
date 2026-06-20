@@ -8,7 +8,7 @@ import java.io.Serializable;
 
 /**
  * Filter parameters for searching restaurant locations.
- * Includes criteria for every attribute of the location (sede) and the restaurant name.
+ * Includes criteria for every attribute of the location (sede) and both its name and the restaurant name.
  * Uses the Builder design pattern to allow flexible instantiation of search criteria.
  * This class is immutable and serializable to ensure safe remote communication via RMI.
  *
@@ -30,6 +30,11 @@ public class SearchFilter implements Serializable {
      * The name of the restaurant.
      */
     private final String restaurantName;
+
+    /**
+     * The name of the location.
+     */
+    private final String locationName;
 
     /**
      * The type of cuisine.
@@ -123,6 +128,7 @@ public class SearchFilter implements Serializable {
      */
     private SearchFilter(Builder builder) {
         this.restaurantName = builder.restaurantName;
+        this.locationName = builder.locationName;
         this.cuisineType = builder.cuisineType;
         this.country = builder.country;
         this.city = builder.city;
@@ -149,6 +155,15 @@ public class SearchFilter implements Serializable {
      */
     public String getRestaurantName() {
         return restaurantName;
+    }
+
+    /**
+     * Function to return the location name.
+     *
+     * @return the location name
+     */
+    public String getLocationName() {
+        return locationName;
     }
 
     /**
@@ -342,6 +357,7 @@ public class SearchFilter implements Serializable {
     public String toString() {
         return "SearchFilter{" +
                 "restaurantName='" + restaurantName + '\'' +
+                ", locationName='" + locationName + '\'' +
                 ", cuisineType=" + cuisineType +
                 ", country='" + country + '\'' +
                 ", city='" + city + '\'' +
@@ -371,6 +387,11 @@ public class SearchFilter implements Serializable {
          * The name of the restaurant.
          */
         private String restaurantName;
+
+        /**
+         * The name of the location.
+         */
+        private String locationName;
 
         /**
          * The type of cuisine.
@@ -470,6 +491,17 @@ public class SearchFilter implements Serializable {
          */
         public Builder restaurantName(String restaurantName) {
             this.restaurantName = restaurantName;
+            return this;
+        }
+
+        /**
+         * Function to set the location name filter.
+         *
+         * @param locationName the location name
+         * @return this builder instance
+         */
+        public Builder locationName(String locationName) {
+            this.locationName = locationName;
             return this;
         }
 

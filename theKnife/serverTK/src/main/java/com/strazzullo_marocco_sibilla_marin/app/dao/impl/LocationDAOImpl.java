@@ -123,6 +123,11 @@ public class LocationDAOImpl implements LocationDAO {
                 params.add("%" + filter.getRestaurantName().toLowerCase() + "%");
             }
 
+            if (filter.getLocationName() != null && !filter.getLocationName().trim().isEmpty()) {
+                query.append("AND LOWER(l.name) LIKE ? ");
+                params.add("%" + filter.getLocationName().toLowerCase() + "%");
+            }
+
             if (filter.getCountry() != null && !filter.getCountry().trim().isEmpty()) {
                 query.append("AND LOWER(l.country) = ? ");
                 params.add(filter.getCountry().toLowerCase().trim());
@@ -238,6 +243,7 @@ public class LocationDAOImpl implements LocationDAO {
      */
     private Location mapRowToLocation(ResultSet rs) throws SQLException {
         String id = rs.getString("location_id");
+        String name = rs.getString("name");
         String country = rs.getString("country");
         String city = rs.getString("city");
         String address = rs.getString("address");
@@ -271,7 +277,7 @@ public class LocationDAOImpl implements LocationDAO {
             }
         }
 
-        return new Location(id, country, city, address, latitude, longitude,
+        return new Location(name, id, country, city, address, latitude, longitude,
                 priceRange, delivery, takeaway, maxCapacity, vegetarianMenu, veganMenu, glutenFreeMenu, openingTimes);
     }
 }

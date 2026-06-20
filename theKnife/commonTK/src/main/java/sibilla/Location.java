@@ -24,6 +24,7 @@ public class Location implements java.io.Serializable {
     private static final long serialVersionUID = 1L;
 
     /** Unique identifier for the location */
+    private String name;
     private String id;
     private String country, city, address;
     private Float latitude, longitude;
@@ -43,6 +44,7 @@ public class Location implements java.io.Serializable {
      * An empty constructor for a location. Nothing is passed to it.
      */
     public Location() {
+        name = "";
         id = UUID.randomUUID().toString();
         country = "";
         city = "";
@@ -61,6 +63,7 @@ public class Location implements java.io.Serializable {
     /**
      * Declares a location with all parameters.
      *
+     * @param name
      * @param id                    location's id
      * @param country               location's country
      * @param city                  location's city
@@ -76,9 +79,10 @@ public class Location implements java.io.Serializable {
      * @param glutenFreeMenu        whether gluten-free menu is available
      * @param openingTimes          map of opening times by day
      */
-    public Location(String id, String country, String city, String address, Float latitude, Float longitude,
+    public Location(String name, String id, String country, String city, String address, Float latitude, Float longitude,
                     int priceRange, boolean delivery, boolean takeaway, int maxCapacity,
                     boolean vegetarianMenu, boolean veganMenu, boolean glutenFreeMenu, Map<Day, String> openingTimes) {
+        this.name = name;
         this.id = id;
         this.country = country;
         this.city = city;
@@ -93,6 +97,25 @@ public class Location implements java.io.Serializable {
         this.veganMenu = veganMenu;
         this.glutenFreeMenu = glutenFreeMenu;
         this.openingTimes = openingTimes;
+    }
+
+    /**
+     * getName
+     *
+     * @return returns name
+     */
+
+    public String getName() {
+        return name;
+    }
+
+    /**
+     * setName
+     *
+     * @param name sets name
+     */
+    public void setName(String name) {
+        this.name = name;
     }
 
     /**

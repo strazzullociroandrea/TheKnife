@@ -7,8 +7,9 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-
+import java.sql.Date;
 import strazzullo.*;
+import java.sql.Types;
 
 /**
  * Concrete JDBC implementation of the {@link UserDAO} interface.
@@ -56,10 +57,10 @@ public class UserDAOImpl implements UserDAO {
                         dateOfBirth = rs.getString("date_of_birth"),
                         city = rs.getString("city"),
                         role = rs.getString("role");
-                if (role.equalsIgnoreCase("cliente")) {
-                    u = new Client(id, name, surname, emailTmp, password, city, dateOfBirth, true);
-                } else if (role.equalsIgnoreCase("gestore")) {
-                    u = new Manager(id, name, surname, emailTmp, password, city, dateOfBirth, true);
+                if (role.equalsIgnoreCase("customer")) {
+                    u = new Client(id, name, surname, emailTmp, password, city, dateOfBirth);
+                } else if (role.equalsIgnoreCase("manager")) {
+                    u = new Manager(id, name, surname, emailTmp, password, city, dateOfBirth);
                 }
                 return u;
             } else {
@@ -115,10 +116,10 @@ public class UserDAOImpl implements UserDAO {
                         dateOfBirth = rs.getString("date_of_birth"),
                         city = rs.getString("city"),
                         role = rs.getString("role");
-                if (role.equalsIgnoreCase("cliente")) {
-                    u = new Client(idTmp, name, surname, email, password, city, dateOfBirth, true);
-                } else if (role.equalsIgnoreCase("gestore")) {
-                    u = new Manager(idTmp, name, surname, email, password, city, dateOfBirth, true);
+                if (role.equalsIgnoreCase("customer")) {
+                    u = new Client(idTmp, name, surname, email, password, city, dateOfBirth);
+                } else if (role.equalsIgnoreCase("manager")) {
+                    u = new Manager(idTmp, name, surname, email, password, city, dateOfBirth);
                 }
                 return u;
             } else {
@@ -152,7 +153,7 @@ public class UserDAOImpl implements UserDAO {
             throw new SQLException("urser is null.");
         }
 
-        String checkQuery = "SELECT count(*) AS recordCount FROM app_user WHERE user_id = ? OR email = ?";
+        String checkQuery = "SELECT count(*) AS recordCount FROM app_user WHERE email = ?";
         String query = "INSERT INTO app_user(user_id, first_name, last_name, email, password_hash, date_of_birth, city, role) VALUES(?,?,?,?,?,?,?,?);";
         Connection conn = null;
         PreparedStatement checkStmt = null;
@@ -160,13 +161,12 @@ public class UserDAOImpl implements UserDAO {
         ResultSet rs = null;
         try {
             if (!(u instanceof Manager || u instanceof Client)) {
-                throw new SQLException("User is not a Manager or a Client");
+                throw new SQLException("User is not a Manager or a customer");
             }
 
             conn = DBConnectionPool.getInstance().getConnection();
             checkStmt = conn.prepareStatement(checkQuery);
-            checkStmt.setString(1, u.getId());
-            checkStmt.setString(2, u.getEmail());
+            checkStmt.setString(1, u.getEmail());
             rs = checkStmt.executeQuery();
             if (rs.next()) {
                 int count = rs.getInt("recordCount");
@@ -177,15 +177,18 @@ public class UserDAOImpl implements UserDAO {
 
 
             stmt = conn.prepareStatement(query);
-
             stmt.setString(1, u.getId());
             stmt.setString(2, u.getName());
             stmt.setString(3, u.getSurname());
             stmt.setString(4, u.getEmail());
             stmt.setString(5, u.getPasswordHash());
-            stmt.setString(6, u.getDateOfBirth());
+            if(u.getDateOfBirth() == null || u.getDateOfBirth().isEmpty()) {
+               stmt.setNull(6, java.sql.Types.DATE);
+            } else {
+                stmt.setDate(6, java.sql.Date.valueOf(u.getDateOfBirth()));
+            }
             stmt.setString(7, u.getDomicile());
-            stmt.setString(8, (u instanceof Client) ? "cliente" : "gestore");
+            stmt.setObject(8, u.getRole(), Types.OTHER);
 
             stmt.executeUpdate();
 
@@ -200,10 +203,6 @@ public class UserDAOImpl implements UserDAO {
             }
             if (stmt != null) try {
                 stmt.close();
-            } catch (SQLException e) {
-            }
-            if (conn != null) try {
-                conn.close();
             } catch (SQLException e) {
             }
         }
@@ -226,7 +225,7 @@ public class UserDAOImpl implements UserDAO {
 
         try {
             if (!(u instanceof Manager || u instanceof Client)) {
-                throw new SQLException("User is not a Manager or a Client");
+                throw new SQLException("User is not a Manager or a customer");
             }
 
             conn = DBConnectionPool.getInstance().getConnection();
@@ -236,9 +235,13 @@ public class UserDAOImpl implements UserDAO {
             stmt.setString(2, u.getSurname());
             stmt.setString(3, u.getEmail());
             stmt.setString(4, u.getPasswordHash());
-            stmt.setString(5, u.getDateOfBirth());
+            if(u.getDateOfBirth() == null || u.getDateOfBirth().isEmpty()) {
+                stmt.setNull(5, java.sql.Types.DATE);
+            } else {
+                stmt.setDate(5, java.sql.Date.valueOf(u.getDateOfBirth()));
+            }
             stmt.setString(6, u.getDomicile());
-            stmt.setString(7, u.getRole());
+            stmt.setObject(7, u.getRole(), Types.OTHER);
             stmt.setString(8, u.getId());
             stmt.executeUpdate();
 

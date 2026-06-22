@@ -44,9 +44,9 @@ public interface AuthService extends Remote {
     Function to hash a password using a secure hashing algorithm.
         @param password The password to be hashed.
         @return The hashed password as a String.
-        @throws RemoteException If a remote communication error occurs.
+        @throws Exception If it fails to hash the password.
      */
-    String hashPassword(String password) throws RemoteException;
+    String hashPassword(String password) throws Exception;
 
     /**
     Function to validate an email address format.

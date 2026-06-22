@@ -33,9 +33,10 @@ public class Server {
         System.out.println("Avvio del progetto in corso...");
         System.out.println("Inserisci i dati per stabilire la connessione al database postgre");
 
-        try (Scanner s = new Scanner(System.in)) {
+        try {
 
             /*
+            Scanner s = new Scanner(System.in)
             String url = getData("Inserisci l'url di connessione: ", s);
             String username = getData("Inserisci l'utente: ", s);
             String password = getData("Inserisci la password: ", s);
@@ -52,7 +53,11 @@ public class Server {
             registry.rebind(AUTH_SERVICE_NAME, new AuthServiceImpl());
             System.out.println("AuthService bound on RMI registry, port " + RMI_PORT);
 
-
+            System.out.println("In attesa di richieste RMI...");
+            synchronized (Server.class) {
+                System.out.println("In attesa di richieste RMI...");
+                Server.class.wait();
+            }
         } catch (Exception e) {
             System.err.println(e.getMessage());
         }

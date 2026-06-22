@@ -69,11 +69,11 @@ public class Manager extends User {
     /**
      * Function to return the user's role
      *
-     * @return the user's role: "gestore"
+     * @return the user's role: "manager"
      */
     @Override
     public String getRole() {
-        return "gestore";
+        return "manager";
     }
 
     /**

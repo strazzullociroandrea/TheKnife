@@ -80,9 +80,9 @@ public class RestaurantDAOImpl implements RestaurantDAO {
                     String city = rs.getString("city");
                     String role = rs.getString("role");
                     if (role != null && role.equalsIgnoreCase("gestore")) {
-                        owners.add(new Manager(uid, first, last, email, pwd, city, dob, true));
+                        owners.add(new Manager(uid, first, last, email, pwd, city, dob));
                     } else {
-                        owners.add(new Client(uid, first, last, email, pwd, city, dob, true));
+                        owners.add(new Client(uid, first, last, email, pwd, city, dob));
                     }
                 }
             }

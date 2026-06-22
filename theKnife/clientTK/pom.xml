@@ -17,6 +17,11 @@
             <artifactId>commonTK</artifactId>
             <version>1.0-SNAPSHOT</version>
         </dependency>
+        <dependency>
+            <groupId>org.postgresql</groupId>
+            <artifactId>postgresql</artifactId>
+            <version>42.7.11</version>
+        </dependency>
     </dependencies>
     <artifactId>clientTK</artifactId>
 

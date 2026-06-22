@@ -8,7 +8,7 @@ import java.rmi.RemoteException;
 import java.rmi.server.UnicastRemoteObject;
 import java.sql.SQLException;
 import java.util.List;
-
+import strazzullo.*;
 import java.util.UUID;
 import java.security.MessageDigest;
 import java.util.ArrayList;
@@ -75,7 +75,7 @@ public class AuthServiceImpl extends UnicastRemoteObject implements AuthService 
             } else {
                 return null;
             }
-        } catch (SQLException e) {
+        } catch (Exception e) {
             throw new RemoteException("Error during login", e);
         }
     }
@@ -104,7 +104,7 @@ public class AuthServiceImpl extends UnicastRemoteObject implements AuthService 
             String hashedPassword = this.hashPassword(password);
             u.setPasswordHash(hashedPassword);
             this.userDAO.save(u);
-        } catch (SQLException e) {
+        } catch (Exception e) {
             throw new RemoteException("Error registering user", e);
         }
     }
@@ -113,9 +113,9 @@ public class AuthServiceImpl extends UnicastRemoteObject implements AuthService 
     * Function to hash a password using SHA-256 algorithm.
     * @param password The password to be hashed.
     * @return The hashed password as a String.
-    * @throws RemoteException If a remote communication error occurs.
+    * @throws Exception If it fails to hash the password.
     */
-    public String hashPassword(String password) throws RemoteException {
+    public String hashPassword(String password) throws Exception {
         try {
             MessageDigest md = MessageDigest.getInstance("SHA-256");
             byte[] hashBytes = md.digest(password.getBytes());
@@ -127,29 +127,31 @@ public class AuthServiceImpl extends UnicastRemoteObject implements AuthService 
 
             return sb.toString();
 
-        }catch(Error e){
-            throw new RuntimeException("Hashing error", e);
+        }catch(Exception e){
+            throw new Exception("Hashing error", e);
         }
 
     }
 
 
     /**
-    Validate email implementation. Checks if the email format is valid and if the email is not already registered in the database.
+    Validate email implementation. Check  if the email is not already registered in the database.
     @param email The email address to be validated.
     @return true if the email format is valid and not already registered, false otherwise.
     @throws RemoteException If a remote communication error occurs.
      */
     public boolean  validateEmail(String email) throws RemoteException {
-        //Regex to validate email address format
-        if(!email.matches("^[A-Za-z0-9+_.-]+@[A-Za-z0-9.-]+$")) {
-            return false;
+
+
+        try{
+            User tmp = this.userDAO.findByEmail(email);
+                if(tmp != null) {
+                    return false;
+                }
+             return true;
+        }catch (SQLException e) {
+            throw new RemoteException("Database error during validation", e);
         }
 
-        User tmp = this.userDAO.findByEmail(email);
-        if(tmp != null) {
-            return false;
-        }
-        return true;
     }
 }

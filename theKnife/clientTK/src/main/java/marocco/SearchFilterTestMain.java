@@ -2,7 +2,7 @@ package marocco;
 
 import com.strazzullo_marocco_sibilla_marin.app.remote.CustomerService;
 import sibilla.Cuisine;
-import sibilla.Location;
+import sibilla.LocationSearchResult;
 
 import java.rmi.registry.LocateRegistry;
 import java.rmi.registry.Registry;
@@ -48,10 +48,13 @@ public class SearchFilterTestMain {
 
     private static void runScenario(String label, CustomerService customerService, SearchFilter filter) throws Exception {
         System.out.println("=== " + label + " ===");
-        List<Location> results = customerService.searchLocations(filter);
+        List<LocationSearchResult> results = customerService.searchLocations(filter);
         System.out.println("results: " + results.size());
-        for (Location location : results) {
-            System.out.println(" - " + location.getId() + " | " + location.getCity() + " | " + location.getAddress());
+        for (LocationSearchResult result : results) {
+            System.out.println(" - " + result.location().getId() + " | " + result.location().getCity() + " | "
+                    + result.location().getAddress() + " | rating=" + result.averageRating()
+                    + " (" + result.reviewCount() + " reviews)"
+                    + (result.distanceKm() != null ? " | distance=" + result.distanceKm() + "km" : ""));
         }
         System.out.println();
     }

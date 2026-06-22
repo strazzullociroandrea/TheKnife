@@ -1,7 +1,7 @@
 package com.strazzullo_marocco_sibilla_marin.app.remote;
 
 import marocco.SearchFilter;
-import sibilla.Location;
+import sibilla.LocationSearchResult;
 
 import java.rmi.Remote;
 import java.rmi.RemoteException;
@@ -23,8 +23,8 @@ public interface CustomerService extends Remote {
      * Function to search for restaurant locations based on a search filter.
      *
      * @param filter the search criteria including cuisines, prices, location, and distance
-     * @return a list of locations matching the filter criteria
+     * @return a list of search results matching the filter criteria, each carrying the location plus its rating and restaurant info
      * @throws RemoteException if a remote communication error occurs
      */
-    List<Location> searchLocations(SearchFilter filter) throws RemoteException;
+    List<LocationSearchResult> searchLocations(SearchFilter filter) throws RemoteException;
 }

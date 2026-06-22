@@ -2,6 +2,7 @@ package com.strazzullo_marocco_sibilla_marin.app.dao;
 
 import marocco.SearchFilter;
 import sibilla.Location;
+import sibilla.LocationSearchResult;
 import sibilla.Restaurant;
 
 import java.sql.SQLException;
@@ -25,10 +26,10 @@ public interface LocationDAO {
      * Calculates distance filtering if geographical reference points and radius are supplied.
      *
      * @param filter the filter criteria
-     * @return a list of locations matching the filter criteria
+     * @return a list of search results matching the filter criteria, each carrying the location plus its rating and restaurant info
      * @throws SQLException if a database query error occurs
      */
-    List<Location> search(SearchFilter filter) throws SQLException;
+    List<LocationSearchResult> search(SearchFilter filter) throws SQLException;
 
     /**
      * Retrieves a location by its unique identifier.

@@ -12,6 +12,7 @@ import marocco.SearchFilter;
 import sibilla.Cuisine;
 import sibilla.Day;
 import sibilla.Location;
+import sibilla.LocationSearchResult;
 import sibilla.Restaurant;
 
 import java.lang.reflect.Type;
@@ -64,176 +65,167 @@ public class LocationDAOImpl implements LocationDAO {
     /**
      * Function to dynamically search restaurant locations using criteria defined in the {@link SearchFilter}.
      * If the filter carries an address instead of coordinates, it is resolved via {@link GeocodingService}
-     * before running the distance calculation.
+     * before running the distance calculation. The Haversine distance is computed once in a {@code search_base}
+     * CTE so it can be reused in both the radius filter and the {@code ORDER BY} clause without duplicating the formula.
      *
      * @param filter the filter criteria
      * @return a list of locations matching the filter criteria
      * @throws SQLException if a database query error occurs or the address cannot be geocoded
      */
     @Override
-    public List<Location> search(SearchFilter filter) throws SQLException {
-        List<Location> results = new ArrayList<>();
-        Connection conn = null;
-        PreparedStatement stmt = null;
-        ResultSet rs = null;
+    public List<LocationSearchResult> search(SearchFilter filter) throws SQLException {
+        Connection conn = DBConnectionPool.getInstance().getConnection();
 
-        try {
-            conn = DBConnectionPool.getInstance().getConnection();
-
-            Double latRef = filter.getLatRef();
-            Double lonRef = filter.getLonRef();
-            if (filter.hasAddressDistanceFilter() && !filter.hasCoordinatesDistanceFilter()) {
-                try {
-                    GeoPoint point = geocodingService.geocode(filter.getAddressRef());
-                    latRef = point.getLatitude();
-                    lonRef = point.getLongitude();
-                } catch (GeocodingException e) {
-                    throw new SQLException("Unable to resolve address for distance search: " + e.getMessage(), e);
-                }
-            }
-
-            StringBuilder query = new StringBuilder();
-            query.append("SELECT l.*, r.name AS restaurant_name, r.cuisine_type AS restaurant_cuisine, ")
-                 .append("v.avg_rating, v.review_count ");
-
-            boolean hasDistance = filter.hasDistanceFilter();
-            if (hasDistance) {
-                query.append(", (6371 * 2 * ASIN(SQRT(POWER(SIN((l.latitude - ?) * pi()/180 / 2), 2) + ")
-                     .append("COS(? * pi()/180) * COS(l.latitude * pi()/180) * ")
-                     .append("POWER(SIN((l.longitude - ?) * pi()/180 / 2), 2)))) AS distance ");
-            }
-
-            query.append("FROM location l ")
-                 .append("JOIN restaurant r ON l.restaurant_id = r.restaurant_id ")
-                 .append("LEFT JOIN view_location_rating v ON l.location_id = v.location_id ")
-                 .append("WHERE 1=1 ");
-
-            List<Object> params = new ArrayList<>();
-
-            if (hasDistance) {
-                params.add(latRef);
-                params.add(latRef);
-                params.add(lonRef);
-            }
-
-            if (filter.getRestaurantName() != null && !filter.getRestaurantName().trim().isEmpty()) {
-                query.append("AND LOWER(r.name) LIKE ? ");
-                params.add("%" + filter.getRestaurantName().toLowerCase() + "%");
-            }
-
-            if (filter.getLocationName() != null && !filter.getLocationName().trim().isEmpty()) {
-                query.append("AND LOWER(l.name) LIKE ? ");
-                params.add("%" + filter.getLocationName().toLowerCase() + "%");
-            }
-
-            if (filter.getCountry() != null && !filter.getCountry().trim().isEmpty()) {
-                query.append("AND LOWER(l.country) = ? ");
-                params.add(filter.getCountry().toLowerCase().trim());
-            }
-
-            if (filter.getCity() != null && !filter.getCity().trim().isEmpty()) {
-                query.append("AND LOWER(l.city) = ? ");
-                params.add(filter.getCity().toLowerCase().trim());
-            }
-
-            if (filter.getAddress() != null && !filter.getAddress().trim().isEmpty()) {
-                query.append("AND LOWER(l.address) LIKE ? ");
-                params.add("%" + filter.getAddress().toLowerCase() + "%");
-            }
-
-            if (filter.getCuisineType() != null) {
-                query.append("AND r.cuisine_type = ? ");
-                params.add(filter.getCuisineType().name());
-            }
-
-            if (filter.getPriceRange() != null) {
-                query.append("AND l.price_range = ? ");
-                params.add(filter.getPriceRange());
-            }
-
-            if (filter.getDelivery() != null) {
-                query.append("AND l.delivery = ? ");
-                params.add(filter.getDelivery());
-            }
-
-            if (filter.getTakeaway() != null) {
-                query.append("AND l.takeaway = ? ");
-                params.add(filter.getTakeaway());
-            }
-
-            if (filter.getMaxCapacity() != null) {
-                query.append("AND l.max_capacity >= ? ");
-                params.add(filter.getMaxCapacity());
-            }
-
-            if (filter.getVegetarianMenu() != null) {
-                query.append("AND l.vegetarian_menu = ? ");
-                params.add(filter.getVegetarianMenu());
-            }
-
-            if (filter.getVeganMenu() != null) {
-                query.append("AND l.vegan_menu = ? ");
-                params.add(filter.getVeganMenu());
-            }
-
-            if (filter.getGlutenFreeMenu() != null) {
-                query.append("AND l.gluten_free_menu = ? ");
-                params.add(filter.getGlutenFreeMenu());
-            }
-
-            if (filter.getOpenDay() != null) {
-                query.append("AND jsonb_exists(l.opening_hours, ?) ");
-                params.add(filter.getOpenDay().name().toLowerCase());
-            }
-
-            if (filter.getMinRating() != null) {
-                query.append("AND COALESCE(v.avg_rating, 0.0) >= ? ");
-                params.add(filter.getMinRating());
-            }
-
-            if (hasDistance) {
-                query.append("AND (6371 * 2 * ASIN(SQRT(POWER(SIN((l.latitude - ?) * pi()/180 / 2), 2) + ")
-                     .append("COS(? * pi()/180) * COS(l.latitude * pi()/180) * ")
-                     .append("POWER(SIN((l.longitude - ?) * pi()/180 / 2), 2)))) <= ? ");
-                params.add(latRef);
-                params.add(latRef);
-                params.add(lonRef);
-                params.add(filter.getRadiusKm());
-            }
-
-            if (hasDistance) {
-                query.append(" ORDER BY distance ASC");
-            } else {
-                query.append(" ORDER BY COALESCE(v.avg_rating, 0.0) DESC");
-            }
-
-            stmt = conn.prepareStatement(query.toString());
-            int idx = 1;
-            for (Object param : params) {
-                stmt.setObject(idx++, param);
-            }
-
-            rs = stmt.executeQuery();
-            while (rs.next()) {
-                Location location = mapRowToLocation(rs);
-                results.add(location);
-            }
-
-        } finally {
-            if (rs != null) {
-                try { rs.close(); } catch (SQLException e) { }
-            }
-            if (stmt != null) {
-                try { stmt.close(); } catch (SQLException e) { }
+        Double latRef = filter.getLatRef();
+        Double lonRef = filter.getLonRef();
+        boolean hasDistance = filter.hasDistanceFilter();
+        if (filter.hasAddressDistanceFilter() && !filter.hasCoordinatesDistanceFilter()) {
+            try {
+                GeoPoint point = geocodingService.geocode(filter.getAddressRef());
+                latRef = point.getLatitude();
+                lonRef = point.getLongitude();
+            } catch (GeocodingException e) {
+                throw new SQLException("Unable to resolve address for distance search: " + e.getMessage(), e);
             }
         }
 
-        return results;
+        StringBuilder query = new StringBuilder("WITH search_base AS (SELECT l.*, ")
+                .append("r.name AS restaurant_name, r.cuisine_type AS restaurant_cuisine, ")
+                .append("v.avg_rating, v.review_count");
+
+        List<Object> params = new ArrayList<>();
+
+        if (hasDistance) {
+            query.append(", (6371 * 2 * ASIN(SQRT(POWER(SIN((l.latitude - ?) * pi()/180 / 2), 2) + ")
+                 .append("COS(? * pi()/180) * COS(l.latitude * pi()/180) * ")
+                 .append("POWER(SIN((l.longitude - ?) * pi()/180 / 2), 2)))) AS distance");
+            params.add(latRef);
+            params.add(latRef);
+            params.add(lonRef);
+        }
+
+        query.append(" FROM location l ")
+             .append("JOIN restaurant r ON l.restaurant_id = r.restaurant_id ")
+             .append("LEFT JOIN view_location_rating v ON l.location_id = v.location_id) ")
+             .append("SELECT * FROM search_base WHERE 1=1 ");
+
+        if (filter.getRestaurantName() != null && !filter.getRestaurantName().trim().isEmpty()) {
+            query.append("AND LOWER(restaurant_name) LIKE ? ");
+            params.add("%" + filter.getRestaurantName().trim().toLowerCase() + "%");
+        }
+
+        if (filter.getLocationName() != null && !filter.getLocationName().trim().isEmpty()) {
+            query.append("AND LOWER(name) LIKE ? ");
+            params.add("%" + filter.getLocationName().trim().toLowerCase() + "%");
+        }
+
+        if (filter.getCountry() != null && !filter.getCountry().trim().isEmpty()) {
+            query.append("AND LOWER(country) = ? ");
+            params.add(filter.getCountry().trim().toLowerCase());
+        }
+
+        if (filter.getCity() != null && !filter.getCity().trim().isEmpty()) {
+            query.append("AND LOWER(city) = ? ");
+            params.add(filter.getCity().trim().toLowerCase());
+        }
+
+        if (filter.getAddress() != null && !filter.getAddress().trim().isEmpty()) {
+            query.append("AND LOWER(address) LIKE ? ");
+            params.add("%" + filter.getAddress().trim().toLowerCase() + "%");
+        }
+
+        if (filter.getCuisineType() != null) {
+            query.append("AND LOWER(restaurant_cuisine) = ? ");
+            params.add(filter.getCuisineType().name().toLowerCase());
+        }
+
+        if (filter.getMaxPriceRange() != null) {
+            query.append("AND price_range <= ? ");
+            params.add(filter.getMaxPriceRange());
+        }
+
+        if (filter.getDelivery() != null) {
+            query.append("AND delivery = ? ");
+            params.add(filter.getDelivery());
+        }
+
+        if (filter.getTakeaway() != null) {
+            query.append("AND takeaway = ? ");
+            params.add(filter.getTakeaway());
+        }
+
+        if (filter.getMaxCapacity() != null) {
+            query.append("AND max_capacity >= ? ");
+            params.add(filter.getMaxCapacity());
+        }
+
+        if (filter.getVegetarianMenu() != null) {
+            query.append("AND vegetarian_menu = ? ");
+            params.add(filter.getVegetarianMenu());
+        }
+
+        if (filter.getVeganMenu() != null) {
+            query.append("AND vegan_menu = ? ");
+            params.add(filter.getVeganMenu());
+        }
+
+        if (filter.getGlutenFreeMenu() != null) {
+            query.append("AND gluten_free_menu = ? ");
+            params.add(filter.getGlutenFreeMenu());
+        }
+
+        if (filter.getOpenDay() != null) {
+            String dayKey = filter.getOpenDay().name().toLowerCase();
+            query.append("AND jsonb_exists(opening_hours, ?) ");
+            params.add(dayKey);
+
+            if (filter.getOpenTime() != null && !filter.getOpenTime().trim().isEmpty()) {
+                query.append("AND ?::time BETWEEN split_part(opening_hours ->> ?, '-', 1)::time ")
+                     .append("AND split_part(opening_hours ->> ?, '-', 2)::time ");
+                params.add(filter.getOpenTime().trim());
+                params.add(dayKey);
+                params.add(dayKey);
+            }
+        }
+
+        if (filter.getMinRating() != null) {
+            query.append("AND COALESCE(avg_rating, 0.0) >= ? ");
+            params.add(filter.getMinRating());
+        }
+
+        if (hasDistance) {
+            query.append("AND distance <= ? ");
+            params.add(filter.getRadiusKm());
+        }
+
+        query.append(hasDistance ? "ORDER BY distance ASC " : "ORDER BY COALESCE(avg_rating, 0.0) DESC ");
+
+        if (filter.hasPagination()) {
+            query.append("LIMIT ? OFFSET ?");
+            params.add(filter.getLimit() != null ? filter.getLimit() : Integer.MAX_VALUE);
+            params.add(filter.getOffset() != null ? filter.getOffset() : 0);
+        }
+
+        try (PreparedStatement stmt = conn.prepareStatement(query.toString())) {
+            for (int i = 0; i < params.size(); i++) {
+                stmt.setObject(i + 1, params.get(i));
+            }
+
+            List<LocationSearchResult> results = new ArrayList<>();
+            try (ResultSet rs = stmt.executeQuery()) {
+                while (rs.next()) {
+                    results.add(mapRowToSearchResult(rs, hasDistance));
+                }
+            }
+            return results;
+        }
     }
 
     /**
      * Function to map a row of ResultSet to a {@link Location} entity object.
-     * Deserializes the opening_hours JSONB field into a Day-based Map.
+     * Deserializes the opening_hours JSONB field into a Day-based Map. Keys are matched against
+     * {@link Day} with {@code toLowerCase()} since the enum constants are lowercase ("monday", ...),
+     * matching the JSON keys written by {@link #serializeOpeningTimes}.
      *
      * @param rs the ResultSet containing location table rows
      * @return the constructed Location entity
@@ -264,7 +256,7 @@ public class LocationDAOImpl implements LocationDAO {
                 if (rawMap != null) {
                     for (Map.Entry<String, String> entry : rawMap.entrySet()) {
                         try {
-                            Day day = Day.valueOf(entry.getKey().toUpperCase());
+                            Day day = Day.valueOf(entry.getKey().toLowerCase());
                             openingTimes.put(day, entry.getValue());
                         } catch (IllegalArgumentException e) {
                         }
@@ -277,6 +269,25 @@ public class LocationDAOImpl implements LocationDAO {
 
         return new Location(name, id, country, city, address, latitude, longitude,
                 priceRange, delivery, takeaway, maxCapacity, vegetarianMenu, veganMenu, glutenFreeMenu, openingTimes);
+    }
+
+    /**
+     * Function to map a row of ResultSet from the {@code search} query into a {@link LocationSearchResult},
+     * pairing the {@link Location} with the rating and restaurant fields the search query joins in.
+     *
+     * @param rs the ResultSet positioned on a search result row
+     * @param hasDistance whether the row carries a computed "distance" column
+     * @return the constructed search result
+     * @throws SQLException if a database mapping error occurs
+     */
+    private LocationSearchResult mapRowToSearchResult(ResultSet rs, boolean hasDistance) throws SQLException {
+        Location location = mapRowToLocation(rs);
+        Double averageRating = rs.getObject("avg_rating") != null ? rs.getDouble("avg_rating") : null;
+        long reviewCount = rs.getLong("review_count");
+        String restaurantName = rs.getString("restaurant_name");
+        String restaurantCuisine = rs.getString("restaurant_cuisine");
+        Double distanceKm = hasDistance ? rs.getDouble("distance") : null;
+        return new LocationSearchResult(location, averageRating, reviewCount, restaurantName, restaurantCuisine, distanceKm);
     }
 
     /**
@@ -381,30 +392,15 @@ public class LocationDAOImpl implements LocationDAO {
             throw new SQLException("id is null or empty");
         }
         String query = "SELECT * FROM location WHERE location_id = ?";
-        Connection conn = null;
-        PreparedStatement stmt = null;
-        ResultSet rs = null;
+        Connection conn = DBConnectionPool.getInstance().getConnection();
 
-        try{
-            conn = DBConnectionPool.getInstance().getConnection();
-            stmt = conn.prepareStatement(query);
+        try (PreparedStatement stmt = conn.prepareStatement(query)) {
             stmt.setString(1, id);
-            rs = stmt.executeQuery();
-            if (rs.next()) {
-                return Optional.of(mapRowToLocation(rs));
-            }
-            return Optional.empty();
-        } finally {
-            if(stmt != null) {
-                try {
-                    stmt.close();
-                }  catch (SQLException e) {}
-            }
-            if (stmt != null) {
-                try {
-                    stmt.close();
-                } catch (SQLException e) {
+            try (ResultSet rs = stmt.executeQuery()) {
+                if (rs.next()) {
+                    return Optional.of(mapRowToLocation(rs));
                 }
+                return Optional.empty();
             }
         }
     }

@@ -37,14 +37,13 @@ public abstract class User implements Serializable {
      * @param password         the user's password
      * @param domicile         the user's domicile
      * @param dateOfBirth      the user's date of birth
-     * @param isPasswordHashed is the password hashed? true = yes, false = no
      */
-    public User(String id, String name, String surname, String email, String password, String domicile, String dateOfBirth, boolean isPasswordHashed) {
+    public User(String id, String name, String surname, String email, String password, String domicile, String dateOfBirth) {
         this.id = id != null ? id : UUID.randomUUID().toString();
         this.name = name;
         this.surname = surname;
         this.email = email;
-        this.passwordHash = isPasswordHashed ? passwordHash : User.hashPassword(password);
+        this.passwordHash = password;
         this.domicile = domicile;
         this.dateOfBirth = dateOfBirth;
     }
@@ -58,10 +57,9 @@ public abstract class User implements Serializable {
      * @param email            the user's email
      * @param password         the user's password
      * @param domicile         the user's domicile
-     * @param isPasswordHashed is the password hashed? true = yes, false = no
      */
-    public User(String id, String name, String surname, String email, String password, String domicile, boolean isPasswordHashed) {
-        this(id, name, surname, email, password, domicile, null, isPasswordHashed);
+    public User(String id, String name, String surname, String email, String password, String domicile) {
+        this(id, name, surname, email, password, domicile, null);
     }
 
     /**
@@ -72,10 +70,9 @@ public abstract class User implements Serializable {
      * @param email            the user's email
      * @param password         the user's password
      * @param domicile         the user's domicile
-     * @param isPasswordHashed is the password hashed? true = yes, false = no
      */
-    public User(String name, String surname, String email, String password, String domicile, boolean isPasswordHashed) {
-        this(null, name, surname, email, password, domicile, null, isPasswordHashed);
+    public User(String name, String surname, String email, String password, String domicile) {
+        this(null, name, surname, email, password, domicile, null);
     }
 
     /**
@@ -168,14 +165,6 @@ public abstract class User implements Serializable {
         this.passwordHash = passwordHash;
     }
 
-    /**
-     * Funcction to set the password (not hashed)
-     *
-     * @param password the user's password (not hashed)
-     */
-    public void setPassword(String password) {
-        this.passwordHash = User.hashPassword(password);
-    }
 
     /**
      * Function to get the user's domicile
@@ -220,28 +209,5 @@ public abstract class User implements Serializable {
      */
     public abstract String getRole();
 
-
-    /**
-     * Static function to hash the user's password
-     *
-     * @param password the user's password
-     * @return the user's hashed password
-     * @throws RuntimeException
-     */
-    public static String hashPassword(String password) throws RuntimeException {
-        try {
-            MessageDigest md = MessageDigest.getInstance("SHA-256");
-            byte[] hashBytes = md.digest(password.getBytes());
-            StringBuilder sb = new StringBuilder();
-
-            for (byte b : hashBytes) {
-                sb.append(String.format("%02x", b));
-            }
-
-            return sb.toString();
-        } catch (NoSuchAlgorithmException e) {
-            throw new RuntimeException("Hashing error", e);
-        }
-    }
 
 }

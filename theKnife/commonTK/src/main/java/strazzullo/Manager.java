@@ -32,10 +32,9 @@ public class Manager extends User {
      * @param password         the user's password
      * @param domicile         the user's domicile
      * @param dateOfBirth      the user's date of birth
-     * @param isPasswordHashed is the password hashed? true = yes, false = no
      */
-    public Manager(String id, String name, String surname, String email, String password, String domicile, String dateOfBirth, boolean isPasswordHashed) {
-        super(id, name, surname, email, password, domicile, dateOfBirth, isPasswordHashed);
+    public Manager(String id, String name, String surname, String email, String password, String domicile, String dateOfBirth) {
+        super(id, name, surname, email, password, domicile, dateOfBirth);
         this.restaurants = new ArrayList<>();
     }
 
@@ -48,10 +47,9 @@ public class Manager extends User {
      * @param email            the user's email
      * @param password         the user's password
      * @param domicile         the user's domicile
-     * @param isPasswordHashed is the password hashed? true = yes, false = no
      */
-    public Manager(String id, String name, String surname, String email, String password, String domicile, boolean isPasswordHashed) {
-        this(id, name, surname, email, password, domicile, null, isPasswordHashed);
+    public Manager(String id, String name, String surname, String email, String password, String domicile) {
+        this(id, name, surname, email, password, domicile, null);
     }
 
     /**
@@ -64,8 +62,8 @@ public class Manager extends User {
      * @param domicile         the user's domicile
      * @param isPasswordHashed is the password hashed? true = yes, false = no
      */
-    public Manager(String name, String surname, String email, String password, String domicile, boolean isPasswordHashed) {
-        this(null, name, surname, email, password, domicile, null, isPasswordHashed);
+    public Manager(String name, String surname, String email, String password, String domicile) {
+        this(null, name, surname, email, password, domicile, null);
     }
 
     /**

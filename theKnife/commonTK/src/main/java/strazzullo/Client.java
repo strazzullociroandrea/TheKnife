@@ -33,10 +33,9 @@ public class Client extends User {
      * @param password         the user's password
      * @param domicile         the user's domicile
      * @param dateOfBirth      the user's date of birth
-     * @param isPasswordHashed is the password hashed? true = yes, false = no
      */
-    public Client(String id, String name, String surname, String email, String password, String domicile, String dateOfBirth, boolean isPasswordHashed) {
-        super(id, name, surname, email, password, domicile, dateOfBirth, isPasswordHashed);
+    public Client(String id, String name, String surname, String email, String password, String domicile, String dateOfBirth) {
+        super(id, name, surname, email, password, domicile, dateOfBirth);
         this.favoriteRestaurants = new ArrayList<>();
     }
 
@@ -49,10 +48,9 @@ public class Client extends User {
      * @param email            the user's email
      * @param password         the user's password
      * @param domicile         the user's domicile
-     * @param isPasswordHashed is the password hashed? true = yes, false = no
      */
-    public Client(String id, String name, String surname, String email, String password, String domicile, boolean isPasswordHashed) {
-        this(id, name, surname, email, password, domicile, null, isPasswordHashed);
+    public Client(String id, String name, String surname, String email, String password, String domicile) {
+        this(id, name, surname, email, password, domicile, null);
     }
 
     /**
@@ -63,10 +61,9 @@ public class Client extends User {
      * @param email            the user's email
      * @param password         the user's password
      * @param domicile         the user's domicile
-     * @param isPasswordHashed is the password hashed? true = yes, false = no
-     */
-    public Client(String name, String surname, String email, String password, String domicile, boolean isPasswordHashed) {
-        this(null, name, surname, email, password, domicile, null, isPasswordHashed);
+      */
+    public Client(String name, String surname, String email, String password, String domicile) {
+        this(null, name, surname, email, password, domicile, null);
     }
 
     /**

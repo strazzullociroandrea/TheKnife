@@ -34,8 +34,8 @@ public class PhotoDAOImpl implements PhotoDAO {
     @Override
     public void insert(Photo photo) throws SQLException {
         String sql = "INSERT INTO photo (photo_id, location_id, url, uploaded_at) VALUES (?, ?, ?, ?)";
-        Connection conn = DBConnectionPool.getInstance().getConnection();
-        try (PreparedStatement stmt = conn.prepareStatement(sql)) {
+        try (Connection conn = DBConnectionPool.getInstance().getConnection();
+             PreparedStatement stmt = conn.prepareStatement(sql)) {
             stmt.setString(1, photo.getId());
             stmt.setString(2, photo.getLocationId());
             stmt.setString(3, photo.getUrl());
@@ -55,8 +55,8 @@ public class PhotoDAOImpl implements PhotoDAO {
     public List<Photo> findByLocation(String locationId) throws SQLException {
         String sql = "SELECT photo_id, location_id, url, uploaded_at FROM photo WHERE location_id = ? ORDER BY uploaded_at ASC";
         List<Photo> results = new ArrayList<>();
-        Connection conn = DBConnectionPool.getInstance().getConnection();
-        try (PreparedStatement stmt = conn.prepareStatement(sql)) {
+        try (Connection conn = DBConnectionPool.getInstance().getConnection();
+             PreparedStatement stmt = conn.prepareStatement(sql)) {
             stmt.setString(1, locationId);
             try (ResultSet rs = stmt.executeQuery()) {
                 while (rs.next()) {
@@ -77,8 +77,8 @@ public class PhotoDAOImpl implements PhotoDAO {
     @Override
     public Optional<Photo> findById(String photoId) throws SQLException {
         String sql = "SELECT photo_id, location_id, url, uploaded_at FROM photo WHERE photo_id = ?";
-        Connection conn = DBConnectionPool.getInstance().getConnection();
-        try (PreparedStatement stmt = conn.prepareStatement(sql)) {
+        try (Connection conn = DBConnectionPool.getInstance().getConnection();
+             PreparedStatement stmt = conn.prepareStatement(sql)) {
             stmt.setString(1, photoId);
             try (ResultSet rs = stmt.executeQuery()) {
                 return rs.next() ? Optional.of(mapRow(rs)) : Optional.empty();
@@ -96,8 +96,8 @@ public class PhotoDAOImpl implements PhotoDAO {
     @Override
     public Optional<String> findRestaurantIdByLocation(String locationId) throws SQLException {
         String sql = "SELECT restaurant_id FROM location WHERE location_id = ?";
-        Connection conn = DBConnectionPool.getInstance().getConnection();
-        try (PreparedStatement stmt = conn.prepareStatement(sql)) {
+        try (Connection conn = DBConnectionPool.getInstance().getConnection();
+             PreparedStatement stmt = conn.prepareStatement(sql)) {
             stmt.setString(1, locationId);
             try (ResultSet rs = stmt.executeQuery()) {
                 return rs.next() ? Optional.of(rs.getString("restaurant_id")) : Optional.empty();
@@ -116,8 +116,8 @@ public class PhotoDAOImpl implements PhotoDAO {
     @Override
     public boolean isRestaurantOwner(String restaurantId, String userId) throws SQLException {
         String sql = "SELECT 1 FROM restaurant_owner WHERE restaurant_id = ? AND user_id = ?";
-        Connection conn = DBConnectionPool.getInstance().getConnection();
-        try (PreparedStatement stmt = conn.prepareStatement(sql)) {
+        try (Connection conn = DBConnectionPool.getInstance().getConnection();
+             PreparedStatement stmt = conn.prepareStatement(sql)) {
             stmt.setString(1, restaurantId);
             stmt.setString(2, userId);
             try (ResultSet rs = stmt.executeQuery()) {
@@ -135,8 +135,8 @@ public class PhotoDAOImpl implements PhotoDAO {
     @Override
     public void delete(String photoId) throws SQLException {
         String sql = "DELETE FROM photo WHERE photo_id = ?";
-        Connection conn = DBConnectionPool.getInstance().getConnection();
-        try (PreparedStatement stmt = conn.prepareStatement(sql)) {
+        try (Connection conn = DBConnectionPool.getInstance().getConnection();
+             PreparedStatement stmt = conn.prepareStatement(sql)) {
             stmt.setString(1, photoId);
             stmt.executeUpdate();
         }

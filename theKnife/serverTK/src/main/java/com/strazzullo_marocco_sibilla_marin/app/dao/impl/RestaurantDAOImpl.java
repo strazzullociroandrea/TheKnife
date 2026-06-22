@@ -66,8 +66,8 @@ public class RestaurantDAOImpl implements RestaurantDAO {
         String sql = "SELECT u.user_id, u.first_name, u.last_name, u.email, u.password_hash, u.date_of_birth, u.city, u.role " +
                 "FROM restaurant_owner ro JOIN app_user u ON ro.user_id = u.user_id WHERE ro.restaurant_id = ?";
         List<User> owners = new ArrayList<>();
-        Connection conn = DBConnectionPool.getInstance().getConnection();
-        try (PreparedStatement stmt = conn.prepareStatement(sql)) {
+        try (Connection conn = DBConnectionPool.getInstance().getConnection();
+             PreparedStatement stmt = conn.prepareStatement(sql)) {
             stmt.setString(1, restaurantId);
             try (ResultSet rs = stmt.executeQuery()) {
                 while (rs.next()) {
@@ -102,9 +102,8 @@ public class RestaurantDAOImpl implements RestaurantDAO {
         if (id == null || id.isEmpty()) throw new SQLException("id is null or empty");
 
         String sql = "SELECT restaurant_id, name, cuisine_type FROM restaurant WHERE restaurant_id = ?";
-        Connection conn = DBConnectionPool.getInstance().getConnection();
-
-        try (PreparedStatement stmt = conn.prepareStatement(sql)) {
+        try (Connection conn = DBConnectionPool.getInstance().getConnection();
+             PreparedStatement stmt = conn.prepareStatement(sql)) {
             stmt.setString(1, id);
             try (ResultSet rs = stmt.executeQuery()) {
                 if (!rs.next()) return Optional.empty();
@@ -129,9 +128,8 @@ public class RestaurantDAOImpl implements RestaurantDAO {
                 "JOIN restaurant_owner ro ON r.restaurant_id = ro.restaurant_id WHERE ro.user_id = ?";
 
         List<Restaurant> results = new ArrayList<>();
-        Connection conn = DBConnectionPool.getInstance().getConnection();
-
-        try (PreparedStatement stmt = conn.prepareStatement(sql)) {
+        try (Connection conn = DBConnectionPool.getInstance().getConnection();
+             PreparedStatement stmt = conn.prepareStatement(sql)) {
             stmt.setString(1, id);
             try (ResultSet rs = stmt.executeQuery()) {
                 while (rs.next()) {
@@ -164,34 +162,32 @@ public class RestaurantDAOImpl implements RestaurantDAO {
 
         String sql = "INSERT INTO restaurant(restaurant_id, name, cuisine_type) VALUES(?, ?, ?)";
         String linkSql = "INSERT INTO restaurant_owner(restaurant_id, user_id) VALUES(?, ?)";
-        Connection conn = DBConnectionPool.getInstance().getConnection();
-        boolean autoCommit = conn.getAutoCommit();
 
-        try {
-            conn.setAutoCommit(false);
+        try (Connection conn = DBConnectionPool.getInstance().getConnection()) {
+            boolean autoCommit = conn.getAutoCommit();
 
-            try (PreparedStatement stmt = conn.prepareStatement(sql)) {
-                stmt.setString(1, restaurant.getId());
-                stmt.setString(2, restaurant.getName());
-                stmt.setString(3, restaurant.getCuisine() != null ? restaurant.getCuisine().name() : null);
-                stmt.executeUpdate();
-            }
-
-            try (PreparedStatement stmt = conn.prepareStatement(linkSql)) {
-                stmt.setString(1, restaurant.getId());
-                stmt.setString(2, ownerId);
-                stmt.executeUpdate();
-            }
-
-            conn.commit();
-        } catch (SQLException e) {
-            conn.rollback();
-            throw e;
-        } finally {
             try {
-                conn.setAutoCommit(autoCommit);
+                conn.setAutoCommit(false);
+
+                try (PreparedStatement stmt = conn.prepareStatement(sql)) {
+                    stmt.setString(1, restaurant.getId());
+                    stmt.setString(2, restaurant.getName());
+                    stmt.setString(3, restaurant.getCuisine() != null ? restaurant.getCuisine().name() : null);
+                    stmt.executeUpdate();
+                }
+
+                try (PreparedStatement stmt = conn.prepareStatement(linkSql)) {
+                    stmt.setString(1, restaurant.getId());
+                    stmt.setString(2, ownerId);
+                    stmt.executeUpdate();
+                }
+
+                conn.commit();
             } catch (SQLException e) {
-                // ignore
+                conn.rollback();
+                throw e;
+            } finally {
+                conn.setAutoCommit(autoCommit);
             }
         }
 
@@ -212,9 +208,8 @@ public class RestaurantDAOImpl implements RestaurantDAO {
         if (restaurant.getId() == null || restaurant.getId().isEmpty()) throw new SQLException("restaurant id is null or empty");
 
         String sql = "UPDATE restaurant SET name = ?, cuisine_type = ? WHERE restaurant_id = ?";
-        Connection conn = DBConnectionPool.getInstance().getConnection();
-
-        try (PreparedStatement stmt = conn.prepareStatement(sql)) {
+        try (Connection conn = DBConnectionPool.getInstance().getConnection();
+             PreparedStatement stmt = conn.prepareStatement(sql)) {
             stmt.setString(1, restaurant.getName());
             stmt.setString(2, restaurant.getCuisine() != null ? restaurant.getCuisine().name() : null);
             stmt.setString(3, restaurant.getId());
@@ -236,9 +231,8 @@ public class RestaurantDAOImpl implements RestaurantDAO {
         if (id == null || id.isEmpty()) throw new SQLException("id is null or empty");
 
         String sql = "DELETE FROM restaurant WHERE restaurant_id = ?";
-        Connection conn = DBConnectionPool.getInstance().getConnection();
-
-        try (PreparedStatement stmt = conn.prepareStatement(sql)) {
+        try (Connection conn = DBConnectionPool.getInstance().getConnection();
+             PreparedStatement stmt = conn.prepareStatement(sql)) {
             stmt.setString(1, id);
             stmt.executeUpdate();
         }
@@ -258,9 +252,8 @@ public class RestaurantDAOImpl implements RestaurantDAO {
         if (ownerId == null || ownerId.isEmpty()) throw new SQLException("owner id is null or empty");
 
         String sql = "INSERT INTO restaurant_owner(restaurant_id, user_id) VALUES(?, ?)";
-        Connection conn = DBConnectionPool.getInstance().getConnection();
-
-        try (PreparedStatement stmt = conn.prepareStatement(sql)) {
+        try (Connection conn = DBConnectionPool.getInstance().getConnection();
+             PreparedStatement stmt = conn.prepareStatement(sql)) {
             stmt.setString(1, restaurantId);
             stmt.setString(2, ownerId);
             stmt.executeUpdate();
@@ -282,9 +275,8 @@ public class RestaurantDAOImpl implements RestaurantDAO {
         if (ownerId == null || ownerId.isEmpty()) throw new SQLException("owner id is null or empty");
 
         String sql = "DELETE FROM restaurant_owner WHERE restaurant_id = ? AND user_id = ?";
-        Connection conn = DBConnectionPool.getInstance().getConnection();
-
-        try (PreparedStatement stmt = conn.prepareStatement(sql)) {
+        try (Connection conn = DBConnectionPool.getInstance().getConnection();
+             PreparedStatement stmt = conn.prepareStatement(sql)) {
             stmt.setString(1, restaurantId);
             stmt.setString(2, ownerId);
             stmt.executeUpdate();
@@ -306,9 +298,8 @@ public class RestaurantDAOImpl implements RestaurantDAO {
         if (ownerId == null || ownerId.isEmpty()) throw new SQLException("owner id is null or empty");
 
         String sql = "SELECT 1 FROM restaurant_owner WHERE restaurant_id = ? AND user_id = ?";
-        Connection conn = DBConnectionPool.getInstance().getConnection();
-
-        try (PreparedStatement stmt = conn.prepareStatement(sql)) {
+        try (Connection conn = DBConnectionPool.getInstance().getConnection();
+             PreparedStatement stmt = conn.prepareStatement(sql)) {
             stmt.setString(1, restaurantId);
             stmt.setString(2, ownerId);
             try (ResultSet rs = stmt.executeQuery()) {

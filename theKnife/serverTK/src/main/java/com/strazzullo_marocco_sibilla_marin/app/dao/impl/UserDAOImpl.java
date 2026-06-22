@@ -37,46 +37,29 @@ public class UserDAOImpl implements UserDAO {
         }
 
         String query = "SELECT * FROM app_user WHERE email = ?;";
-        Connection conn = null;
-        PreparedStatement stmt = null;
-        ResultSet rs = null;
         User u = null;
 
-        try {
-            conn = DBConnectionPool.getInstance().getConnection();
-            stmt = conn.prepareStatement(query);
+        try (Connection conn = DBConnectionPool.getInstance().getConnection();
+             PreparedStatement stmt = conn.prepareStatement(query)) {
             stmt.setString(1, email);
-            rs = stmt.executeQuery();
-
-            if (rs.next()) {
-                String id = rs.getString("user_id"),
-                        name = rs.getString("first_name"),
-                        surname = rs.getString("last_name"),
-                        emailTmp = rs.getString("email"),
-                        password = rs.getString("password_hash"),
-                        dateOfBirth = rs.getString("date_of_birth"),
-                        city = rs.getString("city"),
-                        role = rs.getString("role");
-                if (role.equalsIgnoreCase("customer")) {
-                    u = new Client(id, name, surname, emailTmp, password, city, dateOfBirth);
-                } else if (role.equalsIgnoreCase("manager")) {
-                    u = new Manager(id, name, surname, emailTmp, password, city, dateOfBirth);
-                }
-                return u;
-            } else {
-                return null;
-            }
-        } finally {
-            if (rs != null) {
-                try {
-                    rs.close();
-                } catch (SQLException e) {
-                }
-            }
-            if (stmt != null) {
-                try {
-                    stmt.close();
-                } catch (SQLException e) {
+            try (ResultSet rs = stmt.executeQuery()) {
+                if (rs.next()) {
+                    String id = rs.getString("user_id"),
+                            name = rs.getString("first_name"),
+                            surname = rs.getString("last_name"),
+                            emailTmp = rs.getString("email"),
+                            password = rs.getString("password_hash"),
+                            dateOfBirth = rs.getString("date_of_birth"),
+                            city = rs.getString("city"),
+                            role = rs.getString("role");
+                    if (role.equalsIgnoreCase("customer")) {
+                        u = new Client(id, name, surname, emailTmp, password, city, dateOfBirth);
+                    } else if (role.equalsIgnoreCase("manager")) {
+                        u = new Manager(id, name, surname, emailTmp, password, city, dateOfBirth);
+                    }
+                    return u;
+                } else {
+                    return null;
                 }
             }
         }
@@ -96,46 +79,29 @@ public class UserDAOImpl implements UserDAO {
         }
 
         String query = "SELECT * FROM app_user WHERE id = ?;";
-        Connection conn = null;
-        PreparedStatement stmt = null;
-        ResultSet rs = null;
         User u = null;
 
-        try {
-            conn = DBConnectionPool.getInstance().getConnection();
-            stmt = conn.prepareStatement(query);
+        try (Connection conn = DBConnectionPool.getInstance().getConnection();
+             PreparedStatement stmt = conn.prepareStatement(query)) {
             stmt.setString(1, id);
-            rs = stmt.executeQuery();
-
-            if (rs.next()) {
-                String idTmp = rs.getString("user_id"),
-                        name = rs.getString("first_name"),
-                        surname = rs.getString("last_name"),
-                        email = rs.getString("email"),
-                        password = rs.getString("password_hash"),
-                        dateOfBirth = rs.getString("date_of_birth"),
-                        city = rs.getString("city"),
-                        role = rs.getString("role");
-                if (role.equalsIgnoreCase("customer")) {
-                    u = new Client(idTmp, name, surname, email, password, city, dateOfBirth);
-                } else if (role.equalsIgnoreCase("manager")) {
-                    u = new Manager(idTmp, name, surname, email, password, city, dateOfBirth);
-                }
-                return u;
-            } else {
-                return null;
-            }
-        } finally {
-            if (rs != null) {
-                try {
-                    rs.close();
-                } catch (SQLException e) {
-                }
-            }
-            if (stmt != null) {
-                try {
-                    stmt.close();
-                } catch (SQLException e) {
+            try (ResultSet rs = stmt.executeQuery()) {
+                if (rs.next()) {
+                    String idTmp = rs.getString("user_id"),
+                            name = rs.getString("first_name"),
+                            surname = rs.getString("last_name"),
+                            email = rs.getString("email"),
+                            password = rs.getString("password_hash"),
+                            dateOfBirth = rs.getString("date_of_birth"),
+                            city = rs.getString("city"),
+                            role = rs.getString("role");
+                    if (role.equalsIgnoreCase("customer")) {
+                        u = new Client(idTmp, name, surname, email, password, city, dateOfBirth);
+                    } else if (role.equalsIgnoreCase("manager")) {
+                        u = new Manager(idTmp, name, surname, email, password, city, dateOfBirth);
+                    }
+                    return u;
+                } else {
+                    return null;
                 }
             }
         }
@@ -153,60 +119,43 @@ public class UserDAOImpl implements UserDAO {
             throw new SQLException("urser is null.");
         }
 
+        if (!(u instanceof Manager || u instanceof Client)) {
+            throw new SQLException("User is not a Manager or a customer");
+        }
+
         String checkQuery = "SELECT count(*) AS recordCount FROM app_user WHERE email = ?";
         String query = "INSERT INTO app_user(user_id, first_name, last_name, email, password_hash, date_of_birth, city, role) VALUES(?,?,?,?,?,?,?,?);";
-        Connection conn = null;
-        PreparedStatement checkStmt = null;
-        PreparedStatement stmt = null;
-        ResultSet rs = null;
-        try {
-            if (!(u instanceof Manager || u instanceof Client)) {
-                throw new SQLException("User is not a Manager or a customer");
-            }
 
-            conn = DBConnectionPool.getInstance().getConnection();
-            checkStmt = conn.prepareStatement(checkQuery);
-            checkStmt.setString(1, u.getEmail());
-            rs = checkStmt.executeQuery();
-            if (rs.next()) {
-                int count = rs.getInt("recordCount");
-                if (count > 0) {
-                    throw new SQLException("User already exists.");
+        try (Connection conn = DBConnectionPool.getInstance().getConnection()) {
+            try (PreparedStatement checkStmt = conn.prepareStatement(checkQuery)) {
+                checkStmt.setString(1, u.getEmail());
+                try (ResultSet rs = checkStmt.executeQuery()) {
+                    if (rs.next()) {
+                        int count = rs.getInt("recordCount");
+                        if (count > 0) {
+                            throw new SQLException("User already exists.");
+                        }
+                    }
                 }
             }
 
+            try (PreparedStatement stmt = conn.prepareStatement(query)) {
+                stmt.setString(1, u.getId());
+                stmt.setString(2, u.getName());
+                stmt.setString(3, u.getSurname());
+                stmt.setString(4, u.getEmail());
+                stmt.setString(5, u.getPasswordHash());
+                if (u.getDateOfBirth() == null || u.getDateOfBirth().isEmpty()) {
+                    stmt.setNull(6, Types.DATE);
+                } else {
+                    stmt.setDate(6, Date.valueOf(u.getDateOfBirth()));
+                }
+                stmt.setString(7, u.getDomicile());
+                stmt.setObject(8, u.getRole(), Types.OTHER);
 
-            stmt = conn.prepareStatement(query);
-            stmt.setString(1, u.getId());
-            stmt.setString(2, u.getName());
-            stmt.setString(3, u.getSurname());
-            stmt.setString(4, u.getEmail());
-            stmt.setString(5, u.getPasswordHash());
-            if(u.getDateOfBirth() == null || u.getDateOfBirth().isEmpty()) {
-               stmt.setNull(6, java.sql.Types.DATE);
-            } else {
-                stmt.setDate(6, java.sql.Date.valueOf(u.getDateOfBirth()));
-            }
-            stmt.setString(7, u.getDomicile());
-            stmt.setObject(8, u.getRole(), Types.OTHER);
-
-            stmt.executeUpdate();
-
-        } finally {
-            if (rs != null) try {
-                rs.close();
-            } catch (SQLException e) {
-            }
-            if (checkStmt != null) try {
-                checkStmt.close();
-            } catch (SQLException e) {
-            }
-            if (stmt != null) try {
-                stmt.close();
-            } catch (SQLException e) {
+                stmt.executeUpdate();
             }
         }
-
     }
 
     /**
@@ -219,39 +168,27 @@ public class UserDAOImpl implements UserDAO {
             throw new SQLException("urser is null.");
         }
 
+        if (!(u instanceof Manager || u instanceof Client)) {
+            throw new SQLException("User is not a Manager or a Client");
+        }
+
         String query = "UPDATE app_user SET first_name = ?, last_name = ?, email = ?, password_hash = ?, date_of_birth = ?, city = ?, role = ? WHERE user_id = ?;";
-        Connection conn = null;
-        PreparedStatement stmt = null;
 
-        try {
-            if (!(u instanceof Manager || u instanceof Client)) {
-                throw new SQLException("User is not a Manager or a customer");
-            }
-
-            conn = DBConnectionPool.getInstance().getConnection();
-            stmt = conn.prepareStatement(query);
-
+        try (Connection conn = DBConnectionPool.getInstance().getConnection();
+             PreparedStatement stmt = conn.prepareStatement(query)) {
             stmt.setString(1, u.getName());
             stmt.setString(2, u.getSurname());
             stmt.setString(3, u.getEmail());
             stmt.setString(4, u.getPasswordHash());
-            if(u.getDateOfBirth() == null || u.getDateOfBirth().isEmpty()) {
-                stmt.setNull(5, java.sql.Types.DATE);
+            if (u.getDateOfBirth() == null || u.getDateOfBirth().isEmpty()) {
+                stmt.setNull(5, Types.DATE);
             } else {
-                stmt.setDate(5, java.sql.Date.valueOf(u.getDateOfBirth()));
+                stmt.setDate(5, Date.valueOf(u.getDateOfBirth()));
             }
             stmt.setString(6, u.getDomicile());
             stmt.setObject(7, u.getRole(), Types.OTHER);
             stmt.setString(8, u.getId());
             stmt.executeUpdate();
-
-        } finally {
-            if (stmt != null) {
-                try {
-                    stmt.close();
-                } catch (SQLException e) {
-                }
-            }
         }
     }
 

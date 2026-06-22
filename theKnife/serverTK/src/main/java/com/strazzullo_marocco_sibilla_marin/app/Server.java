@@ -1,6 +1,7 @@
 package com.strazzullo_marocco_sibilla_marin.app;
 
 import com.strazzullo_marocco_sibilla_marin.app.service.CustomerServiceImpl;
+import com.strazzullo_marocco_sibilla_marin.app.service.AuthServiceImpl;
 import com.strazzullo_marocco_sibilla_marin.app.config.DotEnv;
 
 import java.rmi.registry.LocateRegistry;
@@ -12,6 +13,7 @@ public class Server {
 
     public static final int RMI_PORT = 1099;
     public static final String CUSTOMER_SERVICE_NAME = "CustomerService";
+    public static final String AUTH_SERVICE_NAME = "AuthService";
 
     private static String getData(String message, Scanner s) {
         System.out.println(message);
@@ -46,6 +48,10 @@ public class Server {
             Registry registry = LocateRegistry.createRegistry(RMI_PORT);
             registry.rebind(CUSTOMER_SERVICE_NAME, new CustomerServiceImpl());
             System.out.println("CustomerService bound on RMI registry, port " + RMI_PORT);
+
+            registry.rebind(AUTH_SERVICE_NAME, new AuthServiceImpl());
+            System.out.println("AuthService bound on RMI registry, port " + RMI_PORT);
+
 
         } catch (Exception e) {
             System.err.println(e.getMessage());

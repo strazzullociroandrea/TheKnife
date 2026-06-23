@@ -62,12 +62,10 @@ public class CustomerServiceImpl extends UnicastRemoteObject implements Customer
      */
     @Override
     public List<LocationSearchResult> searchLocations(SearchFilter filter) throws RemoteException {
-        if (filter == null) {
-            filter = new SearchFilter.Builder().build();
-        }
-        LOGGER.fine(() -> "Executing location search using filter parameters: " + filter);
+        SearchFilter effectiveFilter = filter != null ? filter : new SearchFilter.Builder().build();
+        LOGGER.fine(() -> "Executing location search using filter parameters: " + effectiveFilter);
         try {
-            return locationDAO.search(filter);
+            return locationDAO.search(effectiveFilter);
         } catch (SQLException e) {
             LOGGER.log(Level.SEVERE, "SQLException encountered in searchLocations service method", e);
             throw new RemoteException("Database access exception occurred on the server side.", e);

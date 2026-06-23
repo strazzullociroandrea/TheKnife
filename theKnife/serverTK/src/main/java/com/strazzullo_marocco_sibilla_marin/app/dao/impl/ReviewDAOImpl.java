@@ -6,6 +6,9 @@ import marin.Review;
 import sibilla.Restaurant;
 import strazzullo.User;
 
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.List;
 import java.util.ArrayList;
@@ -40,7 +43,7 @@ public class ReviewDAOImpl implements ReviewDAO{
         if (restId == null || restId.isEmpty()) {
             throw new SQLException("restId is null or empty");
         }
-        String query = "SELECT * FROM review WHERE location_id = ?;";
+        String query = "SELECT * FROM review WHERE location_id = ?";
         Connection conn = null;
         PreparedStatement stmt = null;
         ResultSet rs = null;
@@ -52,16 +55,17 @@ public class ReviewDAOImpl implements ReviewDAO{
             stmt.setString(1, restId);
             rs = stmt.executeQuery();
             while (rs.next()){
-                String reviewId = rs.getString("review_id");
+                String userId = rs.getString("user_id");
+                String locationId = rs.getString("location_id");
                 int globalStars = rs.getInt("rating");
                 int priceStars = rs.getInt("rating_price");
                 int hospitalityStars = rs.getInt("rating_hospitality");
                 int serviceStars = rs.getInt("rating_service");
                 String text = rs.getString("body");
                 if(text == null){
-                    r.add(new Review(reviewId, globalStars, priceStars, hospitalityStars, serviceStars));
+                    r.add(new Review(userId, locationId, globalStars, priceStars, hospitalityStars, serviceStars));
                 } else{
-                    r.add(new Review(reviewId, globalStars, priceStars, hospitalityStars, serviceStars, text));
+                    r.add(new Review(userId, locationId, globalStars, priceStars, hospitalityStars, serviceStars, text));
                 }
             }
             return r;
@@ -78,23 +82,27 @@ public class ReviewDAOImpl implements ReviewDAO{
                 } catch (SQLException e) {
                 }
             }
+            if (conn != null) try {
+                conn.close();
+            } catch (SQLException e) {
+            }
         }
     }
 
     /**
      * Finds all reviews written by the specified user.
      *
-     * @param userId the identifier of the user
+     * @param uId the identifier of the user
      * @return a list containing the user's reviews
      * @throws SQLException if the user identifier is invalid or
      *         an error occurs while accessing the database
      */
     @Override
-    List<Review> findByUser(String userId) throws SQLException {
-        if (userId == null || userId.isEmpty()) {
-            throw new SQLException("userId is null or empty");
+    public List<Review> findByUser(String uId) throws SQLException {
+        if (uId == null || uId.isEmpty()) {
+            throw new SQLException("uId is null or empty");
         }
-        String query = "SELECT * FROM review WHERE user_id = ?;";
+        String query = "SELECT * FROM review WHERE user_id = ?";
         Connection conn = null;
         PreparedStatement stmt = null;
         ResultSet rs = null;
@@ -103,19 +111,20 @@ public class ReviewDAOImpl implements ReviewDAO{
         try{
             conn = DBConnectionPool.getInstance().getConnection();
             stmt = conn.prepareStatement(query);
-            stmt.setString(1, userId);
+            stmt.setString(1, uId);
             rs = stmt.executeQuery();
             while (rs.next()){
-                String reviewId = rs.getString("review_id");
+                String userId = rs.getString("user_id");
+                String locationId = rs.getString("location_id");
                 int globalStars = rs.getInt("rating");
                 int priceStars = rs.getInt("rating_price");
                 int hospitalityStars = rs.getInt("rating_hospitality");
                 int serviceStars = rs.getInt("rating_service");
                 String text = rs.getString("body");
                 if(text == null){
-                    r.add(new Review(reviewId, globalStars, priceStars, hospitalityStars, serviceStars));
+                    r.add(new Review(userId, locationId, globalStars, priceStars, hospitalityStars, serviceStars));
                 } else{
-                    r.add(new Review(reviewId, globalStars, priceStars, hospitalityStars, serviceStars, text));
+                    r.add(new Review(userId, locationId, globalStars, priceStars, hospitalityStars, serviceStars, text));
                 }
             }
             return r;
@@ -131,6 +140,10 @@ public class ReviewDAOImpl implements ReviewDAO{
                     stmt.close();
                 } catch (SQLException e) {
                 }
+            }
+            if (conn != null) try {
+                conn.close();
+            } catch (SQLException e) {
             }
         }
     }
@@ -152,12 +165,12 @@ public class ReviewDAOImpl implements ReviewDAO{
         boolean text = rev.getText() == null || rev.getText().isEmpty();
         String query;
         if (!text){
-            query = "INSERT INTO review(review_id, user_id, location_id, rating, rating_price, rating_hospitality, rating_service) VALUES(?, ?, ?, ?, ?, ?, ?);";
+            query = "INSERT INTO review(review_id, user_id, location_id, rating, rating_price, rating_hospitality, rating_service) VALUES(?, ?, ?, ?, ?, ?, ?)";
         } else{
-            query = "INSERT INTO review(review_id, user_id, location_id, rating, rating_price, rating_hospitality, rating_service, body) VALUES(?, ?, ?, ?, ?, ?, ?, ?);";
+            query = "INSERT INTO review(review_id, user_id, location_id, rating, rating_price, rating_hospitality, rating_service, body) VALUES(?, ?, ?, ?, ?, ?, ?, ?)";
         }
 
-        String checkQuery = "SELECT count(*) AS recordCount FROM review WHERE review_id = ?;";
+        String checkQuery = "SELECT count(*) AS recordCount FROM review WHERE review_id = ?";
         Connection conn = null;
         PreparedStatement checkStmt = null;
         PreparedStatement stmt = null;
@@ -235,9 +248,9 @@ public class ReviewDAOImpl implements ReviewDAO{
         boolean text = rev.getText() == null || rev.getText().isEmpty();
         String query;
         if (!text) {
-            query = "UPDATE review SET rating = ?, rating_price = ?, rating_hospitality = ?, rating_service = ? WHERE review_id = ?;";
+            query = "UPDATE review SET rating = ?, rating_price = ?, rating_hospitality = ?, rating_service = ? WHERE review_id = ?";
         } else {
-            query = "UPDATE review SET rating = ?, rating_price = ?, rating_hospitality = ?, rating_service = ?, body = ? WHERE review_id = ?;";
+            query = "UPDATE review SET rating = ?, rating_price = ?, rating_hospitality = ?, rating_service = ?, body = ? WHERE review_id = ?";
         }
 
         Connection conn = null;
@@ -288,7 +301,7 @@ public class ReviewDAOImpl implements ReviewDAO{
     public void delete(String reviewId) throws SQLException {
         if (reviewId == null || reviewId.isEmpty()) throw new SQLException("reviewId is null or empty");
 
-        String query = "DELETE FROM review WHERE review_id = ?;";
+        String query = "DELETE FROM review WHERE review_id = ?";
         Connection conn = null;
         PreparedStatement stmt = null;
 
@@ -311,12 +324,238 @@ public class ReviewDAOImpl implements ReviewDAO{
         }
     }
 
-    /*@Override
+    /**
+     * Finds a review by its unique identifier.
+     *
+     * @param reviewId the identifier of the review to retrieve
+     * @return the review object, or null if no review was found
+     * @throws SQLException if an error occurs while accessing the data source
+     */
+    @Override
+    public Review getReviewById(String reviewId) throws SQLException{
+        if (reviewId == null || reviewId.isEmpty()) {
+            throw new SQLException("reviewId is null or empty");
+        }
+        String query = "SELECT * FROM review WHERE review_id = ?";
+        Connection conn = null;
+        PreparedStatement stmt = null;
+        ResultSet rs = null;
+        Review r = null;
+
+        try{
+            conn = DBConnectionPool.getInstance().getConnection();
+            stmt = conn.prepareStatement(query);
+            stmt.setString(1, reviewId);
+            rs = stmt.executeQuery();
+            if (rs.next()){
+                String userId = rs.getString("user_id");
+                String locationId = rs.getString("location_id");
+                int globalStars = rs.getInt("rating");
+                int priceStars = rs.getInt("rating_price");
+                int hospitalityStars = rs.getInt("rating_hospitality");
+                int serviceStars = rs.getInt("rating_service");
+                String text = rs.getString("body");
+                if(text == null){
+                    r = new Review(userId, locationId, globalStars, priceStars, hospitalityStars, serviceStars);
+                } else{
+                    r = new Review(userId, locationId, globalStars, priceStars, hospitalityStars, serviceStars, text);
+                }
+                r.setReviewId(reviewId);
+            }
+            return r;
+        } finally{
+            if (rs != null) {
+                try {
+                    rs.close();
+                } catch (SQLException e) {
+                }
+            }
+            if (stmt != null) {
+                try {
+                    stmt.close();
+                } catch (SQLException e) {
+                }
+            }
+            if (conn != null) try {
+                conn.close();
+            } catch (SQLException e) {
+            }
+        }
+    }
+
+    /**
+     * Adds a like to a review on behalf of a user.
+     *
+     * @param userId the identifier of the user adding the like
+     * @param reviewId the identifier of the review to like
+     * @throws SQLException if an error occurs while accessing the data source
+     */
+    @Override
     public void addLike(String userId, String reviewId) throws SQLException {
         if (userId == null || userId.isEmpty()) {
             throw new SQLException("userId is null or empty");
         }
         if (reviewId == null || reviewId.isEmpty()) throw new SQLException("reviewId is null or empty");
 
-    }*/
+        String query = "INSERT INTO review_like(user_id, review_id) VALUES (?, ?)";
+        Connection conn = null;
+        PreparedStatement stmt = null;
+
+        try{
+            conn = DBConnectionPool.getInstance().getConnection();
+            stmt = conn.prepareStatement(query);
+
+            stmt.setString(1, userId);
+            stmt.setString(2, reviewId);
+
+            stmt.executeUpdate();
+        } catch (SQLException e) {
+            throw new SQLException("User already liked this review", e);
+        } finally {
+            if (stmt != null) try {
+                stmt.close();
+            } catch (SQLException e) {
+            }
+            if (conn != null) try {
+                conn.close();
+            } catch (SQLException e) {
+            }
+        }
+    }
+
+    /**
+     * Removes a like from a review on behalf of a user.
+     *
+     * @param userId the identifier of the user removing the like
+     * @param reviewId the identifier of the review to unlike
+     * @throws SQLException if an error occurs while accessing the data source
+     */
+    @Override
+    public void removeLike(String userId, String reviewId) throws SQLException {
+        if (userId == null || userId.isEmpty()) {
+            throw new SQLException("userId is null or empty");
+        }
+        if (reviewId == null || reviewId.isEmpty()) throw new SQLException("reviewId is null or empty");
+
+        String query = "DELETE FROM review_like WHERE user_id = ? AND review_id = ?";
+        Connection conn = null;
+        PreparedStatement stmt = null;
+
+        try{
+            conn = DBConnectionPool.getInstance().getConnection();
+            stmt = conn.prepareStatement(query);
+
+            stmt.setString(1, userId);
+            stmt.setString(2, reviewId);
+
+            stmt.executeUpdate();
+        } finally {
+            if (stmt != null) try {
+                stmt.close();
+            } catch (SQLException e) {
+            }
+            if (conn != null) try {
+                conn.close();
+            } catch (SQLException e) {
+            }
+        }
+    }
+
+    /**
+     * Finds the total number of likes for a specific review.
+     *
+     * @param reviewId the identifier of the review
+     * @return the total number of likes
+     * @throws SQLException if an error occurs while accessing the data source
+     */
+    @Override
+    public int getReviewLikes(String reviewId) throws SQLException{
+        if (reviewId == null || reviewId.isEmpty()) throw new SQLException("reviewId is null or empty");
+
+        String query = "SELECT COUNT(*) AS like_count FROM review_like WHERE  review_id = ?";
+        Connection conn = null;
+        PreparedStatement stmt = null;
+        ResultSet rs = null;
+
+        try{
+            conn = DBConnectionPool.getInstance().getConnection();
+            stmt = conn.prepareStatement(query);
+
+            stmt.setString(1, reviewId);
+            rs = stmt.executeQuery();
+
+            int likes = 0;
+            if(rs.next()) {
+                likes = rs.getInt("like_count");
+            }
+            return likes;
+        } finally{
+            if (rs != null) {
+                try {
+                    rs.close();
+                } catch (SQLException e) {
+                }
+            }
+            if (stmt != null) {
+                try {
+                    stmt.close();
+                } catch (SQLException e) {
+                }
+            }
+            if (conn != null) try {
+                conn.close();
+            } catch (SQLException e) {
+            }
+        }
+
+    }
+
+    /**
+     * Finds the identifiers of all reviews liked by a specific user.
+     *
+     * @param userId the identifier of the user
+     * @return a list of review identifiers liked by the user
+     * @throws SQLException if an error occurs while accessing the data source
+     */
+    @Override
+    public List<String> getLikesByUser (String userId) throws SQLException{
+        if (userId == null || userId.isEmpty()) throw new SQLException("userId is null or empty");
+
+        String query = "SELECT review_id FROM review_like WHERE  user_id = ?";
+        Connection conn = null;
+        PreparedStatement stmt = null;
+        ResultSet rs = null;
+        List<String> likes = new ArrayList<>();
+
+        try{
+            conn = DBConnectionPool.getInstance().getConnection();
+            stmt = conn.prepareStatement(query);
+
+            stmt.setString(1, userId);
+            rs = stmt.executeQuery();
+
+
+            while(rs.next()) {
+                likes.add(rs.getString("review_id"));
+            }
+            return likes;
+        } finally{
+            if (rs != null) {
+                try {
+                    rs.close();
+                } catch (SQLException e) {
+                }
+            }
+            if (stmt != null) {
+                try {
+                    stmt.close();
+                } catch (SQLException e) {
+                }
+            }
+            if (conn != null) try {
+                conn.close();
+            } catch (SQLException e) {
+            }
+        }
+    }
 }

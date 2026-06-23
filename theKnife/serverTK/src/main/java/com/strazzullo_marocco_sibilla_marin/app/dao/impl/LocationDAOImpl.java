@@ -415,6 +415,27 @@ public class LocationDAOImpl implements LocationDAO {
     }
 
     /**
+     * Finds the id of the restaurant a location belongs to. Borrows a connection from
+     * {@link DBConnectionPool} and returns it via try-with-resources.
+     *
+     * @param locationId the location id
+     * @return the owning restaurant id, if the location exists
+     * @throws SQLException if a database query error occurs
+     */
+    @Override
+    public Optional<String> findRestaurantIdById(String locationId) throws SQLException {
+        String query = "SELECT restaurant_id FROM location WHERE location_id = ?";
+
+        try (Connection conn = DBConnectionPool.getInstance().getConnection();
+             PreparedStatement stmt = conn.prepareStatement(query)) {
+            stmt.setString(1, locationId);
+            try (ResultSet rs = stmt.executeQuery()) {
+                return rs.next() ? Optional.of(rs.getString("restaurant_id")) : Optional.empty();
+            }
+        }
+    }
+
+    /**
      * Updates an existing location's information in the database. Borrows a connection from
      * {@link DBConnectionPool} and returns it via try-with-resources.
      *

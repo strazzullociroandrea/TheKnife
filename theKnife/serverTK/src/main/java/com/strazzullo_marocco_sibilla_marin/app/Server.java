@@ -2,6 +2,8 @@ package com.strazzullo_marocco_sibilla_marin.app;
 
 import com.strazzullo_marocco_sibilla_marin.app.service.CustomerServiceImpl;
 import com.strazzullo_marocco_sibilla_marin.app.service.AuthServiceImpl;
+import com.strazzullo_marocco_sibilla_marin.app.service.LocationServiceImpl;
+import com.strazzullo_marocco_sibilla_marin.app.service.RestaurantServiceImpl;
 import com.strazzullo_marocco_sibilla_marin.app.config.DotEnv;
 
 import java.rmi.registry.LocateRegistry;
@@ -27,6 +29,8 @@ public class Server {
     public static final int RMI_PORT = 1099;
     public static final String CUSTOMER_SERVICE_NAME = "CustomerService";
     public static final String AUTH_SERVICE_NAME = "AuthService";
+    public static final String LOCATION_SERVICE_NAME = "LocationService";
+    public static final String RESTAURANT_SERVICE_NAME = "RestaurantService";
 
     public static void main(String[] args) {
         LOGGER.info("Avvio del progetto in corso...");
@@ -44,6 +48,12 @@ public class Server {
 
             registry.rebind(AUTH_SERVICE_NAME, new AuthServiceImpl());
             LOGGER.info(() -> "AuthService bound on RMI registry, port " + RMI_PORT);
+
+            registry.rebind(LOCATION_SERVICE_NAME, new LocationServiceImpl());
+            LOGGER.info(() -> "LocationService bound on RMI registry, port " + RMI_PORT);
+
+            registry.rebind(RESTAURANT_SERVICE_NAME, new RestaurantServiceImpl());
+            LOGGER.info(() -> "RestaurantService bound on RMI registry, port " + RMI_PORT);
 
             LOGGER.info("In attesa di richieste RMI...");
         } catch (Exception e) {

@@ -50,6 +50,16 @@ public interface LocationDAO {
     List<Location> findByRestaurant(Restaurant restaurant) throws SQLException;
 
     /**
+     * Finds the id of the restaurant a location belongs to, used to verify manager
+     * ownership before allowing update or deletion.
+     *
+     * @param locationId the location id
+     * @return the owning restaurant id, if the location exists
+     * @throws SQLException if a database query error occurs
+     */
+    Optional<String> findRestaurantIdById(String locationId) throws SQLException;
+
+    /**
      * Creates a new location in the database.
      *
      * @param location the location object to create

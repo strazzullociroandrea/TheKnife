@@ -32,6 +32,11 @@ public class DBConnectionPool {
         config.setMaximumPoolSize(10);
         config.setMinimumIdle(2);
         config.setPoolName("TheKnifeDBPool");
+        config.setConnectionTimeout(30_000);
+        config.setIdleTimeout(600_000);
+        config.setMaxLifetime(1_800_000);
+        config.setKeepaliveTime(60_000);
+        config.setConnectionTestQuery("SELECT 1");
         this.dataSource = new HikariDataSource(config);
     }
 

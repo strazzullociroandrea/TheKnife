@@ -338,7 +338,7 @@ public class Review implements Serializable {
      */
     @Override
     public String toString(){
-        return "Review [reviewId: " + reviewId + "\tglobalStars: " + globalStars + "\tpriceStars: " + priceStars + "\thospitalityStars: " + hospitalityStars + "\tserviceStars: " + serviceStars + "\ntext: " + text + "\nreviewDate: " + reviewDate + "\treviewLikes: " + reviewLikes + "\nreply: " + reply + "]";
+        return "Review [reviewId: " + reviewId + "userId: " + userId + "locationId: " + locationId + "\nglobalStars: " + globalStars + "\tpriceStars: " + priceStars + "\thospitalityStars: " + hospitalityStars + "\tserviceStars: " + serviceStars + "\ntext: " + text + "\nreviewDate: " + reviewDate + "\treviewLikes: " + reviewLikes + "\nreply: " + reply + "]";
     }
 
     /**

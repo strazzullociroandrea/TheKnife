@@ -147,6 +147,6 @@ public class ReviewReply {
      */
     @Override
     public String toString(){
-        return "Reply [text: " + text + "\nreplyDate: " + replyDate + "]";
+        return "Reply [replyId: " + replyId + "\treviewId: " + reviewId + "\tmanagerId: " + managerId + "\ntext: " + text + "\nreplyDate: " + replyDate + "]";
     }
 }

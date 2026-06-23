@@ -60,7 +60,6 @@ public class Manager extends User {
      * @param email            the user's email
      * @param password         the user's password
      * @param domicile         the user's domicile
-     * @param isPasswordHashed is the password hashed? true = yes, false = no
      */
     public Manager(String name, String surname, String email, String password, String domicile) {
         this(null, name, surname, email, password, domicile, null);

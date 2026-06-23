@@ -32,27 +32,38 @@ public class SearchFilterTestMain {
      * @throws Exception if the RMI lookup or a remote call fails
      */
     public static void main(String[] args) throws Exception {
-        Registry registry = LocateRegistry.getRegistry(HOST, PORT);
-        CustomerService customerService = (CustomerService) registry.lookup(SERVICE_NAME);
+        String host = args.length > 0 && !args[0].isBlank() ? args[0] : HOST;
+        int port = args.length > 1 ? Integer.parseInt(args[1]) : PORT;
+        String serviceName = args.length > 2 && !args[2].isBlank() ? args[2] : SERVICE_NAME;
+
+        Registry registry = LocateRegistry.getRegistry(host, port);
+        CustomerService customerService = (CustomerService) registry.lookup(serviceName);
 
         runScenario("no filter", customerService, new SearchFilter.Builder().build());
         runScenario("city = Varese", customerService, new SearchFilter.Builder().city("Varese").build());
         runScenario("cuisine = italian", customerService, new SearchFilter.Builder().cuisineType(Cuisine.italian).build());
         runScenario("delivery = true", customerService, new SearchFilter.Builder().delivery(true).build());
         runScenario("min rating = 4.0", customerService, new SearchFilter.Builder().minRating(4.0).build());
-        runScenario("distance 10km from coordinates 45.8,8.8 (auto position case)", customerService,
+        runScenario("open monday at 12:00", customerService,
+                new SearchFilter.Builder().openDay(sibilla.Day.monday).openTime("12:00").build());
+        runScenario("distance 10km from coordinates 45.8,8.8", customerService,
                 new SearchFilter.Builder().distance(45.8, 8.8, 10.0).build());
-        runScenario("distance 10km from address (manual address case)", customerService,
+        runScenario("distance 10km from address", customerService,
                 new SearchFilter.Builder().distanceFromAddress("Varese, Italy", 10.0).build());
+        runScenario("paged results", customerService,
+                new SearchFilter.Builder().page(0, 5).build());
     }
 
     private static void runScenario(String label, CustomerService customerService, SearchFilter filter) throws Exception {
         System.out.println("=== " + label + " ===");
+        System.out.println("filter: " + filter);
         List<LocationSearchResult> results = customerService.searchLocations(filter);
         System.out.println("results: " + results.size());
         for (LocationSearchResult result : results) {
             System.out.println(" - " + result.location().getId() + " | " + result.location().getCity() + " | "
-                    + result.location().getAddress() + " | rating=" + result.averageRating()
+                    + result.location().getAddress() + " | restaurant=" + result.restaurantName()
+                    + " | cuisine=" + result.restaurantCuisine()
+                    + " | rating=" + result.averageRating()
                     + " (" + result.reviewCount() + " reviews)"
                     + (result.distanceKm() != null ? " | distance=" + result.distanceKm() + "km" : ""));
         }

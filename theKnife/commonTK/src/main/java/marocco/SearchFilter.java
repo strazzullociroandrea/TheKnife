@@ -5,6 +5,8 @@ import sibilla.Day;
 
 import java.io.Serial;
 import java.io.Serializable;
+import java.time.LocalTime;
+import java.time.format.DateTimeParseException;
 
 /**
  * Filter parameters for searching restaurant locations.
@@ -19,7 +21,7 @@ import java.io.Serializable;
  */
 public class SearchFilter implements Serializable {
     @Serial
-    private static final long serialVersionUID = 2L;
+    private static final long serialVersionUID = 1L;
 
     private final String restaurantName;
     private final String locationName;
@@ -320,6 +322,21 @@ public class SearchFilter implements Serializable {
             if (radiusKm != null && radiusKm <= 0) {
                 throw new IllegalArgumentException("radiusKm must be positive, got " + radiusKm);
             }
+            if ((latRef != null || lonRef != null) && !(latRef != null && lonRef != null && radiusKm != null)) {
+                throw new IllegalArgumentException("distance(latRef, lonRef, radiusKm) requires latitude, longitude, and radiusKm");
+            }
+            if (addressRef != null && addressRef.trim().isEmpty()) {
+                throw new IllegalArgumentException("addressRef cannot be blank");
+            }
+            if (addressRef != null && radiusKm == null) {
+                throw new IllegalArgumentException("distanceFromAddress(address, radiusKm) requires a radiusKm");
+            }
+            if (addressRef != null && latRef != null && lonRef != null && radiusKm != null) {
+                throw new IllegalArgumentException("Use either coordinate distance or address distance, not both");
+            }
+            if ((latRef != null || lonRef != null || radiusKm != null) && addressRef != null) {
+                throw new IllegalArgumentException("Use either coordinate distance or address distance, not both");
+            }
             if (maxCapacity != null && maxCapacity <= 0) {
                 throw new IllegalArgumentException("maxCapacity must be positive, got " + maxCapacity);
             }
@@ -328,6 +345,13 @@ public class SearchFilter implements Serializable {
             }
             if (openTime != null && openDay == null) {
                 throw new IllegalArgumentException("openTime requires openDay to be set");
+            }
+            if (openTime != null) {
+                try {
+                    LocalTime.parse(openTime.trim());
+                } catch (DateTimeParseException e) {
+                    throw new IllegalArgumentException("openTime must be formatted as HH:mm, got " + openTime, e);
+                }
             }
             if (limit != null && limit <= 0) {
                 throw new IllegalArgumentException("limit must be positive, got " + limit);

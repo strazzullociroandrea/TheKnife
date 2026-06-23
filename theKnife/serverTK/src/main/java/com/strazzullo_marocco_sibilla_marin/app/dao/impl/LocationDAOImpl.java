@@ -82,8 +82,8 @@ public class LocationDAOImpl implements LocationDAO {
             if (filter.hasAddressDistanceFilter() && !filter.hasCoordinatesDistanceFilter()) {
                 try {
                     GeoPoint point = geocodingService.geocode(filter.getAddressRef());
-                    latRef = point.getLatitude();
-                    lonRef = point.getLongitude();
+                    latRef = point.latitude();
+                    lonRef = point.longitude();
                 } catch (GeocodingException e) {
                     throw new SQLException("Unable to resolve address for distance search: " + e.getMessage(), e);
                 }

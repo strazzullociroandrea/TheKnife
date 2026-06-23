@@ -13,16 +13,15 @@ import java.net.http.HttpResponse;
 import java.nio.charset.StandardCharsets;
 import java.time.Duration;
 import java.util.List;
-import java.util.Map;
 
 /**
  * {@link GeocodingService} implementation backed by the public OpenStreetMap
  * Nominatim search API. No API key is required, but every request must carry
  * an identifying User-Agent per Nominatim's usage policy.
  *
- * @version 1.0
+ * @version 2.0
  * @Author Strazzullo Ciro Andrea, 763603, VA
- * @Author Marocco Stefano, 762192, VA - author of this file
+ * @Author Marocco Stefano, 762192, VA - author of this revision
  * @Author Sibilla Ginevra, 761114, VA
  * @Author Marin Marco, 760622, VA
  */
@@ -65,18 +64,31 @@ public class NominatimGeocodingService implements GeocodingService {
                 throw new GeocodingException("Geocoding service returned HTTP " + response.statusCode() + " for address: " + address);
             }
 
-            Type type = new TypeToken<List<Map<String, Object>>>() {}.getType();
-            List<Map<String, Object>> results = gson.fromJson(response.body(), type);
+            Type type = new TypeToken<List<NominatimResult>>() {}.getType();
+            List<NominatimResult> results = gson.fromJson(response.body(), type);
             if (results == null || results.isEmpty()) {
                 throw new GeocodingException("No coordinates found for address: " + address);
             }
 
-            Map<String, Object> first = results.get(0);
-            double latitude = Double.parseDouble(String.valueOf(first.get("lat")));
-            double longitude = Double.parseDouble(String.valueOf(first.get("lon")));
-            return new GeoPoint(latitude, longitude);
-        } catch (IOException | InterruptedException e) {
+            return results.get(0).toGeoPoint();
+        } catch (IOException e) {
             throw new GeocodingException("Failed to reach geocoding service for address: " + address, e);
+        } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
+            throw new GeocodingException("Interrupted while reaching geocoding service for address: " + address, e);
+        }
+    }
+
+    /**
+     * Shape of a single entry in Nominatim's JSON search response, holding only the
+     * fields this client cares about. Coordinates are returned as strings by the API.
+     *
+     * @param lat the latitude, as returned by Nominatim
+     * @param lon the longitude, as returned by Nominatim
+     */
+    private record NominatimResult(String lat, String lon) {
+        GeoPoint toGeoPoint() {
+            return new GeoPoint(Double.parseDouble(lat), Double.parseDouble(lon));
         }
     }
 }

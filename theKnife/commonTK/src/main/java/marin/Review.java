@@ -106,7 +106,19 @@ public class Review implements Serializable {
     }
 
     /**
-     * Validates a star rating value.
+     * Validates a global star rating value.
+     *
+     * @param stars the global star rating to validate
+     * @throws IllegalArgumentException if the global star rating is not between 1 and 5
+     */
+    private void validateGlobalStars(int stars) {
+        if (stars < 1 || stars > 5) {
+            throw new IllegalArgumentException("Global stars must be between 1 and 5.");
+        }
+    }
+
+    /**
+     * Validates all the others star rating value.
      *
      * @param stars the star rating to validate
      * @throws IllegalArgumentException if the rating is not between 0 and 5
@@ -186,7 +198,7 @@ public class Review implements Serializable {
      * @param globalStars
      */
     public void setGlobalStars(int globalStars){
-        validateStars(globalStars)
+        validateGlobalStars(globalStars);
         this.globalStars = globalStars;
     }
 
@@ -205,7 +217,7 @@ public class Review implements Serializable {
      * @param priceStars
      */
     public void setPriceStars(int priceStars){
-        validateStars(priceStars)
+        validateStars(priceStars);
         this.priceStars = priceStars;
     }
 
@@ -224,7 +236,7 @@ public class Review implements Serializable {
      * @param hospitalityStars
      */
     public void setHospitalityStars(int hospitalityStars){
-        validateStars(hospitalityStars)
+        validateStars(hospitalityStars);
         this.hospitalityStars = hospitalityStars;
     }
 
@@ -243,7 +255,7 @@ public class Review implements Serializable {
      * @param serviceStars
      */
     public void setServiceStars(int serviceStars){
-        validateStars(serviceStars)
+        validateStars(serviceStars);
         this.serviceStars = serviceStars;
     }
 

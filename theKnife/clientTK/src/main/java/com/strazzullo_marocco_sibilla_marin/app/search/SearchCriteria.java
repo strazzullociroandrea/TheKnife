@@ -1,0 +1,24 @@
+package com.strazzullo_marocco_sibilla_marin.app.search;
+
+import com.strazzullo_marocco_sibilla_marin.app.ui.AdvancedFilters;
+
+/**
+ * Everything the search screen lets a customer specify, kept free of any JavaFX type so it can
+ * be assembled into a {@link marocco.SearchFilter} (via {@link SearchFilterAssembler}) without
+ * the assembling code depending on the UI controls it was read from.
+ *
+ * @param city the city to search in, or null/blank for any
+ * @param restaurantQuery the free-text restaurant name query, or null/blank for any
+ * @param advancedFilters the cuisine, price, dietary, opening-hours, and rating criteria
+ * @param distanceAddress the address to search around, or null/blank to not filter by distance
+ * @param distanceRadiusKm the search radius in km, only meaningful together with {@link #distanceAddress}
+ *
+ * @Author Marocco Stefano, 762192, VA - author of this file
+ */
+public record SearchCriteria(
+        String city,
+        String restaurantQuery,
+        AdvancedFilters advancedFilters,
+        String distanceAddress,
+        double distanceRadiusKm) {
+}

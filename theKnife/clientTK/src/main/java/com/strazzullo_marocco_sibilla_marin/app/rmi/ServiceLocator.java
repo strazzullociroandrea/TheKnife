@@ -3,6 +3,7 @@ package com.strazzullo_marocco_sibilla_marin.app.rmi;
 import com.strazzullo_marocco_sibilla_marin.app.remote.BookingService;
 import com.strazzullo_marocco_sibilla_marin.app.remote.CustomerService;
 import com.strazzullo_marocco_sibilla_marin.app.remote.LocationService;
+import com.strazzullo_marocco_sibilla_marin.app.remote.PhotoService;
 
 import java.rmi.NotBoundException;
 import java.rmi.RemoteException;
@@ -24,17 +25,21 @@ public final class ServiceLocator {
     private static final String CUSTOMER_SERVICE_NAME = "CustomerService";
     private static final String LOCATION_SERVICE_NAME = "LocationService";
     private static final String BOOKING_SERVICE_NAME = "BookingService";
+    private static final String PHOTO_SERVICE_NAME = "PhotoService";
 
     private static ServiceLocator instance;
 
     private final CustomerService customerService;
     private final LocationService locationService;
     private final BookingService bookingService;
+    private final PhotoService photoService;
 
-    private ServiceLocator(CustomerService customerService, LocationService locationService, BookingService bookingService) {
+    private ServiceLocator(CustomerService customerService, LocationService locationService,
+                            BookingService bookingService, PhotoService photoService) {
         this.customerService = customerService;
         this.locationService = locationService;
         this.bookingService = bookingService;
+        this.photoService = photoService;
     }
 
     /**
@@ -52,7 +57,8 @@ public final class ServiceLocator {
         CustomerService customerService = (CustomerService) registry.lookup(CUSTOMER_SERVICE_NAME);
         LocationService locationService = (LocationService) registry.lookup(LOCATION_SERVICE_NAME);
         BookingService bookingService = (BookingService) registry.lookup(BOOKING_SERVICE_NAME);
-        instance = new ServiceLocator(customerService, locationService, bookingService);
+        PhotoService photoService = (PhotoService) registry.lookup(PHOTO_SERVICE_NAME);
+        instance = new ServiceLocator(customerService, locationService, bookingService, photoService);
         return instance;
     }
 
@@ -94,5 +100,14 @@ public final class ServiceLocator {
      */
     public BookingService getBookingService() {
         return bookingService;
+    }
+
+    /**
+     * Returns the photo service stub
+     *
+     * @return the photo service stub
+     */
+    public PhotoService getPhotoService() {
+        return photoService;
     }
 }

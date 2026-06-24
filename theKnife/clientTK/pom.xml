@@ -17,6 +17,15 @@
             <artifactId>commonTK</artifactId>
             <version>1.0-SNAPSHOT</version>
         </dependency>
+        <!-- Not used directly by any client code, but RMI needs org.postgresql.util.PSQLException
+             on the client classpath to deserialize a SQLException the server throws back with a
+             real Postgres error as its cause; without it the original exception is masked by a
+             ClassNotFoundException during unmarshaling. -->
+        <dependency>
+            <groupId>org.postgresql</groupId>
+            <artifactId>postgresql</artifactId>
+            <version>42.7.11</version>
+        </dependency>
         <dependency>
             <groupId>org.openjfx</groupId>
             <artifactId>javafx-base</artifactId>

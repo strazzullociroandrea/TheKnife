@@ -1,0 +1,65 @@
+package com.strazzullo_marocco_sibilla_marin.app.config;
+
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.util.HashMap;
+import java.util.Map;
+
+/**
+ * Minimal ".env" file reader, used as a fallback for configuration values that
+ * are not exported as real OS environment variables (e.g. local development).
+ * Real environment variables (set via System.getenv) always take precedence.
+ *
+ * @Author Marocco Stefano, 762192, VA - author of this file
+ */
+public final class DotEnv {
+
+    private static final Map<String, String> FILE_VALUES = load();
+
+    private DotEnv() {}
+
+    /**
+     * Function to resolve a configuration value, looking first at real OS
+     * environment variables and then at a ".env" file in the working directory.
+     *
+     * @param key the variable name
+     * @return the resolved value, or {@code null} if not found anywhere
+     */
+    public static String get(String key) {
+        String value = System.getenv(key);
+        if (value != null && !value.isEmpty()) {
+            return value;
+        }
+        return FILE_VALUES.get(key);
+    }
+
+    private static Map<String, String> load() {
+        Map<String, String> values = new HashMap<>();
+        Path path = Path.of(".env");
+        if (!Files.isReadable(path)) {
+            return values;
+        }
+        try {
+            for (String line : Files.readAllLines(path)) {
+                String trimmed = line.trim();
+                if (trimmed.isEmpty() || trimmed.startsWith("#")) {
+                    continue;
+                }
+                int separator = trimmed.indexOf('=');
+                if (separator <= 0) {
+                    continue;
+                }
+                String key = trimmed.substring(0, separator).trim();
+                String value = trimmed.substring(separator + 1).trim();
+                if (value.length() >= 2 && (value.charAt(0) == '"' || value.charAt(0) == '\'')) {
+                    value = value.substring(1, value.length() - 1);
+                }
+                values.put(key, value);
+            }
+        } catch (IOException e) {
+            System.err.println("Unable to read .env file: " + e.getMessage());
+        }
+        return values;
+    }
+}

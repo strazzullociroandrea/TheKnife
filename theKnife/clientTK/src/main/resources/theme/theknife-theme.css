@@ -102,6 +102,91 @@
     -fx-border-radius: 999px;
 }
 
+/* Horizontal photo gallery strip on the location detail screen, and its thumbnails. */
+.tk-photo-gallery {
+    -fx-background-color: transparent;
+    -fx-padding: 0;
+}
+
+.tk-photo-gallery > .viewport {
+    -fx-background-color: transparent;
+}
+
+.tk-photo-thumb {
+    -fx-background-radius: 16px;
+    -fx-effect: dropshadow(gaussian, rgba(0, 0, 0, 0.12), 8, 0, 0, 2);
+}
+
+/* Custom DateSelector replacing javafx.scene.control.DatePicker, whose AtlantaFX popup skin
+   draws a non-stylable week-number column. Field is a rounded pill button; the popover calendar
+   below is built entirely from this app's own day-cell buttons. */
+.tk-date-field {
+    -fx-background-color: -color-bg-default;
+    -fx-background-radius: 999px;
+    -fx-border-radius: 999px;
+    -fx-border-color: -color-border-default;
+    -fx-border-width: 1px;
+    -fx-padding: 8px 16px;
+    -fx-font-weight: normal;
+    -fx-graphic-text-gap: 10px;
+}
+
+.tk-date-field:hover {
+    -fx-border-color: -color-accent-emphasis;
+}
+
+/* The calendar's own clip (set in DateSelector) rounds every corner uniformly, so the header
+   only needs its background color, not its own per-corner radius. */
+.tk-date-calendar {
+    -fx-background-color: -color-bg-default;
+}
+
+.tk-date-calendar-header {
+    -fx-background-color: -color-accent-subtle;
+}
+
+.tk-date-cell {
+    -fx-background-color: transparent;
+    -fx-border-width: 0;
+    -fx-background-radius: 999px;
+    -fx-padding: 0;
+}
+
+.tk-date-cell:hover {
+    -fx-background-color: -color-bg-subtle;
+}
+
+.tk-date-cell:selected {
+    -fx-background-color: -color-accent-emphasis;
+    -fx-text-fill: white;
+}
+
+.tk-date-cell-today {
+    -fx-border-color: -color-accent-emphasis;
+    -fx-border-width: 1.5px;
+    -fx-border-radius: 999px;
+}
+
+/* Popover (DateSelector's calendar popup): the rounded-rect-with-arrow shape is drawn by
+   Popover's own .border Path, sized by Popover#setCornerRadius (set in code, see DateSelector)
+   rather than CSS, since -fx-background-radius has no effect on a Path's vector geometry. This
+   stylesheet only adds the drop shadow and removes the default stroke outline. */
+.popover > .border {
+    -fx-stroke: transparent;
+    -fx-effect: dropshadow(gaussian, rgba(0, 0, 0, 0.18), 14, 0, 0, 4);
+}
+
+.popover > .content {
+    -fx-background-color: -color-bg-default;
+}
+
+/* "Ticket" summary inside the booking confirmation dialog: restaurant + date/time, set apart
+   from the rest of the dialog with a tinted, rounded panel rather than plain text rows. */
+.tk-booking-ticket {
+    -fx-background-color: -color-accent-subtle;
+    -fx-background-radius: 16px;
+}
+
 /* Result card: larger radius and a soft elevation shadow instead of the default thin border. */
 .tk-card {
     -fx-background-color: -color-bg-default;

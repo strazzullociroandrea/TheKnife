@@ -4,8 +4,11 @@ import com.strazzullo_marocco_sibilla_marin.app.service.BookingServiceImpl;
 import com.strazzullo_marocco_sibilla_marin.app.service.CustomerServiceImpl;
 import com.strazzullo_marocco_sibilla_marin.app.service.AuthServiceImpl;
 import com.strazzullo_marocco_sibilla_marin.app.service.LocationServiceImpl;
+import com.strazzullo_marocco_sibilla_marin.app.service.PhotoServiceImpl;
 import com.strazzullo_marocco_sibilla_marin.app.service.RestaurantServiceImpl;
 import com.strazzullo_marocco_sibilla_marin.app.config.DotEnv;
+import com.strazzullo_marocco_sibilla_marin.app.config.PhotoStorageConfig;
+import com.strazzullo_marocco_sibilla_marin.app.storage.S3PhotoStorage;
 
 import java.rmi.registry.LocateRegistry;
 import java.rmi.registry.Registry;
@@ -33,6 +36,7 @@ public class Server {
     public static final String LOCATION_SERVICE_NAME = "LocationService";
     public static final String RESTAURANT_SERVICE_NAME = "RestaurantService";
     public static final String BOOKING_SERVICE_NAME = "BookingService";
+    public static final String PHOTO_SERVICE_NAME = "PhotoService";
 
     public static void main(String[] args) {
         LOGGER.info("Avvio del progetto in corso...");
@@ -60,9 +64,29 @@ public class Server {
             registry.rebind(BOOKING_SERVICE_NAME, new BookingServiceImpl());
             LOGGER.info(() -> "BookingService bound on RMI registry, port " + RMI_PORT);
 
+            bindPhotoService(registry);
+
             LOGGER.info("In attesa di richieste RMI...");
         } catch (Exception e) {
             LOGGER.log(Level.SEVERE, "Avvio del server fallito", e);
+        }
+    }
+
+    /**
+     * Function to bind {@link PhotoServiceImpl}, kept separate from the rest of {@link
+     * #main(String[])} so that a missing/invalid {@code PHOTO_S3_*} configuration only disables
+     * the photo gallery rather than aborting the entire server startup (every other service is
+     * already bound and serving requests by the time this runs).
+     *
+     * @param registry the RMI registry to bind onto
+     */
+    private static void bindPhotoService(Registry registry) {
+        try {
+            registry.rebind(PHOTO_SERVICE_NAME, new PhotoServiceImpl(new S3PhotoStorage(new PhotoStorageConfig())));
+            LOGGER.info(() -> "PhotoService bound on RMI registry, port " + RMI_PORT);
+        } catch (Exception e) {
+            LOGGER.log(Level.WARNING,
+                    "PhotoService not bound (check PHOTO_S3_* configuration); the rest of the server is unaffected", e);
         }
     }
 }

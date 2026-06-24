@@ -16,6 +16,7 @@ import java.rmi.RemoteException;
 import java.rmi.server.UnicastRemoteObject;
 import java.sql.SQLException;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.util.ArrayList;
 import java.util.List;
@@ -143,6 +144,9 @@ public class BookingServiceImpl extends UnicastRemoteObject implements BookingSe
             }
             if (seats <= 0) {
                 throw new IllegalArgumentException("seats must be positive");
+            }
+            if (isInThePast(date, timeSlot)) {
+                throw new IllegalArgumentException("Cannot book a date/time slot in the past: " + date + " " + timeSlot);
             }
 
             Location location = requireLocation(locationId);
@@ -289,9 +293,24 @@ public class BookingServiceImpl extends UnicastRemoteObject implements BookingSe
 
         LocalTime cursor = range[0];
         while (cursor.isBefore(range[1])) {
-            slots.add(cursor);
+            if (!isInThePast(date, cursor)) {
+                slots.add(cursor);
+            }
             cursor = cursor.plusMinutes(SLOT_MINUTES);
         }
         return slots;
+    }
+
+    /**
+     * Function to check whether a date/time slot has already passed, so today's already-elapsed
+     * slots are excluded from {@link #computeSlots(Location, LocalDate)} and rejected by {@link
+     * #createBooking(String, String, LocalDate, LocalTime, int)} rather than silently accepted.
+     *
+     * @param date the slot's date
+     * @param timeSlot the slot's time
+     * @return true if the date/time is strictly before the current moment
+     */
+    private boolean isInThePast(LocalDate date, LocalTime timeSlot) {
+        return LocalDateTime.of(date, timeSlot).isBefore(LocalDateTime.now());
     }
 }

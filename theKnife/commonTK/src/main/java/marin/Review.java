@@ -74,6 +74,7 @@ public class Review implements Serializable {
         this.priceStars = priceStars;
         this.hospitalityStars = hospitalityStars;
         this.serviceStars = serviceStars;
+        validateAllRatings();
         text = "";
         reviewDate = LocalDateTime.now();
         reviewLikes = 0;
@@ -99,6 +100,7 @@ public class Review implements Serializable {
         this.priceStars = priceStars;
         this.hospitalityStars = hospitalityStars;
         this.serviceStars = serviceStars;
+        validateAllRatings();
         this.text = text;
         reviewDate = LocalDateTime.now();
         reviewLikes = 0;
@@ -127,6 +129,18 @@ public class Review implements Serializable {
         if (stars < 0 || stars > 5) {
             throw new IllegalArgumentException("Stars must be between 0 and 5.");
         }
+    }
+
+    /**
+     * Validates all star ratings inside this review instance.
+     *
+     * @throws IllegalArgumentException if any rating is out of bounds
+     */
+    public void validateAllRatings() {
+        validateGlobalStars(this.globalStars);
+        validateStars(this.priceStars);
+        validateStars(this.hospitalityStars);
+        validateStars(this.serviceStars);
     }
 
     /**

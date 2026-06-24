@@ -70,6 +70,7 @@ public class SearchView extends StackPane {
 
     private final ObservableList<LocationSearchResult> results = FXCollections.observableArrayList();
     private final AddressGeocoder geocoder = new AddressGeocoder();
+    private final AppShell shell;
     private AdvancedFilters advancedFilters = AdvancedFilters.empty();
     private String geocodedAddress;
     private AddressGeocoder.Coordinates geocodedCoordinates;
@@ -82,6 +83,7 @@ public class SearchView extends StackPane {
      * @param query the initial free-text restaurant name query, may be blank
      */
     public SearchView(AppShell shell, String city, String query) {
+        this.shell = shell;
         searchToolbar = new SearchToolbar(city, query, shell::showHome, this::runSearch);
         cuisineFilterRow = new CuisineFilterRow(this::onCuisineChanged, this::openFilterPanel);
         distanceFilterRow = new DistanceFilterRow(this::runSearch, this::openLocationPrompt);
@@ -164,7 +166,7 @@ public class SearchView extends StackPane {
                 super.updateItem(item, empty);
                 setText(null);
                 getStyleClass().add("transparent-cell");
-                setGraphic(empty || item == null ? null : new ResultCard(item));
+                setGraphic(empty || item == null ? null : new ResultCard(item, () -> shell.showLocationDetail(item)));
                 setPadding(new Insets(6, 10, 6, 10));
             }
         });

@@ -331,10 +331,7 @@ public class SearchFilter implements Serializable {
             if (addressRef != null && radiusKm == null) {
                 throw new IllegalArgumentException("distanceFromAddress(address, radiusKm) requires a radiusKm");
             }
-            if (addressRef != null && latRef != null && lonRef != null && radiusKm != null) {
-                throw new IllegalArgumentException("Use either coordinate distance or address distance, not both");
-            }
-            if ((latRef != null || lonRef != null || radiusKm != null) && addressRef != null) {
+            if (addressRef != null && (latRef != null || lonRef != null)) {
                 throw new IllegalArgumentException("Use either coordinate distance or address distance, not both");
             }
             if (maxCapacity != null && maxCapacity <= 0) {

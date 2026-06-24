@@ -1,5 +1,6 @@
 package com.strazzullo_marocco_sibilla_marin.app;
 
+import com.strazzullo_marocco_sibilla_marin.app.service.BookingServiceImpl;
 import com.strazzullo_marocco_sibilla_marin.app.service.CustomerServiceImpl;
 import com.strazzullo_marocco_sibilla_marin.app.service.AuthServiceImpl;
 import com.strazzullo_marocco_sibilla_marin.app.service.LocationServiceImpl;
@@ -31,6 +32,7 @@ public class Server {
     public static final String AUTH_SERVICE_NAME = "AuthService";
     public static final String LOCATION_SERVICE_NAME = "LocationService";
     public static final String RESTAURANT_SERVICE_NAME = "RestaurantService";
+    public static final String BOOKING_SERVICE_NAME = "BookingService";
 
     public static void main(String[] args) {
         LOGGER.info("Avvio del progetto in corso...");
@@ -54,6 +56,9 @@ public class Server {
 
             registry.rebind(RESTAURANT_SERVICE_NAME, new RestaurantServiceImpl());
             LOGGER.info(() -> "RestaurantService bound on RMI registry, port " + RMI_PORT);
+
+            registry.rebind(BOOKING_SERVICE_NAME, new BookingServiceImpl());
+            LOGGER.info(() -> "BookingService bound on RMI registry, port " + RMI_PORT);
 
             LOGGER.info("In attesa di richieste RMI...");
         } catch (Exception e) {

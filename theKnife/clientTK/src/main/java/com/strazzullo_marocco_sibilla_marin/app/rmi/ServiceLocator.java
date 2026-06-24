@@ -1,0 +1,98 @@
+package com.strazzullo_marocco_sibilla_marin.app.rmi;
+
+import com.strazzullo_marocco_sibilla_marin.app.remote.BookingService;
+import com.strazzullo_marocco_sibilla_marin.app.remote.CustomerService;
+import com.strazzullo_marocco_sibilla_marin.app.remote.LocationService;
+
+import java.rmi.NotBoundException;
+import java.rmi.RemoteException;
+import java.rmi.registry.LocateRegistry;
+import java.rmi.registry.Registry;
+
+/**
+ * Resolves and holds the RMI stubs the client UI talks to, looked up once from the registry
+ * exposed by the TheKnife server.
+ *
+ * @version 1.0
+ * @Author Strazzullo Ciro Andrea, 763603, VA
+ * @Author Marocco Stefano, 762192, VA - author of this file
+ * @Author Sibilla Ginevra, 761114, VA
+ * @Author Marin Marco, 760622, VA
+ */
+public final class ServiceLocator {
+
+    private static final String CUSTOMER_SERVICE_NAME = "CustomerService";
+    private static final String LOCATION_SERVICE_NAME = "LocationService";
+    private static final String BOOKING_SERVICE_NAME = "BookingService";
+
+    private static ServiceLocator instance;
+
+    private final CustomerService customerService;
+    private final LocationService locationService;
+    private final BookingService bookingService;
+
+    private ServiceLocator(CustomerService customerService, LocationService locationService, BookingService bookingService) {
+        this.customerService = customerService;
+        this.locationService = locationService;
+        this.bookingService = bookingService;
+    }
+
+    /**
+     * Function to connect to the RMI registry and resolve every remote service stub.
+     * Replaces any previously resolved instance.
+     *
+     * @param host the RMI registry host
+     * @param port the RMI registry port
+     * @return the connected service locator
+     * @throws RemoteException if the registry cannot be reached
+     * @throws NotBoundException if a service is not bound on the registry
+     */
+    public static synchronized ServiceLocator connect(String host, int port) throws RemoteException, NotBoundException {
+        Registry registry = LocateRegistry.getRegistry(host, port);
+        CustomerService customerService = (CustomerService) registry.lookup(CUSTOMER_SERVICE_NAME);
+        LocationService locationService = (LocationService) registry.lookup(LOCATION_SERVICE_NAME);
+        BookingService bookingService = (BookingService) registry.lookup(BOOKING_SERVICE_NAME);
+        instance = new ServiceLocator(customerService, locationService, bookingService);
+        return instance;
+    }
+
+    /**
+     * Function to retrieve the already-connected service locator.
+     *
+     * @return the connected service locator
+     * @throws IllegalStateException if {@link #connect(String, int)} was never called successfully
+     */
+    public static ServiceLocator getInstance() {
+        if (instance == null) {
+            throw new IllegalStateException("ServiceLocator is not connected yet. Call connect(host, port) first.");
+        }
+        return instance;
+    }
+
+    /**
+     * Returns the customer service stub
+     *
+     * @return the customer service stub
+     */
+    public CustomerService getCustomerService() {
+        return customerService;
+    }
+
+    /**
+     * Returns the location service stub
+     *
+     * @return the location service stub
+     */
+    public LocationService getLocationService() {
+        return locationService;
+    }
+
+    /**
+     * Returns the booking service stub
+     *
+     * @return the booking service stub
+     */
+    public BookingService getBookingService() {
+        return bookingService;
+    }
+}

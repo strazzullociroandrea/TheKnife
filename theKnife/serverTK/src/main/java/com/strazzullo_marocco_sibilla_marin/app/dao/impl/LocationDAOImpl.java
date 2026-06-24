@@ -3,10 +3,12 @@ package com.strazzullo_marocco_sibilla_marin.app.dao.impl;
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
 import com.strazzullo_marocco_sibilla_marin.app.DBConnectionPool;
+import com.strazzullo_marocco_sibilla_marin.app.config.GeoConfig;
 import com.strazzullo_marocco_sibilla_marin.app.dao.LocationDAO;
 import com.strazzullo_marocco_sibilla_marin.app.geo.GeoPoint;
 import com.strazzullo_marocco_sibilla_marin.app.geo.GeocodingException;
 import com.strazzullo_marocco_sibilla_marin.app.geo.GeocodingService;
+import com.strazzullo_marocco_sibilla_marin.app.geo.GoogleGeocodingService;
 import com.strazzullo_marocco_sibilla_marin.app.geo.NominatimGeocodingService;
 import marocco.SearchFilter;
 import sibilla.Cuisine;
@@ -46,10 +48,17 @@ public class LocationDAOImpl implements LocationDAO {
     private final GeocodingService geocodingService;
 
     /**
-     * LocationDAOImpl constructor to initialize the DAO.
+     * LocationDAOImpl constructor to initialize the DAO. Uses {@link GoogleGeocodingService}
+     * when a {@code GOOGLE_MAPS_API_KEY} is configured, falling back to the free, key-less
+     * {@link NominatimGeocodingService} otherwise.
      */
     public LocationDAOImpl() {
-        this(new NominatimGeocodingService());
+        this(defaultGeocodingService());
+    }
+
+    private static GeocodingService defaultGeocodingService() {
+        String apiKey = GeoConfig.googleMapsApiKey();
+        return apiKey != null ? new GoogleGeocodingService(apiKey) : new NominatimGeocodingService();
     }
 
     /**

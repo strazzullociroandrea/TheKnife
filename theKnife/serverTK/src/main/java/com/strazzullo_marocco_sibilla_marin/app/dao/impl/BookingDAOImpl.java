@@ -212,7 +212,7 @@ public class BookingDAOImpl implements BookingDAO {
         String maxWaitingQuery = "SELECT COALESCE(MAX(waiting_position), 0) AS max_pos FROM booking " +
                 "WHERE location_id = ? AND booking_date = ? AND time_slot = ? AND status = 'waiting'";
         String insertQuery = "INSERT INTO booking(booking_id, user_id, location_id, booking_date, " +
-                "time_slot, seats, status, waiting_position) VALUES (?,?,?,?,?,?,?,?)";
+                "time_slot, seats, status, waiting_position) VALUES (?,?,?,?,?,?,?::booking_status,?)";
 
         try (Connection conn = DBConnectionPool.getInstance().getConnection()) {
             boolean autoCommit = conn.getAutoCommit();

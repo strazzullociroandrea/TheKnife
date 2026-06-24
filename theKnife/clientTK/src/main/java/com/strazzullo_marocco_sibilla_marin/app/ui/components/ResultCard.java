@@ -3,6 +3,7 @@ package com.strazzullo_marocco_sibilla_marin.app.ui.components;
 import atlantafx.base.theme.Styles;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
+import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.control.ToggleButton;
 import javafx.scene.image.Image;
@@ -16,17 +17,17 @@ import org.kordamp.ikonli.feather.Feather;
 import org.kordamp.ikonli.javafx.FontIcon;
 import sibilla.Location;
 import sibilla.LocationSearchResult;
-import sibilla.OpeningHours;
 
 import java.util.Locale;
 
 /**
- * A single result row in the search results list: restaurant/location summary,
- * cuisine and price tags, open/closed status, and star rating.
+ * A single result row in the search results list: restaurant/location summary, cuisine and
+ * price tags, open/closed status, star rating, and a button opening the full {@link
+ * com.strazzullo_marocco_sibilla_marin.app.ui.LocationDetailView} for this location.
  *
- * @version 1.0
+ * @version 2.0
  * @Author Strazzullo Ciro Andrea, 763603, VA
- * @Author Marocco Stefano, 762192, VA - author of this file
+ * @Author Marocco Stefano, 762192, VA - author of this revision
  * @Author Sibilla Ginevra, 761114, VA
  * @Author Marin Marco, 760622, VA
  */
@@ -36,8 +37,9 @@ public class ResultCard extends VBox {
      * ResultCard constructor.
      *
      * @param result the search result this card represents
+     * @param onViewDetails callback invoked when the "Dettagli" button is pressed
      */
-    public ResultCard(LocationSearchResult result) {
+    public ResultCard(LocationSearchResult result, Runnable onViewDetails) {
         Location location = result.location();
 
         getStyleClass().add("tk-card");
@@ -53,16 +55,16 @@ public class ResultCard extends VBox {
         Region spacer = new Region();
         HBox.setHgrow(spacer, Priority.ALWAYS);
 
-        Label statusLabel = buildStatusLabel(location);
+        OpenStatusPill statusPill = new OpenStatusPill(location);
 
         ToggleButton favourite = new ToggleButton();
         favourite.setGraphic(new FontIcon(Feather.HEART));
         favourite.getStyleClass().addAll(Styles.BUTTON_ICON, Styles.FLAT, "tk-favourite");
 
-        HBox headerRow = new HBox(12, avatar, nameLabel, spacer, statusLabel, favourite);
+        HBox headerRow = new HBox(12, avatar, nameLabel, spacer, statusPill, favourite);
         headerRow.setAlignment(Pos.CENTER_LEFT);
 
-        HBox tagsRow = new HBox(6, tag(result.restaurantCuisine()), tag(priceLabel(location.getPriceRange())));
+        HBox tagsRow = new HBox(6, new TagLabel(result.restaurantCuisine()), new TagLabel(PriceLabels.of(location.getPriceRange())));
         tagsRow.setAlignment(Pos.CENTER_LEFT);
 
         HBox addressRow = new HBox(6,
@@ -73,7 +75,13 @@ public class ResultCard extends VBox {
 
         HBox ratingRow = buildRatingRow(result);
 
-        getChildren().addAll(headerRow, tagsRow, addressRow, ratingRow);
+        Button detailsButton = new Button("Dettagli", new FontIcon(Feather.CHEVRON_RIGHT));
+        detailsButton.setContentDisplay(javafx.scene.control.ContentDisplay.RIGHT);
+        detailsButton.getStyleClass().add(Styles.FLAT);
+        detailsButton.setMaxWidth(Double.MAX_VALUE);
+        detailsButton.setOnAction(e -> onViewDetails.run());
+
+        getChildren().addAll(headerRow, tagsRow, addressRow, ratingRow, detailsButton);
     }
 
     /**
@@ -102,58 +110,6 @@ public class ResultCard extends VBox {
             circle.getChildren().add(icon);
         }
         return circle;
-    }
-
-    /**
-     * Function to build the open/closed status pill as a small colored dot plus label, a
-     * lighter-weight treatment than a solid color block.
-     *
-     * @param location the location whose opening hours determine the status
-     * @return the status pill
-     */
-    private Label buildStatusLabel(Location location) {
-        boolean open = OpeningHours.isOpenNow(location);
-        FontIcon dot = new FontIcon(Feather.CIRCLE);
-        dot.getStyleClass().add(open ? Styles.SUCCESS : Styles.DANGER);
-        Label statusLabel = new Label(open ? "Aperto" : "Chiuso", dot);
-        statusLabel.getStyleClass().addAll(Styles.TEXT_SMALL, Styles.TEXT_BOLD, "tk-status-pill",
-                open ? "tk-status-open" : "tk-status-closed");
-        return statusLabel;
-    }
-
-    /**
-     * Function to build a small rounded tag label.
-     *
-     * @param text the tag text
-     * @return the tag label
-     */
-    private Label tag(String text) {
-        Label label = new Label(text == null ? "" : capitalize(text));
-        label.getStyleClass().addAll(Styles.TEXT_SMALL, Styles.TEXT_BOLD, "tk-tag");
-        label.setPadding(new Insets(3, 10, 3, 10));
-        return label;
-    }
-
-    /**
-     * Function to capitalize the first letter of a tag's text.
-     *
-     * @param text the text to capitalize
-     * @return the capitalized text
-     */
-    private String capitalize(String text) {
-        return text.isEmpty() ? text : text.substring(0, 1).toUpperCase(Locale.ITALIAN) + text.substring(1);
-    }
-
-    /**
-     * Function to render a location's price range as a euro-sign scale.
-     *
-     * @param priceRange the location's price range
-     * @return a string of one to three euro signs
-     */
-    private String priceLabel(int priceRange) {
-        if (priceRange <= 15) return "€";
-        if (priceRange <= 35) return "€€";
-        return "€€€";
     }
 
     /**

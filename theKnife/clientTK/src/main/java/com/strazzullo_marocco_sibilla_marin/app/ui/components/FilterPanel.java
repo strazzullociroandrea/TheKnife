@@ -22,9 +22,7 @@ import sibilla.Cuisine;
 import sibilla.Day;
 
 import java.util.ArrayList;
-import java.util.LinkedHashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.function.Consumer;
 
 /**
@@ -47,18 +45,6 @@ import java.util.function.Consumer;
  * @Author Marin Marco, 760622, VA
  */
 public class FilterPanel extends VBox {
-
-    private static final Map<Day, String> DAY_LABELS = new LinkedHashMap<>();
-
-    static {
-        DAY_LABELS.put(Day.monday, "Lunedì");
-        DAY_LABELS.put(Day.tuesday, "Martedì");
-        DAY_LABELS.put(Day.wednesday, "Mercoledì");
-        DAY_LABELS.put(Day.thursday, "Giovedì");
-        DAY_LABELS.put(Day.friday, "Venerdì");
-        DAY_LABELS.put(Day.saturday, "Sabato");
-        DAY_LABELS.put(Day.sunday, "Domenica");
-    }
 
     private final StarRatingPicker minRatingPicker = new StarRatingPicker();
     private final Spinner<Double> maxPriceSpinner = new Spinner<>(0.0, 200.0, 0.0, 5.0);
@@ -93,7 +79,7 @@ public class FilterPanel extends VBox {
         getStyleClass().addAll(Styles.BG_DEFAULT, "tk-modal-card");
 
         openDayBox.getItems().add(null);
-        openDayBox.getItems().addAll(DAY_LABELS.keySet());
+        DayLabels.orderedDays().forEach(openDayBox.getItems()::add);
         openDayBox.setConverter(new DayConverter());
 
         openTimeBox.getItems().add(null);
@@ -291,7 +277,7 @@ public class FilterPanel extends VBox {
     private static class DayConverter extends javafx.util.StringConverter<Day> {
         @Override
         public String toString(Day day) {
-            return day == null ? "Qualsiasi giorno" : DAY_LABELS.get(day);
+            return day == null ? "Qualsiasi giorno" : DayLabels.of(day);
         }
 
         @Override

@@ -134,6 +134,7 @@ public class MapView extends StackPane {
 
     private long lastScrollZoomNanos;
     private Runnable onLocateRequest;
+    private final VBox controls;
 
     /**
      * MapView constructor. Builds the tile canvas, the marker overlay, and the pan/zoom handlers.
@@ -148,7 +149,7 @@ public class MapView extends StackPane {
         mapLayer.getChildren().addAll(canvas, overlay);
         mapLayer.getTransforms().add(zoomScale);
 
-        VBox controls = buildControls();
+        controls = buildControls();
         StackPane.setAlignment(controls, Pos.BOTTOM_RIGHT);
         StackPane.setMargin(controls, new Insets(16));
 
@@ -249,6 +250,18 @@ public class MapView extends StackPane {
      */
     public void setOnLocateRequest(Runnable handler) {
         this.onLocateRequest = handler;
+    }
+
+    /**
+     * Function to show or hide the floating zoom/locate/recenter controls, used to turn this
+     * into a quiet, read-only map preview (e.g. a single static pin on the location detail
+     * screen) without losing mouse pan/scroll-zoom, which aren't tied to the buttons.
+     *
+     * @param visible whether the controls should be shown
+     */
+    public void setControlsVisible(boolean visible) {
+        controls.setVisible(visible);
+        controls.setManaged(visible);
     }
 
     /**

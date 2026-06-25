@@ -40,19 +40,18 @@ public class BookingDialog extends VBox {
     private static final DateTimeFormatter TIME_FORMAT = DateTimeFormatter.ofPattern("HH:mm");
     private static final int MIN_PEOPLE = 1;
     private static final int MAX_PEOPLE = 20;
+    private static final int DEFAULT_PEOPLE = 2;
 
     private final SlotSelection selection;
     private final String userId;
     private final Runnable onClose;
     private final Runnable onBookingCompleted;
 
-    private final Label peopleValueLabel = new Label();
+    private final IntegerStepper peopleStepper = new IntegerStepper(MIN_PEOPLE, MAX_PEOPLE, DEFAULT_PEOPLE);
     private final Label statusLabel = new Label();
     private final ProgressIndicator spinner = new ProgressIndicator();
     private final Button cancelButton = new Button("Annulla");
     private final Button confirmButton = new Button("Conferma prenotazione");
-
-    private int people = 2;
 
     /**
      * BookingDialog constructor, starting on the summary step.
@@ -143,7 +142,7 @@ public class BookingDialog extends VBox {
     }
 
     /**
-     * Function to build the "Numero di persone" stepper.
+     * Function to build the "Numero di persone" stepper section.
      *
      * @return the people stepper section
      */
@@ -151,28 +150,9 @@ public class BookingDialog extends VBox {
         Label peopleTitle = new Label("Numero di persone");
         peopleTitle.getStyleClass().add(Styles.TEXT_BOLD);
 
-        peopleValueLabel.setText(String.valueOf(people));
-        peopleValueLabel.getStyleClass().add(Styles.TITLE_2);
-        peopleValueLabel.setMinWidth(40);
-        peopleValueLabel.setAlignment(Pos.CENTER);
-
-        Button minusButton = new Button("", new FontIcon(Feather.MINUS));
-        minusButton.getStyleClass().addAll(Styles.BUTTON_ICON, Styles.BUTTON_CIRCLE, Styles.FLAT);
-        Button plusButton = new Button("", new FontIcon(Feather.PLUS));
-        plusButton.getStyleClass().addAll(Styles.BUTTON_ICON, Styles.BUTTON_CIRCLE, Styles.FLAT);
-        minusButton.setOnAction(e -> setPeople(people - 1));
-        plusButton.setOnAction(e -> setPeople(people + 1));
-        HBox peopleStepper = new HBox(16, minusButton, peopleValueLabel, plusButton);
-        peopleStepper.setAlignment(Pos.CENTER);
-
         VBox section = new VBox(10, peopleTitle, peopleStepper);
         section.setAlignment(Pos.CENTER_LEFT);
         return section;
-    }
-
-    private void setPeople(int newPeople) {
-        people = Math.max(MIN_PEOPLE, Math.min(MAX_PEOPLE, newPeople));
-        peopleValueLabel.setText(String.valueOf(people));
     }
 
     private void confirmBooking() {
@@ -185,7 +165,7 @@ public class BookingDialog extends VBox {
             @Override
             protected Booking call() throws Exception {
                 return ServiceLocator.getInstance().getBookingService().createBooking(
-                        userId, selection.locationId(), selection.date(), selection.timeSlot(), people);
+                        userId, selection.locationId(), selection.date(), selection.timeSlot(), peopleStepper.getValue());
             }
         };
         task.setOnSucceeded(e -> {

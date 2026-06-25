@@ -7,11 +7,9 @@ import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.control.Button;
 import javafx.scene.control.ComboBox;
-import javafx.scene.control.Control;
 import javafx.scene.control.Label;
 import javafx.scene.control.ScrollPane;
 import javafx.scene.control.Separator;
-import javafx.scene.control.Spinner;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.Priority;
 import javafx.scene.layout.Region;
@@ -21,8 +19,6 @@ import org.kordamp.ikonli.javafx.FontIcon;
 import sibilla.Cuisine;
 import sibilla.Day;
 
-import java.util.ArrayList;
-import java.util.List;
 import java.util.function.Consumer;
 
 /**
@@ -47,8 +43,8 @@ import java.util.function.Consumer;
 public class FilterPanel extends VBox {
 
     private final StarRatingPicker minRatingPicker = new StarRatingPicker();
-    private final Spinner<Double> maxPriceSpinner = new Spinner<>(0.0, 200.0, 0.0, 5.0);
-    private final Spinner<Integer> minCapacitySpinner = new Spinner<>(0, 500, 0, 1);
+    private final PriceRangePicker priceRangePicker = new PriceRangePicker();
+    private final IntegerStepper partySizeStepper = new IntegerStepper(1, 20, 1);
     private final ToggleSwitch deliverySwitch = new ToggleSwitch("Consegna a domicilio");
     private final ToggleSwitch takeawaySwitch = new ToggleSwitch("Da asporto");
     private final ToggleSwitch vegetarianSwitch = new ToggleSwitch("Menu vegetariano");
@@ -83,14 +79,9 @@ public class FilterPanel extends VBox {
         openDayBox.setConverter(new DayConverter());
 
         openTimeBox.getItems().add(null);
-        openTimeBox.getItems().addAll(buildTimeSlots());
+        openTimeBox.getItems().addAll(OpeningTimeSlots.all());
         openTimeBox.setDisable(true);
         openDayBox.valueProperty().addListener((obs, oldDay, newDay) -> openTimeBox.setDisable(newDay == null));
-
-        maxPriceSpinner.setEditable(true);
-        minCapacitySpinner.setEditable(true);
-        commitOnFocusLoss(maxPriceSpinner);
-        commitOnFocusLoss(minCapacitySpinner);
 
         Label title = new Label("Filtri di ricerca");
         title.getStyleClass().add(Styles.TITLE_3);
@@ -104,15 +95,14 @@ public class FilterPanel extends VBox {
         header.setPadding(new Insets(20, 20, 16, 24));
 
         VBox body = new VBox(18,
-                sectionCard("Valutazione minima", minRatingPicker),
-                sectionCard("Prezzo e capienza", twoColumns(
-                        field("Prezzo massimo (€)", maxPriceSpinner),
-                        field("Posti minimi", minCapacitySpinner))),
-                sectionCard("Servizi e preferenze", new VBox(12,
+                FilterFieldLayout.sectionCard("Valutazione minima", minRatingPicker),
+                FilterFieldLayout.sectionCard("Quanto vuoi spendere", priceRangePicker),
+                FilterFieldLayout.sectionCard("In quanti siete", partySizeStepper),
+                FilterFieldLayout.sectionCard("Servizi e preferenze", new VBox(12,
                         deliverySwitch, takeawaySwitch, vegetarianSwitch, veganSwitch, glutenFreeSwitch)),
-                sectionCard("Apertura", twoColumns(
-                        field("Giorno", openDayBox),
-                        field("Ora", openTimeBox))));
+                FilterFieldLayout.sectionCard("Apertura", FilterFieldLayout.twoColumns(
+                        FilterFieldLayout.field("Giorno", openDayBox),
+                        FilterFieldLayout.field("Ora", openTimeBox))));
         body.setPadding(new Insets(4, 22, 24, 22));
 
         ScrollPane scroll = new ScrollPane(body);
@@ -138,90 +128,16 @@ public class FilterPanel extends VBox {
     }
 
     /**
-     * Function to group one section's content under a title, with consistent spacing and
-     * background so the panel reads as a small number of clear sections rather than a flat list
-     * of identical fields.
-     *
-     * @param title the section title
-     * @param content the section content
-     * @return the assembled card
-     */
-    private VBox sectionCard(String title, javafx.scene.Node content) {
-        Label titleLabel = new Label(title);
-        titleLabel.getStyleClass().add(Styles.TEXT_CAPTION);
-        VBox card = new VBox(14, titleLabel, content);
-        card.getStyleClass().add("tk-filter-card");
-        card.setPadding(new Insets(16, 18, 18, 18));
-        return card;
-    }
-
-    /**
-     * Function to lay two fields side by side in equal-width columns. Only used for controls that
-     * are meant to be stretched (spinners, combo boxes) — unlike {@link ToggleSwitch}, which keeps
-     * its own label glued to its own switch and looks disconnected when stretched this way.
-     *
-     * @param left the left column content
-     * @param right the right column content
-     * @return the assembled row
-     */
-    private HBox twoColumns(javafx.scene.Node left, javafx.scene.Node right) {
-        HBox.setHgrow(left, Priority.ALWAYS);
-        HBox.setHgrow(right, Priority.ALWAYS);
-        if (left instanceof Control control) {
-            control.setMaxWidth(Double.MAX_VALUE);
-        }
-        if (right instanceof Control control) {
-            control.setMaxWidth(Double.MAX_VALUE);
-        }
-        return new HBox(16, left, right);
-    }
-
-    /**
-     * Function to lay out a labeled control as a full-width, label-above-control row, so long
-     * Italian labels never get truncated regardless of the panel width.
-     *
-     * @param label the field label
-     * @param control the field control
-     * @return the assembled row
-     */
-    private VBox field(String label, Control control) {
-        Label labelNode = new Label(label);
-        labelNode.getStyleClass().add(Styles.TEXT_BOLD);
-        control.setMaxWidth(Double.MAX_VALUE);
-        return new VBox(8, labelNode, control);
-    }
-
-    /**
-     * Function to commit a spinner's typed editor text into its value on focus loss.
-     * JavaFX's {@link Spinner} only commits typed text on Enter or when the arrows are clicked;
-     * without this, typing a value and then clicking another control silently discards it.
-     *
-     * @param spinner the editable spinner to wire up
-     */
-    private <T> void commitOnFocusLoss(Spinner<T> spinner) {
-        spinner.focusedProperty().addListener((obs, wasFocused, isFocused) -> {
-            if (!isFocused) {
-                try {
-                    spinner.getValueFactory().setValue(
-                            spinner.getValueFactory().getConverter().fromString(spinner.getEditor().getText()));
-                } catch (RuntimeException e) {
-                    spinner.getEditor().setText(spinner.getValueFactory().getConverter().toString(spinner.getValue()));
-                }
-            }
-        });
-    }
-
-    /**
      * Function to pre-fill every control from a set of advanced filters.
      *
      * @param filters the filters to apply to the controls
      */
     private void applyCurrent(AdvancedFilters filters) {
         currentCuisineType = filters.cuisineType();
-        maxPriceSpinner.getValueFactory().setValue(filters.maxPriceRange() == null ? 0 : filters.maxPriceRange());
+        priceRangePicker.setMaxPrice(filters.maxPriceRange());
         deliverySwitch.setSelected(Boolean.TRUE.equals(filters.delivery()));
         takeawaySwitch.setSelected(Boolean.TRUE.equals(filters.takeaway()));
-        minCapacitySpinner.getValueFactory().setValue(filters.minCapacity() == null ? 0 : filters.minCapacity());
+        partySizeStepper.setValue(filters.minCapacity() == null ? 1 : filters.minCapacity());
         vegetarianSwitch.setSelected(Boolean.TRUE.equals(filters.vegetarianMenu()));
         veganSwitch.setSelected(Boolean.TRUE.equals(filters.veganMenu()));
         glutenFreeSwitch.setSelected(Boolean.TRUE.equals(filters.glutenFreeMenu()));
@@ -238,8 +154,8 @@ public class FilterPanel extends VBox {
      * @return the advanced filters as configured by the user
      */
     private AdvancedFilters collect() {
-        Double maxPrice = maxPriceSpinner.getValue() > 0 ? maxPriceSpinner.getValue() : null;
-        Integer minCapacity = minCapacitySpinner.getValue() > 0 ? minCapacitySpinner.getValue() : null;
+        Double maxPrice = priceRangePicker.getMaxPrice();
+        Integer minCapacity = partySizeStepper.getValue() > 1 ? partySizeStepper.getValue() : null;
         Double minRating = minRatingPicker.getValue() > 0 ? (double) minRatingPicker.getValue() : null;
 
         return new AdvancedFilters(
@@ -257,32 +173,4 @@ public class FilterPanel extends VBox {
         );
     }
 
-    /**
-     * Function to build the list of fixed 30-minute time slots used in the opening time picker.
-     *
-     * @return the list of "HH:mm" time slots covering a full day
-     */
-    private List<String> buildTimeSlots() {
-        List<String> slots = new ArrayList<>();
-        for (int hour = 0; hour < 24; hour++) {
-            slots.add(String.format("%02d:00", hour));
-            slots.add(String.format("%02d:30", hour));
-        }
-        return slots;
-    }
-
-    /**
-     * Converts between {@link Day} values and their Italian display label.
-     */
-    private static class DayConverter extends javafx.util.StringConverter<Day> {
-        @Override
-        public String toString(Day day) {
-            return day == null ? "Qualsiasi giorno" : DayLabels.of(day);
-        }
-
-        @Override
-        public Day fromString(String string) {
-            return null;
-        }
-    }
 }

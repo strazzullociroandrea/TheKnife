@@ -4,6 +4,7 @@ import com.strazzullo_marocco_sibilla_marin.app.remote.BookingService;
 import com.strazzullo_marocco_sibilla_marin.app.remote.CustomerService;
 import com.strazzullo_marocco_sibilla_marin.app.remote.LocationService;
 import com.strazzullo_marocco_sibilla_marin.app.remote.PhotoService;
+import com.strazzullo_marocco_sibilla_marin.app.remote.ReviewService;
 
 import java.rmi.NotBoundException;
 import java.rmi.RemoteException;
@@ -26,6 +27,7 @@ public final class ServiceLocator {
     private static final String LOCATION_SERVICE_NAME = "LocationService";
     private static final String BOOKING_SERVICE_NAME = "BookingService";
     private static final String PHOTO_SERVICE_NAME = "PhotoService";
+    private static final String REVIEW_SERVICE_NAME = "ReviewService";
 
     private static ServiceLocator instance;
 
@@ -33,13 +35,15 @@ public final class ServiceLocator {
     private final LocationService locationService;
     private final BookingService bookingService;
     private final PhotoService photoService;
+    private final ReviewService reviewService;
 
     private ServiceLocator(CustomerService customerService, LocationService locationService,
-                            BookingService bookingService, PhotoService photoService) {
+                            BookingService bookingService, PhotoService photoService, ReviewService reviewService) {
         this.customerService = customerService;
         this.locationService = locationService;
         this.bookingService = bookingService;
         this.photoService = photoService;
+        this.reviewService = reviewService;
     }
 
     /**
@@ -58,7 +62,8 @@ public final class ServiceLocator {
         LocationService locationService = (LocationService) registry.lookup(LOCATION_SERVICE_NAME);
         BookingService bookingService = (BookingService) registry.lookup(BOOKING_SERVICE_NAME);
         PhotoService photoService = (PhotoService) registry.lookup(PHOTO_SERVICE_NAME);
-        instance = new ServiceLocator(customerService, locationService, bookingService, photoService);
+        ReviewService reviewService = (ReviewService) registry.lookup(REVIEW_SERVICE_NAME);
+        instance = new ServiceLocator(customerService, locationService, bookingService, photoService, reviewService);
         return instance;
     }
 
@@ -109,5 +114,14 @@ public final class ServiceLocator {
      */
     public PhotoService getPhotoService() {
         return photoService;
+    }
+
+    /**
+     * Returns the review service stub
+     *
+     * @return the review service stub
+     */
+    public ReviewService getReviewService() {
+        return reviewService;
     }
 }

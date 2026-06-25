@@ -6,6 +6,8 @@ import com.strazzullo_marocco_sibilla_marin.app.service.AuthServiceImpl;
 import com.strazzullo_marocco_sibilla_marin.app.service.LocationServiceImpl;
 import com.strazzullo_marocco_sibilla_marin.app.service.PhotoServiceImpl;
 import com.strazzullo_marocco_sibilla_marin.app.service.RestaurantServiceImpl;
+import com.strazzullo_marocco_sibilla_marin.app.service.ReviewServiceImpl;
+import com.strazzullo_marocco_sibilla_marin.app.dao.impl.ReviewDAOImpl;
 import com.strazzullo_marocco_sibilla_marin.app.config.DotEnv;
 import com.strazzullo_marocco_sibilla_marin.app.config.PhotoStorageConfig;
 import com.strazzullo_marocco_sibilla_marin.app.storage.S3PhotoStorage;
@@ -37,6 +39,7 @@ public class Server {
     public static final String RESTAURANT_SERVICE_NAME = "RestaurantService";
     public static final String BOOKING_SERVICE_NAME = "BookingService";
     public static final String PHOTO_SERVICE_NAME = "PhotoService";
+    public static final String REVIEW_SERVICE_NAME = "ReviewService";
 
     public static void main(String[] args) {
         LOGGER.info("Avvio del progetto in corso...");
@@ -63,6 +66,9 @@ public class Server {
 
             registry.rebind(BOOKING_SERVICE_NAME, new BookingServiceImpl());
             LOGGER.info(() -> "BookingService bound on RMI registry, port " + RMI_PORT);
+
+            registry.rebind(REVIEW_SERVICE_NAME, new ReviewServiceImpl(new ReviewDAOImpl()));
+            LOGGER.info(() -> "ReviewService bound on RMI registry, port " + RMI_PORT);
 
             bindPhotoService(registry);
 

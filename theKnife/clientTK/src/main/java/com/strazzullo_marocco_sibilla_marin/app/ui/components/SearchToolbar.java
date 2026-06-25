@@ -6,10 +6,12 @@ import javafx.geometry.Pos;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.control.TextField;
+import javafx.scene.control.Tooltip;
 import javafx.scene.input.KeyCode;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.Priority;
 import javafx.scene.layout.Region;
+import javafx.util.Duration;
 import org.kordamp.ikonli.feather.Feather;
 import org.kordamp.ikonli.javafx.FontIcon;
 
@@ -67,7 +69,7 @@ public class SearchToolbar extends HBox {
         HBox pill = new HBox(10,
                 new FontIcon(Feather.MAP_PIN), cityField,
                 divider,
-                new FontIcon(Feather.SEARCH), queryField, new FontIcon(Feather.MIC));
+                new FontIcon(Feather.SEARCH), queryField);
         pill.getStyleClass().add("tk-search-pill");
         pill.setAlignment(Pos.CENTER_LEFT);
         pill.setPadding(new Insets(10, 18, 10, 18));
@@ -78,8 +80,11 @@ public class SearchToolbar extends HBox {
         searchButton.getStyleClass().addAll(Styles.BUTTON_ICON, Styles.BUTTON_CIRCLE, "tk-toolbar-search-button");
         searchButton.setOnAction(e -> onSearch.run());
 
-        Button accountButton = new Button("Accedi", new FontIcon(Feather.USER));
-        accountButton.getStyleClass().add(Styles.BUTTON_OUTLINED);
+        Button accountButton = new Button("", new FontIcon(Feather.USER));
+        accountButton.getStyleClass().addAll(Styles.BUTTON_ICON, Styles.BUTTON_CIRCLE, Styles.BUTTON_OUTLINED, "tk-account-button");
+        Tooltip accountTooltip = new Tooltip("Accedi");
+        accountTooltip.setShowDelay(Duration.millis(150));
+        accountButton.setTooltip(accountTooltip);
 
         getChildren().addAll(logo, pill, searchButton, accountButton);
     }

@@ -3,15 +3,13 @@ package com.strazzullo_marocco_sibilla_marin.app.ui.components;
 import atlantafx.base.theme.Styles;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
-import javafx.scene.control.Button;
+import javafx.event.Event;
+import javafx.scene.Cursor;
 import javafx.scene.control.Label;
 import javafx.scene.control.ToggleButton;
-import javafx.scene.image.Image;
-import javafx.scene.image.ImageView;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.Priority;
 import javafx.scene.layout.Region;
-import javafx.scene.layout.StackPane;
 import javafx.scene.layout.VBox;
 import org.kordamp.ikonli.feather.Feather;
 import org.kordamp.ikonli.javafx.FontIcon;
@@ -22,10 +20,12 @@ import java.util.Locale;
 
 /**
  * A single result row in the search results list: restaurant/location summary, cuisine and
- * price tags, open/closed status, star rating, and a button opening the full {@link
- * com.strazzullo_marocco_sibilla_marin.app.ui.LocationDetailView} for this location.
+ * price tags, open/closed status, star rating, and a photo thumbnail. The whole card is
+ * clickable, opening the full {@link
+ * com.strazzullo_marocco_sibilla_marin.app.ui.LocationDetailView} for this location, with a
+ * trailing chevron hinting at it.
  *
- * @version 2.0
+ * @version 3.0
  * @Author Strazzullo Ciro Andrea, 763603, VA
  * @Author Marocco Stefano, 762192, VA - author of this revision
  * @Author Sibilla Ginevra, 761114, VA
@@ -37,7 +37,7 @@ public class ResultCard extends VBox {
      * ResultCard constructor.
      *
      * @param result the search result this card represents
-     * @param onViewDetails callback invoked when the "Dettagli" button is pressed
+     * @param onViewDetails callback invoked when the card is clicked
      */
     public ResultCard(LocationSearchResult result, Runnable onViewDetails) {
         Location location = result.location();
@@ -45,8 +45,8 @@ public class ResultCard extends VBox {
         getStyleClass().add("tk-card");
         setSpacing(10);
         setPadding(new Insets(16));
-
-        StackPane avatar = cuisineAvatar(result.restaurantCuisine());
+        setCursor(Cursor.HAND);
+        setOnMouseClicked(e -> onViewDetails.run());
 
         Label nameLabel = new Label(location.getName() == null || location.getName().isBlank()
                 ? result.restaurantName() : location.getName());
@@ -60,8 +60,9 @@ public class ResultCard extends VBox {
         ToggleButton favourite = new ToggleButton();
         favourite.setGraphic(new FontIcon(Feather.HEART));
         favourite.getStyleClass().addAll(Styles.BUTTON_ICON, Styles.FLAT, "tk-favourite");
+        favourite.setOnMouseClicked(Event::consume);
 
-        HBox headerRow = new HBox(12, avatar, nameLabel, spacer, statusPill, favourite);
+        HBox headerRow = new HBox(12, nameLabel, spacer, statusPill, favourite);
         headerRow.setAlignment(Pos.CENTER_LEFT);
 
         HBox tagsRow = new HBox(6, new TagLabel(result.restaurantCuisine()), new TagLabel(PriceLabels.of(location.getPriceRange())));
@@ -75,41 +76,16 @@ public class ResultCard extends VBox {
 
         HBox ratingRow = buildRatingRow(result);
 
-        Button detailsButton = new Button("Dettagli", new FontIcon(Feather.CHEVRON_RIGHT));
-        detailsButton.setContentDisplay(javafx.scene.control.ContentDisplay.RIGHT);
-        detailsButton.getStyleClass().add(Styles.FLAT);
-        detailsButton.setMaxWidth(Double.MAX_VALUE);
-        detailsButton.setOnAction(e -> onViewDetails.run());
+        VBox content = new VBox(8, headerRow, tagsRow, addressRow, ratingRow);
+        HBox.setHgrow(content, Priority.ALWAYS);
 
-        getChildren().addAll(headerRow, tagsRow, addressRow, ratingRow, detailsButton);
-    }
+        FontIcon chevron = new FontIcon(Feather.CHEVRON_RIGHT);
+        chevron.getStyleClass().add(Styles.TEXT_MUTED);
 
-    /**
-     * Function to build a small circular cuisine icon avatar, echoing the same circular badge
-     * language used by the quick-filter cuisine chips and by the simplified map pins, so the
-     * list and the map read as one consistent design rather than two clashing styles.
-     *
-     * @param cuisine the restaurant's cuisine type, matching a {@code /icons/cuisine/<cuisine>.png} asset
-     * @return the avatar, or an empty circle if the icon asset is missing
-     */
-    private StackPane cuisineAvatar(String cuisine) {
-        StackPane circle = new StackPane();
-        circle.getStyleClass().add("tk-card-avatar");
-        circle.setPrefSize(36, 36);
-        circle.setMinSize(36, 36);
-        circle.setMaxSize(36, 36);
+        HBox topRow = new HBox(16, new LocationThumbnail(location.getId(), result.restaurantCuisine()), content, chevron);
+        topRow.setAlignment(Pos.CENTER_LEFT);
 
-        var stream = cuisine == null ? null
-                : getClass().getResourceAsStream("/icons/cuisine/" + cuisine.toLowerCase(Locale.ROOT) + ".png");
-        if (stream != null) {
-            ImageView icon = new ImageView(new Image(stream));
-            icon.setFitWidth(20);
-            icon.setFitHeight(20);
-            icon.setPreserveRatio(true);
-            icon.setSmooth(true);
-            circle.getChildren().add(icon);
-        }
-        return circle;
+        getChildren().add(topRow);
     }
 
     /**
@@ -119,20 +95,14 @@ public class ResultCard extends VBox {
      * @return the rating row
      */
     private HBox buildRatingRow(LocationSearchResult result) {
-        HBox row = new HBox(4);
-        row.setAlignment(Pos.CENTER_LEFT);
         double rating = result.averageRating() == null ? 0.0 : result.averageRating();
-        int fullStars = Math.round((float) rating);
-        for (int i = 1; i <= 5; i++) {
-            FontIcon star = new FontIcon(Feather.STAR);
-            star.getStyleClass().add(i <= fullStars ? Styles.WARNING : Styles.TEXT_MUTED);
-            row.getChildren().add(star);
-        }
         Label reviewCount = new Label(result.averageRating() == null
                 ? "Nessuna recensione"
                 : String.format(Locale.ITALIAN, "%.1f (%d recensioni)", rating, result.reviewCount()));
         reviewCount.getStyleClass().add(Styles.TEXT_MUTED);
-        row.getChildren().add(reviewCount);
+
+        HBox row = new HBox(4, new StarRating(rating), reviewCount);
+        row.setAlignment(Pos.CENTER_LEFT);
         return row;
     }
 }

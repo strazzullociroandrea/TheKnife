@@ -4,14 +4,13 @@ import atlantafx.base.controls.ModalPane;
 import atlantafx.base.theme.Styles;
 import com.strazzullo_marocco_sibilla_marin.app.geo.AddressGeocoder;
 import com.strazzullo_marocco_sibilla_marin.app.rmi.ServiceLocator;
-import com.strazzullo_marocco_sibilla_marin.app.search.ResultsSortOption;
 import com.strazzullo_marocco_sibilla_marin.app.search.SearchCriteria;
 import com.strazzullo_marocco_sibilla_marin.app.search.SearchFilterAssembler;
 import com.strazzullo_marocco_sibilla_marin.app.ui.components.CuisineFilterRow;
 import com.strazzullo_marocco_sibilla_marin.app.ui.components.DistanceFilterRow;
 import com.strazzullo_marocco_sibilla_marin.app.ui.components.FilterPanel;
 import com.strazzullo_marocco_sibilla_marin.app.ui.components.LocationPromptPanel;
-import com.strazzullo_marocco_sibilla_marin.app.ui.components.ResultCard;
+import com.strazzullo_marocco_sibilla_marin.app.ui.components.SearchResultsPanel;
 import com.strazzullo_marocco_sibilla_marin.app.ui.components.SearchToolbar;
 import com.strazzullo_marocco_sibilla_marin.app.ui.map.MapPin;
 import com.strazzullo_marocco_sibilla_marin.app.ui.map.MapView;
@@ -22,15 +21,8 @@ import javafx.concurrent.Task;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.control.Alert;
-import javafx.scene.control.ComboBox;
-import javafx.scene.control.Label;
-import javafx.scene.control.ListCell;
-import javafx.scene.control.ListView;
 import javafx.scene.control.SplitPane;
 import javafx.scene.layout.BorderPane;
-import javafx.scene.layout.HBox;
-import javafx.scene.layout.Priority;
-import javafx.scene.layout.Region;
 import javafx.scene.layout.StackPane;
 import javafx.scene.layout.VBox;
 import marocco.SearchFilter;
@@ -38,20 +30,18 @@ import sibilla.LocationSearchResult;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Optional;
 
 /**
- * Search results screen: search bar, quick cuisine filters, advanced {@link FilterPanel},
- * a results list, and a {@link MapView} showing the same results as pins. Selecting a result
- * focuses its pin on the map. The advanced filters and the "your position" prompt both open as
- * an in-app centered modal card (via {@link ModalPane}) instead of a separate OS dialog window,
- * so they stay visually part of this screen.
- * Building the {@link SearchFilter} actually sent to the server and choosing how to sort the
- * results are both delegated to the domain-level {@link SearchFilterAssembler} and {@link
- * ResultsSortOption}, so this class is left to coordinate its own UI components rather than also
- * encode those rules itself.
+ * Search results screen: search bar, quick cuisine filters, advanced {@link FilterPanel}, a
+ * {@link SearchResultsPanel}, and a {@link MapView} showing the same results as pins. Selecting a
+ * result focuses its pin on the map. The advanced filters and the "your position" prompt both
+ * open as an in-app centered modal card (via {@link ModalPane}) instead of a separate OS dialog
+ * window, so they stay visually part of this screen.
+ * Building the {@link SearchFilter} actually sent to the server is delegated to the domain-level
+ * {@link SearchFilterAssembler}, so this class is left to coordinate its own UI components rather
+ * than also encode that rule itself.
  *
- * @version 2.0
+ * @version 3.0
  * @Author Strazzullo Ciro Andrea, 763603, VA
  * @Author Marocco Stefano, 762192, VA - author of this revision
  * @Author Sibilla Ginevra, 761114, VA
@@ -62,18 +52,15 @@ public class SearchView extends StackPane {
     private final SearchToolbar searchToolbar;
     private final CuisineFilterRow cuisineFilterRow;
     private final DistanceFilterRow distanceFilterRow;
-    private final Label resultsCountLabel = new Label();
-    private final ComboBox<String> sortBox = new ComboBox<>();
-    private final ListView<LocationSearchResult> resultsList = new ListView<>();
     private final MapView mapView = new MapView();
     private final ModalPane centeredModalPane = new ModalPane();
+    private SearchResultsPanel resultsPanel;
 
     private final ObservableList<LocationSearchResult> results = FXCollections.observableArrayList();
     private final AddressGeocoder geocoder = new AddressGeocoder();
+    private final SearchDistanceReference distanceReference = new SearchDistanceReference(geocoder, mapView);
     private final AppShell shell;
     private AdvancedFilters advancedFilters = AdvancedFilters.empty();
-    private String geocodedAddress;
-    private AddressGeocoder.Coordinates geocodedCoordinates;
 
     /**
      * SearchView constructor. Builds the screen and runs an initial search.
@@ -94,6 +81,7 @@ public class SearchView extends StackPane {
 
         centeredModalPane.setAlignment(Pos.CENTER);
         mapView.setOnLocateRequest(this::openLocationPrompt);
+        mapView.setOnPinDetails(this::openPinDetails);
 
         getChildren().addAll(content, centeredModalPane);
 
@@ -127,6 +115,18 @@ public class SearchView extends StackPane {
     }
 
     /**
+     * Function to open a location's detail screen from the map pin popup's "Dettagli" button.
+     *
+     * @param locationId the id of the pin's location, matched against the current results
+     */
+    private void openPinDetails(String locationId) {
+        results.stream()
+                .filter(result -> result.location().getId().equals(locationId))
+                .findFirst()
+                .ifPresent(shell::showLocationDetail);
+    }
+
+    /**
      * Function to open the "your position" prompt as an in-app centered modal card, used to
      * resolve the "Distanza" filter's reference address either automatically (preferring a
      * Wi-Fi scan, falling back to the user's IP) or manually, when the map's locate-me button is
@@ -147,53 +147,12 @@ public class SearchView extends StackPane {
      * @return the content split pane
      */
     private SplitPane buildContent() {
-        for (ResultsSortOption option : ResultsSortOption.values()) {
-            sortBox.getItems().add(option.label());
-        }
-        sortBox.getSelectionModel().selectFirst();
-        sortBox.setOnAction(e -> applySort());
+        resultsPanel = new SearchResultsPanel(results,
+                newItem -> mapView.focusPin(newItem.location().getId()), shell::showLocationDetail);
 
-        HBox header = new HBox(resultsCountLabel, spacer(), new Label("Ordina"), sortBox);
-        header.setAlignment(Pos.CENTER_LEFT);
-        header.setSpacing(8);
-        header.setPadding(new Insets(12, 16, 8, 16));
-
-        resultsList.setItems(results);
-        resultsList.getStyleClass().add(Styles.BG_SUBTLE);
-        resultsList.setCellFactory(lv -> new ListCell<>() {
-            @Override
-            protected void updateItem(LocationSearchResult item, boolean empty) {
-                super.updateItem(item, empty);
-                setText(null);
-                getStyleClass().add("transparent-cell");
-                setGraphic(empty || item == null ? null : new ResultCard(item, () -> shell.showLocationDetail(item)));
-                setPadding(new Insets(6, 10, 6, 10));
-            }
-        });
-        resultsList.getSelectionModel().selectedItemProperty().addListener((obs, oldItem, newItem) -> {
-            if (newItem != null) {
-                mapView.focusPin(newItem.location().getId());
-            }
-        });
-
-        VBox left = new VBox(header, resultsList);
-        left.getStyleClass().add(Styles.BG_SUBTLE);
-        VBox.setVgrow(resultsList, Priority.ALWAYS);
-
-        SplitPane splitPane = new SplitPane(left, mapView);
+        SplitPane splitPane = new SplitPane(resultsPanel, mapView);
         splitPane.setDividerPositions(0.45);
         return splitPane;
-    }
-
-    /**
-     * Function to build a horizontally-growing spacer region.
-     *
-     * @return the spacer region
-     */
-    private Region spacer() {
-        Region region = new Region();
-        HBox.setHgrow(region, Priority.ALWAYS);
-        return region;
     }
 
     /**
@@ -202,7 +161,7 @@ public class SearchView extends StackPane {
      */
     private void runSearch() {
         SearchFilter filter = SearchFilterAssembler.assemble(currentCriteria());
-        updateRadiusReference();
+        distanceReference.update(distanceFilterRow.getAddress(), distanceFilterRow.getRadiusKm());
 
         Task<List<LocationSearchResult>> task = new Task<>() {
             @Override
@@ -212,9 +171,8 @@ public class SearchView extends StackPane {
         };
         task.setOnSucceeded(e -> {
             results.setAll(task.getValue());
-            applySort();
+            resultsPanel.refresh();
             updateMap();
-            resultsCountLabel.setText(results.size() + " ristoranti trovati");
         });
         task.setOnFailed(e -> showError(task.getException()));
 
@@ -235,55 +193,6 @@ public class SearchView extends StackPane {
                 advancedFilters,
                 distanceFilterRow.getAddress(),
                 distanceFilterRow.getRadiusKm());
-    }
-
-    /**
-     * Function to resolve the "Distanza" filter's reference address into coordinates and draw
-     * its "you are here" pin and search radius circle on the map, or clear them if the filter
-     * is not set. Runs the geocoding call on a background thread, mirroring the equivalent
-     * lookup the server performs to evaluate the filter itself.
-     */
-    private void updateRadiusReference() {
-        String address = distanceFilterRow.getAddress().isBlank() ? null : distanceFilterRow.getAddress().trim();
-        double radiusKm = distanceFilterRow.getRadiusKm();
-        if (address == null) {
-            geocodedAddress = null;
-            geocodedCoordinates = null;
-            mapView.clearUserLocation();
-            mapView.clearSearchRadius();
-            return;
-        }
-        if (address.equals(geocodedAddress) && geocodedCoordinates != null) {
-            mapView.setSearchRadius(geocodedCoordinates.lat(), geocodedCoordinates.lng(), radiusKm);
-            return;
-        }
-        geocodedAddress = address;
-
-        Task<Optional<AddressGeocoder.Coordinates>> task = new Task<>() {
-            @Override
-            protected Optional<AddressGeocoder.Coordinates> call() {
-                return geocoder.geocode(address);
-            }
-        };
-        task.setOnSucceeded(e -> task.getValue().ifPresent(coords -> {
-            geocodedCoordinates = coords;
-            mapView.setUserLocation(coords.lat(), coords.lng());
-            mapView.setSearchRadius(coords.lat(), coords.lng(), radiusKm);
-        }));
-
-        Thread thread = new Thread(task, "geocode-worker");
-        thread.setDaemon(true);
-        thread.start();
-    }
-
-    /**
-     * Function to re-sort the in-memory results according to the selected {@link ResultsSortOption}.
-     */
-    private void applySort() {
-        ResultsSortOption option = ResultsSortOption.fromLabel(sortBox.getValue());
-        if (option.comparator() != null) {
-            results.sort(option.comparator());
-        }
     }
 
     /**

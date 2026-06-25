@@ -9,9 +9,6 @@ import javafx.geometry.Pos;
 import javafx.scene.control.Button;
 import javafx.scene.control.ContentDisplay;
 import javafx.scene.control.Label;
-import javafx.scene.control.ToggleButton;
-import javafx.scene.layout.ColumnConstraints;
-import javafx.scene.layout.GridPane;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.Priority;
 import javafx.scene.layout.Region;
@@ -19,7 +16,6 @@ import javafx.scene.layout.VBox;
 import org.kordamp.ikonli.feather.Feather;
 import org.kordamp.ikonli.javafx.FontIcon;
 
-import java.time.DayOfWeek;
 import java.time.LocalDate;
 import java.time.Month;
 import java.time.YearMonth;
@@ -41,7 +37,6 @@ import java.util.Locale;
  */
 public class DateSelector extends HBox {
 
-    private static final String[] WEEKDAY_HEADERS = {"Lun", "Mar", "Mer", "Gio", "Ven", "Sab", "Dom"};
     private static final DateTimeFormatter FIELD_FORMAT = DateTimeFormatter.ofPattern("dd/MM/yyyy");
     private static final double CELL_SIZE = 40;
     private static final double POPOVER_CORNER_RADIUS = 16;
@@ -81,10 +76,7 @@ public class DateSelector extends HBox {
         popover.setArrowLocation(Popover.ArrowLocation.TOP_LEFT);
         popover.setDetachable(false);
         popover.setCornerRadius(POPOVER_CORNER_RADIUS);
-        // No arrow nub: it's a small triangular cutout in the rounded-rect Path that doesn't line
-        // up with this content's own clip, leaving visible triangular slivers at the corners.
-        popover.setArrowSize(0);
-        popover.setArrowIndent(0);
+        disableArrowNub();
 
         headerLabel.getStyleClass().add(Styles.TEXT_BOLD);
         headerLabel.setCursor(javafx.scene.Cursor.HAND);
@@ -114,6 +106,16 @@ public class DateSelector extends HBox {
      */
     public LocalDate getValue() {
         return value.get();
+    }
+
+    /**
+     * Function to disable the popover's arrow nub: it's a small triangular cutout in the
+     * rounded-rect Path that doesn't line up with this content's own clip, leaving visible
+     * triangular slivers at the corners.
+     */
+    private void disableArrowNub() {
+        popover.setArrowSize(0);
+        popover.setArrowIndent(0);
     }
 
     private void openPopover() {
@@ -146,19 +148,27 @@ public class DateSelector extends HBox {
         VBox calendar = new VBox(header, calendarBody);
         calendar.setPrefWidth(7 * CELL_SIZE + 16 + 6 * 4);
         calendar.getStyleClass().add("tk-date-calendar");
+        clipToRoundedCorners(calendar);
 
-        // Popover's own rounded-rect Path sits *behind* this content, so this opaque background
-        // fully covers it; without its own clip here, this rectangle's square corners would show
-        // up on top of the Path's rounded ones. Round this content directly instead of relying
-        // on Popover's shape showing through.
+        return calendar;
+    }
+
+    /**
+     * Function to clip a node to rounded corners matching the popover's own corner radius.
+     * Popover's rounded-rect Path sits *behind* its content, so this content's opaque background
+     * fully covers it; without its own clip, this node's square corners would show up on top of
+     * the Path's rounded ones. Rounding the content directly is simpler than relying on Popover's
+     * shape showing through.
+     *
+     * @param node the node to clip
+     */
+    private void clipToRoundedCorners(javafx.scene.layout.Region node) {
         javafx.scene.shape.Rectangle clip = new javafx.scene.shape.Rectangle();
         clip.setArcWidth(POPOVER_CORNER_RADIUS * 2);
         clip.setArcHeight(POPOVER_CORNER_RADIUS * 2);
-        clip.widthProperty().bind(calendar.widthProperty());
-        clip.heightProperty().bind(calendar.heightProperty());
-        calendar.setClip(clip);
-
-        return calendar;
+        clip.widthProperty().bind(node.widthProperty());
+        clip.heightProperty().bind(node.heightProperty());
+        node.setClip(clip);
     }
 
     private void refresh() {
@@ -166,92 +176,21 @@ public class DateSelector extends HBox {
                 ? String.valueOf(displayedMonth.getYear())
                 : Capitalization.capitalize(displayedMonth.getMonth().getDisplayName(TextStyle.FULL, Locale.ITALIAN))
                         + " " + displayedMonth.getYear());
-        calendarBody.getChildren().setAll(showingMonthGrid ? buildMonthGrid() : buildDayGrid());
+        calendarBody.getChildren().setAll(showingMonthGrid
+                ? DateSelectorGrids.buildMonthGrid(displayedMonth, this::onMonthPicked)
+                : DateSelectorGrids.buildDayGrid(displayedMonth, getValue(), this::onDayPicked));
     }
 
-    private VBox buildDayGrid() {
-        HBox weekdaysRow = new HBox(4);
-        weekdaysRow.setPadding(new Insets(8, 8, 0, 8));
-        for (String weekday : WEEKDAY_HEADERS) {
-            Label label = new Label(weekday);
-            label.getStyleClass().add(Styles.TEXT_MUTED);
-            label.setMinWidth(CELL_SIZE);
-            label.setAlignment(Pos.CENTER);
-            weekdaysRow.getChildren().add(label);
-        }
-
-        GridPane grid = new GridPane();
-        grid.setHgap(4);
-        grid.setVgap(4);
-        grid.setPadding(new Insets(4, 8, 12, 8));
-        for (int i = 0; i < 7; i++) {
-            grid.getColumnConstraints().add(new ColumnConstraints(CELL_SIZE));
-        }
-
-        LocalDate firstOfMonth = displayedMonth.atDay(1);
-        int leadingBlanks = firstOfMonth.getDayOfWeek().getValue() - DayOfWeek.MONDAY.getValue();
-        int row = 0;
-        int column = leadingBlanks;
-        for (int day = 1; day <= displayedMonth.lengthOfMonth(); day++) {
-            grid.add(buildDayCell(displayedMonth.atDay(day)), column, row);
-            column++;
-            if (column == 7) {
-                column = 0;
-                row++;
-            }
-        }
-
-        return new VBox(weekdaysRow, grid);
+    private void onDayPicked(LocalDate date) {
+        value.set(date);
+        updateFieldText();
+        popover.hide();
     }
 
-    private ToggleButton buildDayCell(LocalDate date) {
-        ToggleButton button = new ToggleButton(String.valueOf(date.getDayOfMonth()));
-        button.getStyleClass().add("tk-date-cell");
-        button.setMinSize(CELL_SIZE, 36);
-        button.setMaxSize(CELL_SIZE, 36);
-        if (date.equals(LocalDate.now())) {
-            button.getStyleClass().add("tk-date-cell-today");
-        }
-        if (date.isBefore(LocalDate.now())) {
-            button.setDisable(true);
-        }
-        button.setSelected(date.equals(getValue()));
-        button.setOnAction(e -> {
-            value.set(date);
-            updateFieldText();
-            popover.hide();
-        });
-        return button;
-    }
-
-    private GridPane buildMonthGrid() {
-        GridPane grid = new GridPane();
-        grid.setHgap(8);
-        grid.setVgap(8);
-        grid.setPadding(new Insets(8));
-        for (int i = 0; i < 3; i++) {
-            grid.getColumnConstraints().add(new ColumnConstraints(2.5 * CELL_SIZE));
-        }
-
-        Month[] months = Month.values();
-        for (int i = 0; i < months.length; i++) {
-            grid.add(buildMonthCell(months[i]), i % 3, i / 3);
-        }
-        return grid;
-    }
-
-    private ToggleButton buildMonthCell(Month month) {
-        ToggleButton button = new ToggleButton(Capitalization.capitalize(month.getDisplayName(TextStyle.SHORT, Locale.ITALIAN)));
-        button.getStyleClass().add("tk-date-cell");
-        button.setMinHeight(40);
-        button.setMaxWidth(Double.MAX_VALUE);
-        button.setSelected(month == displayedMonth.getMonth());
-        button.setOnAction(e -> {
-            displayedMonth = YearMonth.of(displayedMonth.getYear(), month);
-            showingMonthGrid = false;
-            refresh();
-        });
-        return button;
+    private void onMonthPicked(Month month) {
+        displayedMonth = YearMonth.of(displayedMonth.getYear(), month);
+        showingMonthGrid = false;
+        refresh();
     }
 
     private static Button navButton(Feather icon) {

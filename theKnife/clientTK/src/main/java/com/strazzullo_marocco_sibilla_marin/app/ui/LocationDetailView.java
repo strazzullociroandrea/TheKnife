@@ -4,12 +4,10 @@ import atlantafx.base.controls.ModalPane;
 import atlantafx.base.theme.Styles;
 import com.strazzullo_marocco_sibilla_marin.app.ui.components.BookingDialog;
 import com.strazzullo_marocco_sibilla_marin.app.ui.components.BookingPanel;
-import com.strazzullo_marocco_sibilla_marin.app.ui.components.OpenStatusPill;
-import com.strazzullo_marocco_sibilla_marin.app.ui.components.OpeningHoursGrid;
+import com.strazzullo_marocco_sibilla_marin.app.ui.components.LocationInfoCard;
 import com.strazzullo_marocco_sibilla_marin.app.ui.components.PhotoGallery;
-import com.strazzullo_marocco_sibilla_marin.app.ui.components.PriceLabels;
+import com.strazzullo_marocco_sibilla_marin.app.ui.components.ReviewsSection;
 import com.strazzullo_marocco_sibilla_marin.app.ui.components.SlotSelection;
-import com.strazzullo_marocco_sibilla_marin.app.ui.components.TagLabel;
 import com.strazzullo_marocco_sibilla_marin.app.ui.map.MapPin;
 import com.strazzullo_marocco_sibilla_marin.app.ui.map.MapView;
 import javafx.geometry.Insets;
@@ -17,7 +15,6 @@ import javafx.geometry.Pos;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.control.ScrollPane;
-import javafx.scene.control.Separator;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.Priority;
 import javafx.scene.layout.Region;
@@ -29,20 +26,19 @@ import sibilla.Location;
 import sibilla.LocationSearchResult;
 
 import java.util.List;
-import java.util.Locale;
 
 /**
  * Full detail screen for a single restaurant location: photo gallery, name, cuisine/dietary
  * tags, open/closed status, address, rating, price range, the full week's opening hours, a small
- * map pinpointing the location, a "Prenota un tavolo" booking panel, and (once a {@code
- * ReviewService} is exposed over RMI) its reviews. Reachable from a "Dettagli" button on every
- * {@link com.strazzullo_marocco_sibilla_marin.app.ui.components.ResultCard} in the search
- * results, and meant to be reusable from anywhere else a {@link LocationSearchResult} is
- * available, via {@link AppShell#showLocationDetail(LocationSearchResult)}.
+ * map pinpointing the location, a "Prenota un tavolo" booking panel, and its reviews. Reachable
+ * from a "Dettagli" button on every {@link
+ * com.strazzullo_marocco_sibilla_marin.app.ui.components.ResultCard} in the search results, and
+ * meant to be reusable from anywhere else a {@link LocationSearchResult} is available, via {@link
+ * AppShell#showLocationDetail(LocationSearchResult)}.
  * Booking has no login gate yet: every booking is attributed to {@link AppShell#getCurrentUserId()}'s
  * demo placeholder until a real login screen exists.
  *
- * @version 2.0
+ * @version 3.0
  * @Author Marocco Stefano, 762192, VA - author of this revision
  * @Author Strazzullo Ciro Andrea, 763603, VA
  * @Author Sibilla Ginevra, 761114, VA
@@ -69,8 +65,8 @@ public class LocationDetailView extends StackPane {
 
         VBox leftColumn = new VBox(20,
                 new PhotoGallery(location.getId()),
-                buildInfoCard(result, restaurantName),
-                buildReviewsSection());
+                new LocationInfoCard(result, restaurantName),
+                new ReviewsSection(location.getId(), shell.getCurrentUserId()));
         HBox.setHgrow(leftColumn, Priority.ALWAYS);
 
         VBox rightColumn = new VBox(20, buildMapCard(location, restaurantName), bookingPanel);
@@ -146,55 +142,6 @@ public class LocationDetailView extends StackPane {
     }
 
     /**
-     * Function to build the main info card: name, tags, open/closed status, address, rating,
-     * price, and the full week's opening hours.
-     *
-     * @param result the location to show
-     * @param restaurantName the restaurant name to show as the title
-     * @return the info card
-     */
-    private VBox buildInfoCard(LocationSearchResult result, String restaurantName) {
-        Location location = result.location();
-
-        Label nameLabel = new Label(restaurantName);
-        nameLabel.getStyleClass().add(Styles.TITLE_2);
-
-        Region titleSpacer = new Region();
-        HBox.setHgrow(titleSpacer, Priority.ALWAYS);
-
-        HBox titleRow = new HBox(12, nameLabel, titleSpacer, new OpenStatusPill(location));
-        titleRow.setAlignment(Pos.CENTER_LEFT);
-
-        HBox tagsRow = new HBox(6);
-        tagsRow.setAlignment(Pos.CENTER_LEFT);
-        tagsRow.getChildren().add(new TagLabel(result.restaurantCuisine()));
-        if (location.isVegetarianMenu()) {
-            tagsRow.getChildren().add(new TagLabel("Vegetariano"));
-        }
-        if (location.isVeganMenu()) {
-            tagsRow.getChildren().add(new TagLabel("Vegano"));
-        }
-        if (location.isGlutenFreeMenu()) {
-            tagsRow.getChildren().add(new TagLabel("Senza glutine"));
-        }
-
-        HBox metaRow = new HBox(16,
-                metaItem(Feather.MAP_PIN, location.getAddress() + ", " + location.getCity()),
-                metaItem(Feather.STAR, ratingText(result)),
-                metaItem(null, PriceLabels.of(location.getPriceRange())));
-        metaRow.setAlignment(Pos.CENTER_LEFT);
-        metaRow.getStyleClass().add(Styles.TEXT_MUTED);
-
-        Label hoursTitle = new Label("Orari", new FontIcon(Feather.CLOCK));
-        hoursTitle.getStyleClass().add(Styles.TITLE_3);
-
-        VBox card = new VBox(16, titleRow, tagsRow, metaRow, new Separator(), hoursTitle, new OpeningHoursGrid(location));
-        card.getStyleClass().add("tk-card");
-        card.setPadding(new Insets(24));
-        return card;
-    }
-
-    /**
      * Function to build the "Dove si trova" card: a small, control-free map preview pinned on
      * the location.
      *
@@ -220,55 +167,5 @@ public class LocationDetailView extends StackPane {
         card.getStyleClass().add("tk-card");
         card.setPadding(new Insets(24));
         return card;
-    }
-
-    /**
-     * Function to build a small icon-plus-text item for the address/rating/price meta row.
-     *
-     * @param icon the leading icon, or null for none
-     * @param text the item text
-     * @return the meta item
-     */
-    private HBox metaItem(Feather icon, String text) {
-        HBox item = new HBox(6, new Label(text));
-        if (icon != null) {
-            item.getChildren().add(0, new FontIcon(icon));
-        }
-        item.setAlignment(Pos.CENTER_LEFT);
-        return item;
-    }
-
-    /**
-     * Function to format a result's rating and review count for the meta row.
-     *
-     * @param result the search result to format
-     * @return the formatted rating text
-     */
-    private String ratingText(LocationSearchResult result) {
-        if (result.averageRating() == null) {
-            return "Nessuna recensione";
-        }
-        return String.format(Locale.ITALIAN, "%.1f (%d recensioni)", result.averageRating(), result.reviewCount());
-    }
-
-    /**
-     * Function to build the reviews section. Shows a placeholder for now: reading reviews
-     * requires a {@code ReviewService} exposed over RMI, which does not exist yet.
-     *
-     * @return the reviews section
-     */
-    private VBox buildReviewsSection() {
-        Label title = new Label("Recensioni", new FontIcon(Feather.MESSAGE_CIRCLE));
-        title.getStyleClass().add(Styles.TITLE_3);
-
-        Label placeholder = new Label("Le recensioni saranno presto disponibili.");
-        placeholder.getStyleClass().add(Styles.TEXT_MUTED);
-
-        VBox placeholderCard = new VBox(placeholder);
-        placeholderCard.getStyleClass().add("tk-card");
-        placeholderCard.setPadding(new Insets(24));
-        placeholderCard.setAlignment(Pos.CENTER_LEFT);
-
-        return new VBox(16, title, placeholderCard);
     }
 }

@@ -35,7 +35,7 @@ public class AppShell extends StackPane {
      * AppShell constructor. Starts on the home screen.
      */
     public AppShell() {
-        showHome();
+        showLogin();
     }
 
     /**
@@ -46,6 +46,15 @@ public class AppShell extends StackPane {
      */
     public String getCurrentUserId() {
         return currentUserId;
+    }
+
+    /**
+     * Function to set the id of the user currently "Logged in"
+     *
+     * @param id the user id logged in
+     */
+    public void setCurrentUserId(String id) {
+        this.currentUserId = id;
     }
 
     /**
@@ -60,7 +69,7 @@ public class AppShell extends StackPane {
      * Function to navigate to the search results screen, running an initial search and resetting
      * any back-stack built up so far.
      *
-     * @param city the city to search in, may be blank
+     * @param city  the city to search in, may be blank
      * @param query the free-text restaurant name query, may be blank
      */
     public void showSearch(String city, String query) {
@@ -97,7 +106,22 @@ public class AppShell extends StackPane {
         }
     }
 
+
     private void show(Node view) {
         getChildren().setAll(view);
+    }
+
+    /**
+     * Function to show the login page
+     */
+    public void showLogin() {
+        show(new LoginView(this));
+    }
+
+    /**
+     * Function to show the registration page
+     */
+    public void showRegistrationView() {
+        show(new RegistrationView(this));
     }
 }

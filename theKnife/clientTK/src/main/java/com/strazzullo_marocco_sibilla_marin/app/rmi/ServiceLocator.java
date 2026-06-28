@@ -5,6 +5,7 @@ import com.strazzullo_marocco_sibilla_marin.app.remote.CustomerService;
 import com.strazzullo_marocco_sibilla_marin.app.remote.LocationService;
 import com.strazzullo_marocco_sibilla_marin.app.remote.PhotoService;
 import com.strazzullo_marocco_sibilla_marin.app.remote.ReviewService;
+import com.strazzullo_marocco_sibilla_marin.app.remote.AuthService;
 
 import java.rmi.NotBoundException;
 import java.rmi.RemoteException;
@@ -28,6 +29,7 @@ public final class ServiceLocator {
     private static final String BOOKING_SERVICE_NAME = "BookingService";
     private static final String PHOTO_SERVICE_NAME = "PhotoService";
     private static final String REVIEW_SERVICE_NAME = "ReviewService";
+    private static final String AUTH_SERVICE_NAME = "AuthService";
 
     private static ServiceLocator instance;
 
@@ -36,14 +38,16 @@ public final class ServiceLocator {
     private final BookingService bookingService;
     private final PhotoService photoService;
     private final ReviewService reviewService;
+    private final AuthService authService;
 
     private ServiceLocator(CustomerService customerService, LocationService locationService,
-                            BookingService bookingService, PhotoService photoService, ReviewService reviewService) {
+                           BookingService bookingService, PhotoService photoService, ReviewService reviewService, AuthService authService) {
         this.customerService = customerService;
         this.locationService = locationService;
         this.bookingService = bookingService;
         this.photoService = photoService;
         this.reviewService = reviewService;
+        this.authService = authService;
     }
 
     /**
@@ -53,7 +57,7 @@ public final class ServiceLocator {
      * @param host the RMI registry host
      * @param port the RMI registry port
      * @return the connected service locator
-     * @throws RemoteException if the registry cannot be reached
+     * @throws RemoteException   if the registry cannot be reached
      * @throws NotBoundException if a service is not bound on the registry
      */
     public static synchronized ServiceLocator connect(String host, int port) throws RemoteException, NotBoundException {
@@ -63,7 +67,9 @@ public final class ServiceLocator {
         BookingService bookingService = (BookingService) registry.lookup(BOOKING_SERVICE_NAME);
         PhotoService photoService = (PhotoService) registry.lookup(PHOTO_SERVICE_NAME);
         ReviewService reviewService = (ReviewService) registry.lookup(REVIEW_SERVICE_NAME);
-        instance = new ServiceLocator(customerService, locationService, bookingService, photoService, reviewService);
+        AuthService authService = (AuthService) registry.lookup(AUTH_SERVICE_NAME);
+
+        instance = new ServiceLocator(customerService, locationService, bookingService, photoService, reviewService, authService);
         return instance;
     }
 
@@ -78,6 +84,15 @@ public final class ServiceLocator {
             throw new IllegalStateException("ServiceLocator is not connected yet. Call connect(host, port) first.");
         }
         return instance;
+    }
+
+    /**
+     * Returns the auth service stub
+     *
+     * @return the auth service stub
+     */
+    public AuthService getAuthService() {
+        return authService;
     }
 
     /**

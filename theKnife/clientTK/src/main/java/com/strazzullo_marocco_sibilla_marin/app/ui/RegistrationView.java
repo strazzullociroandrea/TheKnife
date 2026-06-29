@@ -12,7 +12,6 @@ import javafx.scene.layout.Priority;
 import javafx.scene.layout.Region;
 import javafx.scene.layout.VBox;
 import javafx.scene.paint.Color;
-import javafx.scene.paint.Paint;
 import javafx.scene.text.Text;
 import javafx.scene.text.TextFlow;
 import org.kordamp.ikonli.feather.Feather;
@@ -58,18 +57,16 @@ public class RegistrationView extends HBox {
         leftPanel.setPrefWidth(500);
         leftPanel.setPadding(new Insets(40));
 
-        FontIcon backIcon = new FontIcon(Feather.ARROW_LEFT);
-        backIcon.setIconColor(Paint.valueOf("white"));
-        Button backButton = new Button("", backIcon);
-        backButton.getStyleClass().addAll(Styles.BUTTON_ICON, Styles.FLAT);
-        backButton.setCursor(Cursor.HAND);
-        backButton.setOnAction(e -> shell.goBack());
+        Label backLabel = new Label("←");
+        backLabel.setStyle("-fx-text-fill: white; -fx-font-size: 18px;");
+        backLabel.setCursor(Cursor.HAND);
+        backLabel.setOnMouseClicked(e -> shell.goBack());
 
         Label appName = new Label("TheKnife");
         appName.getStyleClass().add(Styles.TITLE_2);
         appName.setStyle("-fx-text-fill: white;");
 
-        HBox topRow = new HBox(8, backButton, appName);
+        HBox topRow = new HBox(10, backLabel, appName);
         topRow.setAlignment(Pos.CENTER_LEFT);
 
         Region spacer = new Region();

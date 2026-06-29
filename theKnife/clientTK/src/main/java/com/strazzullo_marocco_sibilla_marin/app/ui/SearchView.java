@@ -150,12 +150,20 @@ public class SearchView extends StackPane {
     private SplitPane buildContent() {
         resultsPanel = new SearchResultsPanel(results,
                 newItem -> mapView.focusPin(newItem.location().getId()), shell::showLocationDetail,
-                shell::isLoggedIn,
-                () -> centeredModalPane.show(new AuthPromptCard(
-                        "Per aggiungere ai preferiti, accedi o registrati.",
-                        () -> centeredModalPane.hide(true),
-                        shell::showLogin,
-                        shell::showRegistrationView)));
+                shell::isCustomer,
+                () -> {
+                    if (shell.isLoggedIn()) {
+                        centeredModalPane.show(new AuthPromptCard(
+                                "I preferiti sono disponibili solo per i clienti.",
+                                () -> centeredModalPane.hide(true)));
+                    } else {
+                        centeredModalPane.show(new AuthPromptCard(
+                                "Per aggiungere ai preferiti, accedi o registrati.",
+                                () -> centeredModalPane.hide(true),
+                                shell::showLogin,
+                                shell::showRegistrationView));
+                    }
+                });
 
         SplitPane splitPane = new SplitPane(resultsPanel, mapView);
         splitPane.setDividerPositions(0.45);

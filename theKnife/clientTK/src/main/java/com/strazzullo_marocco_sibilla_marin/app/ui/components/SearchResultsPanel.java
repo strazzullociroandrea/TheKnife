@@ -24,6 +24,7 @@ import java.util.function.Consumer;
  * so {@link com.strazzullo_marocco_sibilla_marin.app.ui.SearchView} only has to call {@link
  * #refresh()} after a search completes.
  *
+ * @version 2.0
  * @Author Marocco Stefano, 762192, VA - author of this file
  */
 public class SearchResultsPanel extends VBox {
@@ -37,12 +38,12 @@ public class SearchResultsPanel extends VBox {
      * @param results the shared, mutable results list to display and sort
      * @param onSelected called with the newly selected result, e.g. to focus its map pin
      * @param onViewDetails called with a result when its card is clicked
-     * @param isLoggedIn supplier returning whether a user is currently logged in
-     * @param onFavouriteAuthRequired called when a guest clicks the heart button on any card
+     * @param isCustomer supplier returning whether the current user is a logged-in customer
+     * @param onFavouriteAuthRequired called when a non-customer clicks the heart button on any card
      */
     public SearchResultsPanel(ObservableList<LocationSearchResult> results,
                                Consumer<LocationSearchResult> onSelected, Consumer<LocationSearchResult> onViewDetails,
-                               BooleanSupplier isLoggedIn, Runnable onFavouriteAuthRequired) {
+                               BooleanSupplier isCustomer, Runnable onFavouriteAuthRequired) {
         this.results = results;
 
         for (ResultsSortOption option : ResultsSortOption.values()) {
@@ -66,7 +67,7 @@ public class SearchResultsPanel extends VBox {
                 setText(null);
                 getStyleClass().add("transparent-cell");
                 setGraphic(empty || item == null ? null
-                        : new ResultCard(item, () -> onViewDetails.accept(item), isLoggedIn, onFavouriteAuthRequired));
+                        : new ResultCard(item, () -> onViewDetails.accept(item), isCustomer, onFavouriteAuthRequired));
                 setPadding(new Insets(6, 10, 6, 10));
             }
         });

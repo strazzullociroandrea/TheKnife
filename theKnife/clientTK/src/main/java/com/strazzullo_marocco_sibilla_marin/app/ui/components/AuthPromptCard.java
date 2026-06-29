@@ -14,18 +14,57 @@ import org.kordamp.ikonli.feather.Feather;
 import org.kordamp.ikonli.javafx.FontIcon;
 
 /**
- * Centered modal card prompting the user to sign in or register to access a feature. Shown
- * inside an {@code atlantafx.base.controls.ModalPane} when a guest attempts an action that
- * requires authentication, such as adding a favourite or booking a table. Two large action
- * cards give quick access to both paths side by side.
+ * Centered modal card shown inside an {@code atlantafx.base.controls.ModalPane} when a user
+ * attempts an action they are not authorized to perform. Used in two modes:
+ * <ul>
+ *   <li>Guest mode: shows "Accedi" and "Registrati" action cards for unauthenticated users.</li>
+ *   <li>Info mode: shows only the message and a close button, e.g. for manager role restrictions.</li>
+ * </ul>
  *
- * @version 2.0
+ * @version 3.0
  * @Author Marocco Stefano, 762192, VA - author of this file
  */
 public class AuthPromptCard extends VBox {
 
     /**
-     * AuthPromptCard constructor.
+     * Info-only constructor: shows the message and a close button, without auth action cards.
+     * Used when the user is already logged in but lacks the required role.
+     *
+     * @param message feature-specific restriction message
+     * @param onClose callback invoked when the card should be dismissed
+     */
+    public AuthPromptCard(String message, Runnable onClose) {
+        getStyleClass().addAll(Styles.BG_DEFAULT, "tk-modal-card");
+        setPrefWidth(420);
+        setMinWidth(360);
+        setMaxWidth(460);
+        setMaxHeight(Region.USE_PREF_SIZE);
+
+        Button closeButton = new Button("", new FontIcon(Feather.X));
+        closeButton.getStyleClass().addAll(Styles.BUTTON_ICON, Styles.FLAT, Styles.BUTTON_CIRCLE);
+        closeButton.setOnAction(e -> onClose.run());
+
+        Label title = new Label("Accesso limitato");
+        title.getStyleClass().add(Styles.TITLE_4);
+
+        Region headerSpacer = new Region();
+        HBox.setHgrow(headerSpacer, Priority.ALWAYS);
+
+        HBox header = new HBox(title, headerSpacer, closeButton);
+        header.setAlignment(Pos.CENTER_LEFT);
+        header.setPadding(new Insets(20, 16, 0, 20));
+
+        Label messageLabel = new Label(message);
+        messageLabel.setWrapText(true);
+        messageLabel.getStyleClass().add(Styles.TEXT_MUTED);
+        messageLabel.setPadding(new Insets(10, 20, 20, 20));
+
+        getChildren().addAll(header, messageLabel);
+    }
+
+    /**
+     * Auth-prompt constructor: shows the message and two action cards for login and registration.
+     * Used for unauthenticated users.
      *
      * @param message    feature-specific body line, e.g. "Per aggiungere ai preferiti, accedi o registrati."
      * @param onClose    callback invoked when the card should be dismissed

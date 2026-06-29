@@ -24,8 +24,8 @@ import java.util.function.BooleanSupplier;
  * price tags, open/closed status, star rating, and a photo thumbnail. The whole card is
  * clickable, opening the full {@link
  * com.strazzullo_marocco_sibilla_marin.app.ui.LocationDetailView} for this location, with a
- * trailing chevron hinting at it. The favourite heart button is gated: guests see a login prompt
- * instead of toggling the state.
+ * trailing chevron hinting at it. The favourite heart button is gated: only customers can toggle
+ * it; guests and managers are intercepted and shown an appropriate prompt instead.
  *
  * @version 4.0
  * @Author Strazzullo Ciro Andrea, 763603, VA
@@ -40,11 +40,11 @@ public class ResultCard extends VBox {
      *
      * @param result the search result this card represents
      * @param onViewDetails callback invoked when the card is clicked
-     * @param isLoggedIn supplier returning whether a user is currently logged in
-     * @param onFavouriteAuthRequired callback invoked when a guest clicks the heart button
+     * @param isCustomer supplier returning whether the current user is a logged-in customer
+     * @param onFavouriteAuthRequired callback invoked when a non-customer clicks the heart button
      */
     public ResultCard(LocationSearchResult result, Runnable onViewDetails,
-                      BooleanSupplier isLoggedIn, Runnable onFavouriteAuthRequired) {
+                      BooleanSupplier isCustomer, Runnable onFavouriteAuthRequired) {
         Location location = result.location();
 
         getStyleClass().add("tk-card");
@@ -66,7 +66,7 @@ public class ResultCard extends VBox {
         favourite.setGraphic(new FontIcon(Feather.HEART));
         favourite.getStyleClass().addAll(Styles.BUTTON_ICON, Styles.FLAT, "tk-favourite");
         favourite.addEventFilter(MouseEvent.MOUSE_CLICKED, e -> {
-            if (!isLoggedIn.getAsBoolean()) {
+            if (!isCustomer.getAsBoolean()) {
                 e.consume();
                 onFavouriteAuthRequired.run();
             }

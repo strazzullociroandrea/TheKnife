@@ -35,11 +35,11 @@ import java.util.List;
  * button on every {@link com.strazzullo_marocco_sibilla_marin.app.ui.components.ResultCard} in
  * the search results, and meant to be reusable from anywhere else a {@link LocationSearchResult}
  * is available, via {@link AppShell#showLocationDetail(LocationSearchResult)}.
- * The booking section requires authentication: logged-in users see the full {@link
- * com.strazzullo_marocco_sibilla_marin.app.ui.components.BookingPanel}, while guests see a
- * prompt with links to log in or register.
+ * The booking section is role-aware: customers see the full {@link
+ * com.strazzullo_marocco_sibilla_marin.app.ui.components.BookingPanel}, managers see a
+ * restriction notice, and guests see a prompt with links to log in or register.
  *
- * @version 4.0
+ * @version 5.0
  * @Author Marocco Stefano, 762192, VA - author of this revision
  * @Author Strazzullo Ciro Andrea, 763603, VA
  * @Author Sibilla Ginevra, 761114, VA
@@ -62,10 +62,12 @@ public class LocationDetailView extends StackPane {
                 ? result.restaurantName() : location.getName();
 
         Node bookingSection;
-        if (shell.isLoggedIn()) {
+        if (shell.isCustomer()) {
             bookingPanel = new BookingPanel(location.getId(),
                     selection -> openBookingDialog(restaurantName, selection, shell.getCurrentUserId()));
             bookingSection = bookingPanel;
+        } else if (shell.isLoggedIn()) {
+            bookingSection = buildManagerRestrictionCard();
         } else {
             bookingSection = buildBookingLoginPrompt(shell);
         }
@@ -109,6 +111,26 @@ public class LocationDetailView extends StackPane {
         BookingDialog dialog = new BookingDialog(restaurantName, selection, userId,
                 () -> modalPane.hide(true), bookingPanel::loadSlots);
         modalPane.show(dialog);
+    }
+
+    /**
+     * Function to build the booking placeholder shown when a manager is logged in, informing them
+     * that bookings are reserved for customer accounts.
+     *
+     * @return the customer-only restriction card
+     */
+    private VBox buildManagerRestrictionCard() {
+        Label title = new Label("Prenota un tavolo", new FontIcon(Feather.CALENDAR));
+        title.getStyleClass().add(Styles.TITLE_3);
+
+        Label message = new Label("Le prenotazioni sono disponibili solo per i clienti.");
+        message.getStyleClass().add(Styles.TEXT_MUTED);
+        message.setWrapText(true);
+
+        VBox card = new VBox(16, title, message);
+        card.getStyleClass().add("tk-card");
+        card.setPadding(new Insets(24));
+        return card;
     }
 
     /**

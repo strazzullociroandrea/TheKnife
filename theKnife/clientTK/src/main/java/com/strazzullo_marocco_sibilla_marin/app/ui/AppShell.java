@@ -5,6 +5,7 @@ import com.strazzullo_marocco_sibilla_marin.app.session.SessionStore;
 import javafx.scene.Node;
 import javafx.scene.layout.StackPane;
 import sibilla.LocationSearchResult;
+import strazzullo.Client;
 import strazzullo.User;
 
 import java.util.ArrayDeque;
@@ -55,6 +56,16 @@ public class AppShell extends StackPane {
      */
     public String getCurrentUserId() {
         return currentUser != null ? currentUser.getId() : null;
+    }
+
+    /**
+     * Function to check whether the currently logged-in user is a customer. Returns {@code false}
+     * when no user is logged in or the user is a manager.
+     *
+     * @return true if a customer is logged in, false otherwise
+     */
+    public boolean isCustomer() {
+        return currentUser instanceof Client;
     }
 
     /**

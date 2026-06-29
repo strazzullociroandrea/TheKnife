@@ -1,58 +1,65 @@
 package com.strazzullo_marocco_sibilla_marin.app.remote;
- 
+
 import strazzullo.User;
+
 import java.rmi.Remote;
 import java.rmi.RemoteException;
-import java.util.List;
 
 /**
- * Remote service interface exposing authservice-specific actions via RMI. 
+ * Remote service interface exposing authentication actions via RMI.
  *
- * @version 1.0
+ * @version 2.0
  * @Author Strazzullo Ciro Andrea, 763603, VA
- * @Author Marocco Stefano, 762192, VA  
+ * @Author Marocco Stefano, 762192, VA
  * @Author Sibilla Ginevra, 761114, VA
  * @Author Marin Marco, 760622, VA
  */
 public interface AuthService extends Remote {
 
-     /**
-     Function to login a user with the given email and password.
-        @param email The email of the user.
-        @param password The password of the user.
-        @return The User object if the login is successful, null otherwise.
-        @throws RemoteException If a remote communication error occurs.
-      */
-    User login(String email, String password) throws RemoteException;
+    /**
+     * Authenticates the user and creates a persistent session.
+     *
+     * @param email    the user's email
+     * @param password the plain-text password
+     * @return a {@link LoginResult} containing the user and a session token, or {@code null} if
+     *         the credentials are invalid
+     * @throws RemoteException if a remote communication error occurs
+     */
+    LoginResult login(String email, String password) throws RemoteException;
 
     /**
-    Function to register a new user with the given User object and password.
-        @param u The User object containing user details.
-        @param password The password for the new user.
-        @throws RemoteException If a remote communication error occurs.
+     * Validates an existing session token and returns the associated user.
+     *
+     * @param token the session token previously returned by {@link #login}
+     * @return the user associated with the token, or {@code null} if the token is expired or
+     *         not found
+     * @throws RemoteException if a remote communication error occurs
+     */
+    User validateSession(String token) throws RemoteException;
+
+    /**
+     * Invalidates the session identified by the given token.
+     *
+     * @param token the session token to invalidate
+     * @throws RemoteException if a remote communication error occurs
+     */
+    void logout(String token) throws RemoteException;
+
+    /**
+     * Registers a new user.
+     *
+     * @param u        the user to register
+     * @param password the plain-text password
+     * @throws RemoteException if the email is already taken or a DB error occurs
      */
     void register(User u, String password) throws RemoteException;
 
     /**
-    Function to logout a user with the given userid.
-        @param userid The ID of the user to logout.
-        @throws RemoteException If a remote communication error occurs.
-     */
-    void logout(String userid)  throws RemoteException;
-
-    /**
-    Function to hash a password using a secure hashing algorithm.
-        @param password The password to be hashed.
-        @return The hashed password as a String.
-        @throws Exception If it fails to hash the password.
-     */
-    String hashPassword(String password) throws Exception;
-
-    /**
-    Function to validate an email address format.
-        @param email The email address to be validated.
-        @return true if the email format is valid, false otherwise.
-        @throws RemoteException If a remote communication error occurs.
+     * Checks whether an email address is available (not already registered).
+     *
+     * @param email the email to check
+     * @return {@code true} if the email is available, {@code false} if already taken
+     * @throws RemoteException if a remote communication error occurs
      */
     boolean validateEmail(String email) throws RemoteException;
 }

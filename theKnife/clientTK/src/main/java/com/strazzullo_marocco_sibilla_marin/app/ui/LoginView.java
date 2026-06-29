@@ -1,7 +1,9 @@
 package com.strazzullo_marocco_sibilla_marin.app.ui;
 
 import atlantafx.base.theme.Styles;
+import com.strazzullo_marocco_sibilla_marin.app.remote.LoginResult;
 import com.strazzullo_marocco_sibilla_marin.app.rmi.ServiceLocator;
+import com.strazzullo_marocco_sibilla_marin.app.session.SessionStore;
 import javafx.geometry.Pos;
 import javafx.scene.Cursor;
 import javafx.scene.control.Button;
@@ -156,13 +158,14 @@ public class LoginView extends HBox {
                 showMessage.setStyle("-fx-text-fill: red;");
                 showMessage.setVisible(true);
             } else {
-                User u = ServiceLocator.getInstance().getAuthService().login(email, password);
-                if (u == null) {
+                LoginResult result = ServiceLocator.getInstance().getAuthService().login(email, password);
+                if (result == null) {
                     showMessage.setText("Attenzione. Non è stato trovato nessun account con le credenziali inserite.");
                     showMessage.setStyle("-fx-text-fill: red;");
                     showMessage.setVisible(true);
                 } else {
-                    shell.setCurrentUser(u);
+                    SessionStore.save(result.getSessionToken());
+                    shell.setSession(result.getUser(), result.getSessionToken());
                     shell.goBack();
                 }
             }

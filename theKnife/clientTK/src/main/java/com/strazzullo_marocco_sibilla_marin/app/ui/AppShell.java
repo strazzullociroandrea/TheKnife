@@ -1,5 +1,7 @@
 package com.strazzullo_marocco_sibilla_marin.app.ui;
 
+import com.strazzullo_marocco_sibilla_marin.app.rmi.ServiceLocator;
+import com.strazzullo_marocco_sibilla_marin.app.session.SessionStore;
 import javafx.scene.Node;
 import javafx.scene.layout.StackPane;
 import sibilla.LocationSearchResult;
@@ -13,8 +15,10 @@ import java.util.Deque;
  * and search results are entry points that reset navigation; sub-pages reached from them (the
  * location detail, login, and registration screens) push onto a small back-stack instead, so
  * {@link #goBack()} always returns to wherever the user came from.
+ * On startup the shell attempts to restore a previous session from disk so the user does not have
+ * to log in again after restarting the app.
  *
- * @version 4.0
+ * @version 5.0
  * @Author Strazzullo Ciro Andrea, 763603, VA
  * @Author Marocco Stefano, 762192, VA - author of this revision
  * @Author Sibilla Ginevra, 761114, VA
@@ -24,11 +28,13 @@ public class AppShell extends StackPane {
 
     private final Deque<Node> backStack = new ArrayDeque<>();
     private User currentUser = null;
+    private String currentSessionToken = null;
 
     /**
-     * AppShell constructor. Starts on the home screen.
+     * AppShell constructor. Attempts to restore a previous session, then shows the home screen.
      */
     public AppShell() {
+        tryRestoreSession();
         showHome();
     }
 
@@ -62,18 +68,29 @@ public class AppShell extends StackPane {
     }
 
     /**
-     * Function to record which user just logged in.
+     * Records the authenticated user and its session token. Called by {@link LoginView} after a
+     * successful login RMI call.
      *
-     * @param user the logged-in user
+     * @param user  the authenticated user
+     * @param token the session token returned by the server
      */
-    public void setCurrentUser(User user) {
+    public void setSession(User user, String token) {
         this.currentUser = user;
+        this.currentSessionToken = token;
     }
 
     /**
-     * Function to log out the current user and return to the home screen.
+     * Function to log out the current user: invalidates the session on the server, removes the
+     * token from disk, and returns to the home screen.
      */
     public void logout() {
+        if (currentSessionToken != null) {
+            try {
+                ServiceLocator.getInstance().getAuthService().logout(currentSessionToken);
+            } catch (Exception ignored) {}
+            SessionStore.clear();
+            currentSessionToken = null;
+        }
         currentUser = null;
         showHome();
     }
@@ -170,5 +187,21 @@ public class AppShell extends StackPane {
     public void switchToLogin() {
         if (!backStack.isEmpty()) backStack.pop();
         show(new LoginView(this));
+    }
+
+    private void tryRestoreSession() {
+        SessionStore.load().ifPresent(token -> {
+            try {
+                User user = ServiceLocator.getInstance().getAuthService().validateSession(token);
+                if (user != null) {
+                    currentUser = user;
+                    currentSessionToken = token;
+                } else {
+                    SessionStore.clear();
+                }
+            } catch (Exception ignored) {
+                SessionStore.clear();
+            }
+        });
     }
 }

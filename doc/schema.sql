@@ -9,6 +9,7 @@ DROP VIEW  IF EXISTS view_location_rating    CASCADE;
 DROP VIEW  IF EXISTS view_restaurant_rating  CASCADE;
 DROP VIEW  IF EXISTS vista_media_stelle      CASCADE;
 
+DROP TABLE IF EXISTS session            CASCADE;
 DROP TABLE IF EXISTS booking            CASCADE;
 DROP TABLE IF EXISTS review_like        CASCADE;
 DROP TABLE IF EXISTS review_reply       CASCADE;
@@ -188,6 +189,19 @@ CREATE INDEX idx_booking_user     ON booking (user_id);
 CREATE INDEX idx_booking_location ON booking (location_id);
 CREATE INDEX idx_booking_slot     ON booking (location_id, booking_date, time_slot);
 CREATE INDEX idx_booking_status   ON booking (status);
+
+
+-- One row per active client session. Deleted on logout or expiry.
+CREATE TABLE session (
+    token       CHAR(36)    PRIMARY KEY,
+    user_id     CHAR(36)    NOT NULL
+        REFERENCES app_user (user_id) ON DELETE CASCADE,
+    created_at  TIMESTAMP   NOT NULL DEFAULT NOW(),
+    expires_at  TIMESTAMP   NOT NULL
+);
+
+CREATE INDEX idx_session_user    ON session (user_id);
+CREATE INDEX idx_session_expires ON session (expires_at);
 
 
 -- Keeps review.like_count in sync whenever a review_like row is added or removed.

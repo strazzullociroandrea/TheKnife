@@ -9,6 +9,7 @@ import com.strazzullo_marocco_sibilla_marin.app.service.RestaurantServiceImpl;
 import com.strazzullo_marocco_sibilla_marin.app.service.ReviewServiceImpl;
 import com.strazzullo_marocco_sibilla_marin.app.dao.impl.ReviewDAOImpl;
 import com.strazzullo_marocco_sibilla_marin.app.config.DotEnv;
+import com.strazzullo_marocco_sibilla_marin.app.config.EnvSetup;
 import com.strazzullo_marocco_sibilla_marin.app.config.PhotoStorageConfig;
 import com.strazzullo_marocco_sibilla_marin.app.storage.S3PhotoStorage;
 
@@ -42,6 +43,7 @@ public class Server {
     public static final String REVIEW_SERVICE_NAME = "ReviewService";
 
     public static void main(String[] args) {
+        EnvSetup.run();
         LOGGER.info("Avvio del progetto in corso...");
 
         try {

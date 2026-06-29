@@ -19,7 +19,7 @@ import java.util.Map;
  */
 public final class DotEnv {
 
-    private static final Map<String, String> FILE_VALUES = load();
+    private static Map<String, String> FILE_VALUES = load();
 
     private DotEnv() {}
 
@@ -30,6 +30,13 @@ public final class DotEnv {
      * @param key the variable name
      * @return the resolved value, or {@code null} if not found anywhere
      */
+    /**
+     * Reloads the {@code .env} file from disk, picking up values written by {@link EnvSetup}.
+     */
+    public static void reload() {
+        FILE_VALUES = load();
+    }
+
     public static String get(String key) {
         String value = System.getenv(key);
         if (value != null && !value.isEmpty()) {

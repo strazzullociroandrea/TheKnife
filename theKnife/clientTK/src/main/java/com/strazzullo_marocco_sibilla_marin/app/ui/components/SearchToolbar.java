@@ -17,10 +17,11 @@ import org.kordamp.ikonli.javafx.FontIcon;
 
 /**
  * The search screen's top toolbar: the "TheKnife" logo (which navigates home), a single unified
- * search pill (city + free-text query), the search button, and the (decorative, not yet wired to
- * auth) account button.
+ * search pill (city + free-text query), the search button, and the account button that opens the
+ * login screen.
  *
- * @Author Marocco Stefano, 762192, VA - author of this file
+ * @version 2.0
+ * @Author Marocco Stefano, 762192, VA - author of this revision
  * @Author Strazzullo Ciro Andrea, 763603, VA
  * @Author Sibilla Ginevra, 761114, VA
  * @Author Marin Marco, 760622, VA
@@ -37,8 +38,9 @@ public class SearchToolbar extends HBox {
      * @param initialQuery the free-text query to pre-fill the query field with, may be blank
      * @param onLogoClick callback invoked when the logo is clicked
      * @param onSearch callback invoked when the search button is pressed, or Enter in either field
+     * @param onAccountClick callback invoked when the account button is pressed
      */
-    public SearchToolbar(String initialCity, String initialQuery, Runnable onLogoClick, Runnable onSearch) {
+    public SearchToolbar(String initialCity, String initialQuery, Runnable onLogoClick, Runnable onSearch, Runnable onAccountClick) {
         setSpacing(14);
         setAlignment(Pos.CENTER_LEFT);
         setPadding(new Insets(16, 24, 12, 24));
@@ -85,6 +87,7 @@ public class SearchToolbar extends HBox {
         Tooltip accountTooltip = new Tooltip("Accedi");
         accountTooltip.setShowDelay(Duration.millis(150));
         accountButton.setTooltip(accountTooltip);
+        accountButton.setOnAction(e -> onAccountClick.run());
 
         getChildren().addAll(logo, pill, searchButton, accountButton);
     }

@@ -12,6 +12,7 @@ import com.strazzullo_marocco_sibilla_marin.app.ui.map.MapPin;
 import com.strazzullo_marocco_sibilla_marin.app.ui.map.MapView;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
+import javafx.scene.Node;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.control.ScrollPane;
@@ -30,15 +31,15 @@ import java.util.List;
 /**
  * Full detail screen for a single restaurant location: photo gallery, name, cuisine/dietary
  * tags, open/closed status, address, rating, price range, the full week's opening hours, a small
- * map pinpointing the location, a "Prenota un tavolo" booking panel, and its reviews. Reachable
- * from a "Dettagli" button on every {@link
- * com.strazzullo_marocco_sibilla_marin.app.ui.components.ResultCard} in the search results, and
- * meant to be reusable from anywhere else a {@link LocationSearchResult} is available, via {@link
- * AppShell#showLocationDetail(LocationSearchResult)}.
- * Booking has no login gate yet: every booking is attributed to {@link AppShell#getCurrentUserId()}'s
- * demo placeholder until a real login screen exists.
+ * map pinpointing the location, a booking section, and its reviews. Reachable from a "Dettagli"
+ * button on every {@link com.strazzullo_marocco_sibilla_marin.app.ui.components.ResultCard} in
+ * the search results, and meant to be reusable from anywhere else a {@link LocationSearchResult}
+ * is available, via {@link AppShell#showLocationDetail(LocationSearchResult)}.
+ * The booking section requires authentication: logged-in users see the full {@link
+ * com.strazzullo_marocco_sibilla_marin.app.ui.components.BookingPanel}, while guests see a
+ * prompt with links to log in or register.
  *
- * @version 3.0
+ * @version 4.0
  * @Author Marocco Stefano, 762192, VA - author of this revision
  * @Author Strazzullo Ciro Andrea, 763603, VA
  * @Author Sibilla Ginevra, 761114, VA
@@ -46,7 +47,7 @@ import java.util.List;
  */
 public class LocationDetailView extends StackPane {
 
-    private final BookingPanel bookingPanel;
+    private BookingPanel bookingPanel;
     private final ModalPane modalPane = new ModalPane();
 
     /**
@@ -60,8 +61,14 @@ public class LocationDetailView extends StackPane {
         String restaurantName = location.getName() == null || location.getName().isBlank()
                 ? result.restaurantName() : location.getName();
 
-        bookingPanel = new BookingPanel(location.getId(),
-                selection -> openBookingDialog(restaurantName, selection, shell.getCurrentUserId()));
+        Node bookingSection;
+        if (shell.isLoggedIn()) {
+            bookingPanel = new BookingPanel(location.getId(),
+                    selection -> openBookingDialog(restaurantName, selection, shell.getCurrentUserId()));
+            bookingSection = bookingPanel;
+        } else {
+            bookingSection = buildBookingLoginPrompt(shell);
+        }
 
         VBox leftColumn = new VBox(20,
                 new PhotoGallery(location.getId()),
@@ -69,7 +76,7 @@ public class LocationDetailView extends StackPane {
                 new ReviewsSection(location.getId(), shell.getCurrentUserId()));
         HBox.setHgrow(leftColumn, Priority.ALWAYS);
 
-        VBox rightColumn = new VBox(20, buildMapCard(location, restaurantName), bookingPanel);
+        VBox rightColumn = new VBox(20, buildMapCard(location, restaurantName), bookingSection);
         rightColumn.setPrefWidth(380);
         rightColumn.setMinWidth(320);
         rightColumn.setMaxWidth(420);
@@ -102,6 +109,36 @@ public class LocationDetailView extends StackPane {
         BookingDialog dialog = new BookingDialog(restaurantName, selection, userId,
                 () -> modalPane.hide(true), bookingPanel::loadSlots);
         modalPane.show(dialog);
+    }
+
+    /**
+     * Function to build the "Prenota un tavolo" placeholder shown when the user is not logged in:
+     * a short message and two buttons leading to the login and registration screens.
+     *
+     * @param shell the app shell, used to navigate to login or registration
+     * @return the login-required booking card
+     */
+    private VBox buildBookingLoginPrompt(AppShell shell) {
+        Label title = new Label("Prenota un tavolo", new FontIcon(Feather.CALENDAR));
+        title.getStyleClass().add(Styles.TITLE_3);
+
+        Label message = new Label("Per prenotare accedi o registrati.");
+        message.getStyleClass().add(Styles.TEXT_MUTED);
+        message.setWrapText(true);
+
+        Button loginButton = new Button("Accedi");
+        loginButton.getStyleClass().add(Styles.ACCENT);
+        loginButton.setOnAction(e -> shell.showLogin());
+
+        Button registerButton = new Button("Registrati");
+        registerButton.setOnAction(e -> shell.showRegistrationView());
+
+        HBox buttons = new HBox(8, loginButton, registerButton);
+
+        VBox card = new VBox(16, title, message, buttons);
+        card.getStyleClass().add("tk-card");
+        card.setPadding(new Insets(24));
+        return card;
     }
 
     /**

@@ -3,10 +3,10 @@ package com.strazzullo_marocco_sibilla_marin.app.ui.components;
 import atlantafx.base.theme.Styles;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
-import javafx.event.Event;
 import javafx.scene.Cursor;
 import javafx.scene.control.Label;
 import javafx.scene.control.ToggleButton;
+import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.Priority;
 import javafx.scene.layout.Region;
@@ -17,15 +17,17 @@ import sibilla.Location;
 import sibilla.LocationSearchResult;
 
 import java.util.Locale;
+import java.util.function.BooleanSupplier;
 
 /**
  * A single result row in the search results list: restaurant/location summary, cuisine and
  * price tags, open/closed status, star rating, and a photo thumbnail. The whole card is
  * clickable, opening the full {@link
  * com.strazzullo_marocco_sibilla_marin.app.ui.LocationDetailView} for this location, with a
- * trailing chevron hinting at it.
+ * trailing chevron hinting at it. The favourite heart button is gated: guests see a login prompt
+ * instead of toggling the state.
  *
- * @version 3.0
+ * @version 4.0
  * @Author Strazzullo Ciro Andrea, 763603, VA
  * @Author Marocco Stefano, 762192, VA - author of this revision
  * @Author Sibilla Ginevra, 761114, VA
@@ -38,8 +40,11 @@ public class ResultCard extends VBox {
      *
      * @param result the search result this card represents
      * @param onViewDetails callback invoked when the card is clicked
+     * @param isLoggedIn supplier returning whether a user is currently logged in
+     * @param onFavouriteAuthRequired callback invoked when a guest clicks the heart button
      */
-    public ResultCard(LocationSearchResult result, Runnable onViewDetails) {
+    public ResultCard(LocationSearchResult result, Runnable onViewDetails,
+                      BooleanSupplier isLoggedIn, Runnable onFavouriteAuthRequired) {
         Location location = result.location();
 
         getStyleClass().add("tk-card");
@@ -60,7 +65,12 @@ public class ResultCard extends VBox {
         ToggleButton favourite = new ToggleButton();
         favourite.setGraphic(new FontIcon(Feather.HEART));
         favourite.getStyleClass().addAll(Styles.BUTTON_ICON, Styles.FLAT, "tk-favourite");
-        favourite.setOnMouseClicked(Event::consume);
+        favourite.addEventFilter(MouseEvent.MOUSE_CLICKED, e -> {
+            if (!isLoggedIn.getAsBoolean()) {
+                e.consume();
+                onFavouriteAuthRequired.run();
+            }
+        });
 
         HBox headerRow = new HBox(12, nameLabel, spacer, statusPill, favourite);
         headerRow.setAlignment(Pos.CENTER_LEFT);

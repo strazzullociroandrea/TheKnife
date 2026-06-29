@@ -10,10 +10,10 @@ import java.util.Deque;
 /**
  * Root container of the client UI, swapping its single child between screens. The home screen
  * and search results are entry points that reset navigation; sub-pages reached from them (the
- * location detail screen, and whatever else needs a "back" button in the future) push onto a
- * small back-stack instead, so {@link #goBack()} always returns to wherever the user came from.
+ * location detail, login, and registration screens) push onto a small back-stack instead, so
+ * {@link #goBack()} always returns to wherever the user came from.
  *
- * @version 2.0
+ * @version 3.0
  * @Author Strazzullo Ciro Andrea, 763603, VA
  * @Author Marocco Stefano, 762192, VA - author of this revision
  * @Author Sibilla Ginevra, 761114, VA
@@ -21,37 +21,39 @@ import java.util.Deque;
  */
 public class AppShell extends StackPane {
 
-    /**
-     * Stand-in for the logged-in user's id until a real login screen is wired up to {@code
-     * AuthService}. Booking has no login gate yet by design (it will once login exists), so
-     * every booking made through this build is attributed to this seeded demo customer.
-     */
-    private static final String DEMO_USER_ID = "11111111-1111-1111-1111-111111111101";
-
     private final Deque<Node> backStack = new ArrayDeque<>();
-    private String currentUserId = DEMO_USER_ID;
+    private String currentUserId = null;
 
     /**
      * AppShell constructor. Starts on the home screen.
      */
     public AppShell() {
-        showLogin();
+        showHome();
     }
 
     /**
-     * Function to resolve the id of the user currently "logged in", for screens (like booking)
-     * that need one. Always the same demo customer until a real login screen exists.
+     * Function to check whether a user is currently logged in.
      *
-     * @return the current user's id
+     * @return true if a user is logged in, false otherwise
+     */
+    public boolean isLoggedIn() {
+        return currentUserId != null;
+    }
+
+    /**
+     * Function to resolve the id of the currently logged-in user. Returns {@code null} when no
+     * user is logged in.
+     *
+     * @return the current user's id, or {@code null} if not logged in
      */
     public String getCurrentUserId() {
         return currentUserId;
     }
 
     /**
-     * Function to set the id of the user currently "Logged in"
+     * Function to record which user just logged in.
      *
-     * @param id the user id logged in
+     * @param id the logged-in user's id
      */
     public void setCurrentUserId(String id) {
         this.currentUserId = id;
@@ -112,16 +114,28 @@ public class AppShell extends StackPane {
     }
 
     /**
-     * Function to show the login page
+     * Function to navigate to the login screen, pushing the current screen onto the back-stack so
+     * {@link #goBack()} returns to it after login.
      */
     public void showLogin() {
+        pushCurrent();
         show(new LoginView(this));
     }
 
     /**
-     * Function to show the registration page
+     * Function to navigate to the registration screen, pushing the current screen onto the
+     * back-stack so {@link #goBack()} returns to it.
      */
     public void showRegistrationView() {
+        pushCurrent();
         show(new RegistrationView(this));
+    }
+
+    /**
+     * Function to replace the current screen with the login screen without touching the back-stack.
+     * Used after registration so the pre-registration back-stack entry is preserved for after login.
+     */
+    public void switchToLogin() {
+        show(new LoginView(this));
     }
 }

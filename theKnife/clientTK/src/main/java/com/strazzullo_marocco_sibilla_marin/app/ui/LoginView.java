@@ -4,18 +4,21 @@ import atlantafx.base.theme.Styles;
 import com.strazzullo_marocco_sibilla_marin.app.rmi.ServiceLocator;
 import javafx.geometry.Pos;
 import javafx.scene.Cursor;
+import javafx.scene.control.Button;
+import javafx.scene.control.Label;
 import javafx.scene.control.PasswordField;
 import javafx.scene.control.TextField;
+import javafx.geometry.Insets;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.Priority;
+import javafx.scene.layout.Region;
 import javafx.scene.layout.VBox;
-import javafx.scene.control.Label;
-import javafx.geometry.Insets;
-import javafx.scene.layout.*;
-import javafx.scene.control.Button;
 import javafx.scene.paint.Color;
-import javafx.scene.text.TextFlow;
 import javafx.scene.text.Text;
+import javafx.scene.text.TextFlow;
+import javafx.scene.paint.Paint;
+import org.kordamp.ikonli.feather.Feather;
+import org.kordamp.ikonli.javafx.FontIcon;
 import strazzullo.*;
 
 /**
@@ -54,9 +57,19 @@ public class LoginView extends HBox {
         leftPanel.setPrefWidth(500);
         leftPanel.setPadding(new Insets(40));
 
+        FontIcon backIcon = new FontIcon(Feather.ARROW_LEFT);
+        backIcon.setIconColor(Paint.valueOf("white"));
+        Button backButton = new Button("", backIcon);
+        backButton.getStyleClass().addAll(Styles.BUTTON_ICON, Styles.FLAT);
+        backButton.setCursor(Cursor.HAND);
+        backButton.setOnAction(e -> shell.goBack());
+
         Label appName = new Label("TheKnife");
         appName.getStyleClass().add(Styles.TITLE_2);
         appName.setStyle("-fx-text-fill: white;");
+
+        HBox topRow = new HBox(8, backButton, appName);
+        topRow.setAlignment(Pos.CENTER_LEFT);
 
         Region spacer = new Region();
         VBox.setVgrow(spacer, Priority.ALWAYS);
@@ -69,13 +82,15 @@ public class LoginView extends HBox {
         subtitle.getStyleClass().add(Styles.TEXT_CAPTION);
         subtitle.setStyle("-fx-text-fill: white;");
         subtitle.setWrapText(true);
-        leftPanel.getChildren().addAll(appName, spacer, title, subtitle);
+        leftPanel.getChildren().addAll(topRow, spacer, title, subtitle);
 
         //Right panel - login form
         VBox rightPanel = new VBox(10);
         rightPanel.setStyle("-fx-background-color: #ffffff;");
         rightPanel.setPadding(new Insets(0, 100, 0, 100));
         rightPanel.setAlignment(Pos.CENTER_LEFT);
+
+        VBox formContent = rightPanel;
 
         Label greet = new Label("Bentornato");
         greet.getStyleClass().add(Styles.TITLE_1);
@@ -94,7 +109,6 @@ public class LoginView extends HBox {
         email.getStyleClass().add(Styles.TEXT_SMALL);
         emailField = new TextField();
         emailField.setPromptText("marco.rossi@email.it");
-        rightPanel.getChildren().addAll(greet, info);
         Label password = new Label("Password *");
         password.setStyle("-fx-text-fill: grey;");
         password.getStyleClass().add(Styles.TEXT_SMALL);
@@ -108,27 +122,20 @@ public class LoginView extends HBox {
         login.setStyle("-fx-background-color: #000000; -fx-text-fill: white; ");
         login.setCursor(Cursor.HAND);
 
-        login.setOnMouseClicked(e -> {
-            this.handleLoginUser(shell);
-        });
+        login.setOnMouseClicked(e -> this.handleLoginUser(shell));
 
         Text labelReg = new Text("Non hai un account? ");
         labelReg.getStyleClass().add(Styles.TEXT);
         Text reg = new Text("Registrati");
         reg.setFill(Color.GREEN);
         reg.setCursor(Cursor.HAND);
-        reg.setOnMouseClicked(event -> {
-            shell.showRegistrationView();
-        });
+        reg.setOnMouseClicked(event -> shell.showRegistrationView());
 
-        TextFlow gotoRegisterPage = new TextFlow(
-                labelReg,
-                reg
-        );
+        TextFlow gotoRegisterPage = new TextFlow(labelReg, reg);
         HBox registerContainer = new HBox(gotoRegisterPage);
         registerContainer.setAlignment(Pos.CENTER);
-        rightPanel.getChildren().addAll(showMessage, email, emailField, password, passwordField, login, registerContainer);
 
+        formContent.getChildren().addAll(greet, info, showMessage, email, emailField, password, passwordField, login, registerContainer);
 
         HBox.setHgrow(rightPanel, Priority.ALWAYS);
 
@@ -162,6 +169,7 @@ public class LoginView extends HBox {
                     showMessage.setVisible(true);
                 } else {
                     shell.setCurrentUserId(u.getId());
+                    shell.goBack();
                 }
             }
         } catch (Exception e) {

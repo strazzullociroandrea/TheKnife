@@ -8,6 +8,7 @@ import com.strazzullo_marocco_sibilla_marin.app.search.SearchCriteria;
 import com.strazzullo_marocco_sibilla_marin.app.search.SearchFilterAssembler;
 import com.strazzullo_marocco_sibilla_marin.app.ui.components.CuisineFilterRow;
 import com.strazzullo_marocco_sibilla_marin.app.ui.components.DistanceFilterRow;
+import com.strazzullo_marocco_sibilla_marin.app.ui.components.AuthPromptCard;
 import com.strazzullo_marocco_sibilla_marin.app.ui.components.FilterPanel;
 import com.strazzullo_marocco_sibilla_marin.app.ui.components.LocationPromptPanel;
 import com.strazzullo_marocco_sibilla_marin.app.ui.components.SearchResultsPanel;
@@ -71,7 +72,7 @@ public class SearchView extends StackPane {
      */
     public SearchView(AppShell shell, String city, String query) {
         this.shell = shell;
-        searchToolbar = new SearchToolbar(city, query, shell::showHome, this::runSearch);
+        searchToolbar = new SearchToolbar(city, query, shell::showHome, this::runSearch, shell::showLogin);
         cuisineFilterRow = new CuisineFilterRow(this::onCuisineChanged, this::openFilterPanel);
         distanceFilterRow = new DistanceFilterRow(this::runSearch, this::openLocationPrompt);
 
@@ -148,7 +149,13 @@ public class SearchView extends StackPane {
      */
     private SplitPane buildContent() {
         resultsPanel = new SearchResultsPanel(results,
-                newItem -> mapView.focusPin(newItem.location().getId()), shell::showLocationDetail);
+                newItem -> mapView.focusPin(newItem.location().getId()), shell::showLocationDetail,
+                shell::isLoggedIn,
+                () -> centeredModalPane.show(new AuthPromptCard(
+                        "Per aggiungere ai preferiti, accedi o registrati.",
+                        () -> centeredModalPane.hide(true),
+                        shell::showLogin,
+                        shell::showRegistrationView)));
 
         SplitPane splitPane = new SplitPane(resultsPanel, mapView);
         splitPane.setDividerPositions(0.45);

@@ -81,7 +81,9 @@ public class ReviewsSection extends VBox {
             protected ReviewsData call() throws Exception {
                 var reviewService = ServiceLocator.getInstance().getReviewService();
                 List<Review> reviews = reviewService.getReviewsByRestaurant(locationId);
-                Set<String> likedByUser = new HashSet<>(reviewService.getUserLikedReviews(currentUserId));
+                Set<String> likedByUser = currentUserId != null
+                        ? new HashSet<>(reviewService.getUserLikedReviews(currentUserId))
+                        : Set.of();
                 return new ReviewsData(reviews, likedByUser);
             }
         };

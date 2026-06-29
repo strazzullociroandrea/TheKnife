@@ -43,6 +43,7 @@ public class RegistrationView extends HBox {
     private final DateSelector dateBirthField;
     private final Label showMessage;
 
+
     /**
      * Registration view constructor.
      *
@@ -146,10 +147,10 @@ public class RegistrationView extends HBox {
         placeField.setMaxWidth(Double.MAX_VALUE);
         AddressAutocomplete.attach(placeField);
 
-        Label dateBirth = new Label("Data di nascita");
+        Label dateBirth = new Label("Data di nascita (opzionale)");
         dateBirth.setStyle("-fx-text-fill: grey;");
         dateBirth.getStyleClass().add(Styles.TEXT_SMALL);
-        dateBirthField = new DateSelector(LocalDate.now().minusYears(18));
+        dateBirthField = new DateSelector(null, date -> date.isAfter(LocalDate.now()));
         dateBirthField.setMaxWidth(Double.MAX_VALUE);
 
         HBox passwords = new HBox(20);
@@ -231,10 +232,16 @@ public class RegistrationView extends HBox {
                 showMessage.setStyle("-fx-text-fill: red;");
                 showMessage.setVisible(true);
             } else {
-                User u = role.equals("customer")
-                        ? new Client(null, name, surname, email, password, place, formatDate(dateOfBirth))
-                        : new Manager(null, name, surname, email, password, place, formatDate(dateOfBirth));
-
+                User u;
+                if (dateOfBirth != null) {
+                    u = role.equals("customer")
+                            ? new Client(null, name, surname, email, password, place, formatDate(dateOfBirth))
+                            : new Manager(null, name, surname, email, password, place, formatDate(dateOfBirth));
+                } else {
+                    u = role.equals("customer")
+                            ? new Client(null, name, surname, email, password, place)
+                            : new Manager(null, name, surname, email, password, place);
+                }
                 ServiceLocator.getInstance().getAuthService().register(u, password);
                 showMessage.setText("Registrazione avvenuta con successo");
                 showMessage.setStyle("-fx-text-fill: green;");

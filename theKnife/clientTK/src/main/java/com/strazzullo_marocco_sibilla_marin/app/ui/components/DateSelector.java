@@ -22,6 +22,7 @@ import java.time.YearMonth;
 import java.time.format.DateTimeFormatter;
 import java.time.format.TextStyle;
 import java.util.Locale;
+import java.util.function.Predicate;
 
 /**
  * Brand-styled replacement for {@code javafx.scene.control.DatePicker}, whose AtlantaFX popup
@@ -42,6 +43,7 @@ public class DateSelector extends HBox {
     private static final double POPOVER_CORNER_RADIUS = 16;
 
     private final ObjectProperty<LocalDate> value;
+    private final Predicate<LocalDate> isDisabled;
     private final Button field = new Button();
     private final Popover popover = new Popover();
     private final Label headerLabel = new Label();
@@ -53,13 +55,30 @@ public class DateSelector extends HBox {
     private boolean showingMonthGrid;
 
     /**
-     * DateSelector constructor.
+     * DateSelector constructor. Disables past dates by default (suitable for booking future slots).
+     * Pass a non-null {@code initialValue} to pre-select a date, or {@code null} to start with
+     * no selection (shows "Seleziona data" on the pill button).
      *
-     * @param initialValue the initially selected date
+     * @param initialValue the initially selected date, or {@code null} for no selection
      */
     public DateSelector(LocalDate initialValue) {
+        this(initialValue, date -> date.isBefore(LocalDate.now()));
+    }
+
+    /**
+     * DateSelector constructor with a custom disabled-date predicate.
+     * Pass a non-null {@code initialValue} to pre-select a date, or {@code null} to start with
+     * no selection (shows "Seleziona data" on the pill button).
+     *
+     * @param initialValue the initially selected date, or {@code null} for no selection
+     * @param isDisabled   predicate returning {@code true} for dates that should be greyed out and
+     *                     unclickable; e.g. {@code date -> date.isAfter(LocalDate.now())} for
+     *                     past-only pickers such as date of birth
+     */
+    public DateSelector(LocalDate initialValue, Predicate<LocalDate> isDisabled) {
+        this.isDisabled = isDisabled;
         value = new SimpleObjectProperty<>(initialValue);
-        displayedMonth = YearMonth.from(initialValue);
+        displayedMonth = initialValue != null ? YearMonth.from(initialValue) : YearMonth.now();
 
         field.getStyleClass().add("tk-date-field");
         field.setMaxWidth(Double.MAX_VALUE);
@@ -119,7 +138,8 @@ public class DateSelector extends HBox {
     }
 
     private void openPopover() {
-        displayedMonth = YearMonth.from(getValue());
+        LocalDate current = getValue();
+        displayedMonth = current != null ? YearMonth.from(current) : YearMonth.now();
         showingMonthGrid = false;
         popover.setContentNode(buildCalendar());
         popover.show(field);
@@ -178,7 +198,7 @@ public class DateSelector extends HBox {
                         + " " + displayedMonth.getYear());
         calendarBody.getChildren().setAll(showingMonthGrid
                 ? DateSelectorGrids.buildMonthGrid(displayedMonth, this::onMonthPicked)
-                : DateSelectorGrids.buildDayGrid(displayedMonth, getValue(), this::onDayPicked));
+                : DateSelectorGrids.buildDayGrid(displayedMonth, getValue(), isDisabled, this::onDayPicked));
     }
 
     private void onDayPicked(LocalDate date) {
@@ -200,6 +220,7 @@ public class DateSelector extends HBox {
     }
 
     private void updateFieldText() {
-        field.setText(getValue().format(FIELD_FORMAT));
+        LocalDate v = getValue();
+        field.setText(v != null ? v.format(FIELD_FORMAT) : "Seleziona data");
     }
 }

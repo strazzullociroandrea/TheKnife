@@ -17,6 +17,7 @@ import java.time.YearMonth;
 import java.time.format.TextStyle;
 import java.util.Locale;
 import java.util.function.Consumer;
+import java.util.function.Predicate;
 
 /**
  * Builds {@link DateSelector}'s two calendar grids: the day grid for a displayed month, and the
@@ -34,12 +35,15 @@ final class DateSelectorGrids {
     }
 
     /**
-     * @param month the month to lay out
-     * @param selected the currently selected date, highlighted if it falls in this month
-     * @param onPick called with the picked date when an enabled day cell is clicked
+     * @param month      the month to lay out
+     * @param selected   the currently selected date, highlighted if it falls in this month
+     * @param isDisabled predicate returning {@code true} for dates that should be greyed out and
+     *                   unclickable (e.g. past dates for booking, future dates for date of birth)
+     * @param onPick     called with the picked date when an enabled day cell is clicked
      * @return the day grid, with a weekday header row above it
      */
-    static VBox buildDayGrid(YearMonth month, LocalDate selected, Consumer<LocalDate> onPick) {
+    static VBox buildDayGrid(YearMonth month, LocalDate selected, Predicate<LocalDate> isDisabled,
+                             Consumer<LocalDate> onPick) {
         HBox weekdaysRow = new HBox(4);
         weekdaysRow.setPadding(new Insets(8, 8, 0, 8));
         for (String weekday : WEEKDAY_HEADERS) {
@@ -63,7 +67,7 @@ final class DateSelectorGrids {
         int row = 0;
         int column = leadingBlanks;
         for (int day = 1; day <= month.lengthOfMonth(); day++) {
-            grid.add(buildDayCell(month.atDay(day), selected, onPick), column, row);
+            grid.add(buildDayCell(month.atDay(day), selected, isDisabled, onPick), column, row);
             column++;
             if (column == 7) {
                 column = 0;
@@ -74,7 +78,8 @@ final class DateSelectorGrids {
         return new VBox(weekdaysRow, grid);
     }
 
-    private static ToggleButton buildDayCell(LocalDate date, LocalDate selected, Consumer<LocalDate> onPick) {
+    private static ToggleButton buildDayCell(LocalDate date, LocalDate selected,
+                                              Predicate<LocalDate> isDisabled, Consumer<LocalDate> onPick) {
         ToggleButton button = new ToggleButton(String.valueOf(date.getDayOfMonth()));
         button.getStyleClass().add("tk-date-cell");
         button.setMinSize(CELL_SIZE, 36);
@@ -82,10 +87,10 @@ final class DateSelectorGrids {
         if (date.equals(LocalDate.now())) {
             button.getStyleClass().add("tk-date-cell-today");
         }
-        if (date.isBefore(LocalDate.now())) {
+        if (isDisabled.test(date)) {
             button.setDisable(true);
         }
-        button.setSelected(date.equals(selected));
+        button.setSelected(selected != null && date.equals(selected));
         button.setOnAction(e -> onPick.accept(date));
         return button;
     }

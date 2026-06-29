@@ -20,6 +20,7 @@ import org.kordamp.ikonli.feather.Feather;
 import org.kordamp.ikonli.javafx.FontIcon;
 import strazzullo.*;
 
+import java.rmi.RemoteException;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 
@@ -177,7 +178,10 @@ public class RegistrationView extends HBox {
         addUser.getStyleClass().add(Styles.TEXT_NORMAL);
         addUser.setStyle("-fx-background-color: #000000; -fx-text-fill: white; ");
         addUser.setCursor(Cursor.HAND);
-        addUser.setOnMouseClicked(e -> this.handleRegistrationUser());
+        addUser.setOnMouseClicked(e -> {
+            showMessage.setVisible(false);
+            this.handleRegistrationUser();
+        });
 
         Text labelReg = new Text("Hai già un account? ");
         labelReg.getStyleClass().add(Styles.TEXT);
@@ -212,23 +216,19 @@ public class RegistrationView extends HBox {
      */
     private void handleRegistrationUser() {
         try {
-            String name     = nameField.getText(),
-                   surname  = surnameField.getText(),
-                   email    = emailField.getText(),
-                   password = passwordField.getText(),
-                   confirm  = confirmField.getText(),
-                   role     = client.getIsSelected() ? "customer" : (manager.getIsSelected() ? "manager" : ""),
-                   place    = placeField.getText();
+            String name = nameField.getText(),
+                    surname = surnameField.getText(),
+                    email = emailField.getText(),
+                    password = passwordField.getText(),
+                    confirm = confirmField.getText(),
+                    role = client.getIsSelected() ? "customer" : (manager.getIsSelected() ? "manager" : ""),
+                    place = placeField.getText();
 
             LocalDate dateOfBirth = dateBirthField.getValue();
 
             if (place.isEmpty() || role.isEmpty() || name.isEmpty() || surname.isEmpty()
                     || email.isEmpty() || password.isEmpty() || confirm.isEmpty()) {
                 showMessage.setText("Attenzione. Tutti i dati obbligatori devono essere compilati");
-                showMessage.setStyle("-fx-text-fill: red;");
-                showMessage.setVisible(true);
-            } else if (!password.equals(confirm)) {
-                showMessage.setText("Attenzione. Inserisci correttamente la password.");
                 showMessage.setStyle("-fx-text-fill: red;");
                 showMessage.setVisible(true);
             } else {
@@ -242,24 +242,24 @@ public class RegistrationView extends HBox {
                             ? new Client(null, name, surname, email, password, place)
                             : new Manager(null, name, surname, email, password, place);
                 }
+
                 ServiceLocator.getInstance().getAuthService().register(u, password);
+                nameField.clear();
+                surnameField.clear();
+                emailField.clear();
+                placeField.clear();
+                passwordField.clear();
+                confirmField.clear();
+                client.setSelected(false);
+                manager.setSelected(false);
                 showMessage.setText("Registrazione avvenuta con successo");
                 showMessage.setStyle("-fx-text-fill: green;");
                 showMessage.setVisible(true);
             }
-        } catch (Exception e) {
-            showMessage.setText("Attenzione. " + e.getMessage());
+        } catch (RemoteException e) {
+            showMessage.setText("Attenzione. Non è stato possibile proseguire con la registrazione. Controlla i dati inseriti.");
             showMessage.setStyle("-fx-text-fill: red;");
             showMessage.setVisible(true);
-        } finally {
-            nameField.clear();
-            surnameField.clear();
-            emailField.clear();
-            placeField.clear();
-            passwordField.clear();
-            confirmField.clear();
-            client.setSelected(false);
-            manager.setSelected(false);
         }
     }
 

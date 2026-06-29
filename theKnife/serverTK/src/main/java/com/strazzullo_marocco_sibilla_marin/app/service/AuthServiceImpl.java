@@ -101,12 +101,8 @@ public class AuthServiceImpl extends UnicastRemoteObject implements AuthService 
             }
             u.setPasswordHash(hashPassword(password));
             userDAO.save(u);
-        } catch (SQLException e) {
-            throw new RemoteException("Non è stato possibile registrarti. Riprova più tardi.");
-        } catch (RemoteException e) {
-            throw e;
         } catch (Exception e) {
-            throw new RemoteException("Errore imprevisto. Riprova più tardi.");
+            throw new RemoteException("Non è stato possibile registrarti. Riprova più tardi.");
         }
     }
 

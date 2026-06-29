@@ -37,13 +37,19 @@ import strazzullo.*;
  */
 public class LoginView extends HBox {
 
-    /** Email input field. */
+    /**
+     * Email input field.
+     */
     private final TextField emailField;
 
-    /** Password input field. */
+    /**
+     * Password input field.
+     */
     private final PasswordField passwordField;
 
-    /** Feedback label, hidden until a login attempt completes. */
+    /**
+     * Feedback label, hidden until a login attempt completes.
+     */
     private final Label showMessage;
 
     /**
@@ -115,7 +121,11 @@ public class LoginView extends HBox {
         login.getStyleClass().add(Styles.TEXT_NORMAL);
         login.setStyle("-fx-background-color: #000000; -fx-text-fill: white; ");
         login.setCursor(Cursor.HAND);
-        login.setOnMouseClicked(e -> this.handleLoginUser(shell));
+        login.setOnMouseClicked(e -> {
+            showMessage.setVisible(false);
+
+            this.handleLoginUser(shell);
+        });
 
         Text labelReg = new Text("Non hai un account? ");
         labelReg.getStyleClass().add(Styles.TEXT);
@@ -143,7 +153,7 @@ public class LoginView extends HBox {
      */
     private void handleLoginUser(AppShell shell) {
         try {
-            String email    = emailField.getText();
+            String email = emailField.getText();
             String password = passwordField.getText();
 
             if (email.isEmpty() || password.isEmpty()) {
@@ -153,22 +163,21 @@ public class LoginView extends HBox {
             } else {
                 LoginResult result = ServiceLocator.getInstance().getAuthService().login(email, password);
                 if (result == null) {
-                    showMessage.setText("Attenzione. Non è stato trovato nessun account con le credenziali inserite.");
+                    showMessage.setText("Attenzione. Verifica le credenziali inserite.");
                     showMessage.setStyle("-fx-text-fill: red;");
                     showMessage.setVisible(true);
                 } else {
+                    emailField.clear();
+                    passwordField.clear();
                     SessionStore.save(result.getSessionToken());
                     shell.setSession(result.getUser(), result.getSessionToken());
                     shell.goBack();
                 }
             }
         } catch (Exception e) {
-            showMessage.setText("Attenzione. " + e.getMessage());
+            showMessage.setText("Attenzione. Non è stato possibile proseguire con l'autenticazione.");
             showMessage.setStyle("-fx-text-fill: red;");
             showMessage.setVisible(true);
-        } finally {
-            emailField.clear();
-            passwordField.clear();
         }
     }
 }

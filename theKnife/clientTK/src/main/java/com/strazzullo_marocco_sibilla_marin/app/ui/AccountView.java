@@ -32,7 +32,6 @@ public class AccountView extends HBox {
         User user = shell.getCurrentUser();
         String roleLabel = "manager".equals(user.getRole()) ? "Ristoratore" : "Cliente";
 
-        // Left panel
         VBox leftPanel = new VBox(20);
         leftPanel.setStyle("-fx-background-color: #000000;");
         leftPanel.setPrefWidth(500);
@@ -64,7 +63,6 @@ public class AccountView extends HBox {
 
         leftPanel.getChildren().addAll(topRow, spacer, title, subtitle);
 
-        // Right panel — vertically centered like LoginView
         VBox rightPanel = new VBox(12);
         rightPanel.setStyle("-fx-background-color: #ffffff;");
         rightPanel.setPadding(new Insets(0, 100, 0, 100));
@@ -103,6 +101,13 @@ public class AccountView extends HBox {
         getChildren().addAll(leftPanel, rightPanel);
     }
 
+    /**
+     * Builds a two-line display field: a small grey label above the value text.
+     *
+     * @param labelText the field label, e.g. "Email"
+     * @param value     the value to display; shown as "—" when {@code null}
+     * @return a {@link VBox} containing the label and value
+     */
     private VBox buildField(String labelText, String value) {
         Label lbl = new Label(labelText);
         lbl.getStyleClass().add(Styles.TEXT_SMALL);

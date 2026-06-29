@@ -32,6 +32,8 @@ public class AuthServiceImpl extends UnicastRemoteObject implements AuthService 
     private final SessionDAO sessionDAO;
 
     /**
+     * Constructs the service and initialises the backing DAOs.
+     *
      * @throws RemoteException if RMI export fails
      */
     public AuthServiceImpl() throws RemoteException {
@@ -40,6 +42,11 @@ public class AuthServiceImpl extends UnicastRemoteObject implements AuthService 
         this.sessionDAO = new SessionDAOImpl();
     }
 
+    /**
+     * {@inheritDoc}
+     * Looks up the user by email, verifies the SHA-256 password hash, generates a UUID token,
+     * persists the session row, and returns both the user and the token.
+     */
     @Override
     public LoginResult login(String email, String password) throws RemoteException {
         try {
@@ -54,6 +61,11 @@ public class AuthServiceImpl extends UnicastRemoteObject implements AuthService 
         }
     }
 
+    /**
+     * {@inheritDoc}
+     * Delegates to {@link SessionDAO#findUserByToken}, which joins the {@code session} and
+     * {@code app_user} tables and rejects expired rows.
+     */
     @Override
     public User validateSession(String token) throws RemoteException {
         try {
@@ -63,6 +75,10 @@ public class AuthServiceImpl extends UnicastRemoteObject implements AuthService 
         }
     }
 
+    /**
+     * {@inheritDoc}
+     * Deletes the session row for the given token so it can no longer be used to authenticate.
+     */
     @Override
     public void logout(String token) throws RemoteException {
         try {
@@ -72,6 +88,11 @@ public class AuthServiceImpl extends UnicastRemoteObject implements AuthService 
         }
     }
 
+    /**
+     * {@inheritDoc}
+     * Checks email uniqueness, hashes the plain-text password before persisting, and delegates
+     * the actual insert to {@link UserDAO#save}.
+     */
     @Override
     public void register(User u, String password) throws RemoteException {
         try {
@@ -89,6 +110,10 @@ public class AuthServiceImpl extends UnicastRemoteObject implements AuthService 
         }
     }
 
+    /**
+     * {@inheritDoc}
+     * Returns {@code true} when no row with the given email exists in the {@code app_user} table.
+     */
     @Override
     public boolean validateEmail(String email) throws RemoteException {
         try {
@@ -98,6 +123,13 @@ public class AuthServiceImpl extends UnicastRemoteObject implements AuthService 
         }
     }
 
+    /**
+     * Computes the SHA-256 hex digest of the given plain-text password.
+     *
+     * @param password the plain-text password
+     * @return the lowercase hex-encoded SHA-256 hash
+     * @throws Exception if the SHA-256 algorithm is unavailable
+     */
     private String hashPassword(String password) throws Exception {
         MessageDigest md = MessageDigest.getInstance("SHA-256");
         byte[] hashBytes = md.digest(password.getBytes());

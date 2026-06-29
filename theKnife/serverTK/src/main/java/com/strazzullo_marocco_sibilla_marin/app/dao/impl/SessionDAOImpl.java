@@ -24,6 +24,10 @@ public class SessionDAOImpl implements SessionDAO {
 
     private static final int SESSION_DAYS = 30;
 
+    /**
+     * {@inheritDoc}
+     * Sets {@code expires_at} to {@value #SESSION_DAYS} days from the current instant.
+     */
     @Override
     public void save(String token, String userId) throws SQLException {
         String sql = "INSERT INTO session (token, user_id, expires_at) VALUES (?, ?, ?)";
@@ -37,6 +41,12 @@ public class SessionDAOImpl implements SessionDAO {
         }
     }
 
+    /**
+     * {@inheritDoc}
+     * JOINs {@code session} with {@code app_user} and rejects rows whose {@code expires_at} is in
+     * the past. Returns a {@link strazzullo.Client} or {@link strazzullo.Manager} depending on the
+     * {@code role} column.
+     */
     @Override
     public User findUserByToken(String token) throws SQLException {
         String sql = """
@@ -68,6 +78,9 @@ public class SessionDAOImpl implements SessionDAO {
         }
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public void delete(String token) throws SQLException {
         String sql = "DELETE FROM session WHERE token = ?";

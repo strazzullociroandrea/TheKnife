@@ -42,6 +42,14 @@ public class Server {
     public static final String PHOTO_SERVICE_NAME = "PhotoService";
     public static final String REVIEW_SERVICE_NAME = "ReviewService";
 
+    /**
+     * Starts the server: runs the interactive setup wizard if any required environment variables
+     * are missing, connects to the database, creates the RMI registry, and binds all remote
+     * services. The JVM stays alive after this method returns because the registry's internal
+     * threads are non-daemon.
+     *
+     * @param args command-line arguments (not used)
+     */
     public static void main(String[] args) {
         EnvSetup.run();
         LOGGER.info("Avvio del progetto in corso...");

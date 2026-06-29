@@ -149,12 +149,21 @@ public class AppShell extends StackPane {
         }
     }
 
+    /**
+     * Saves the currently displayed screen onto the back-stack so it can be restored by
+     * {@link #goBack()}. No-op if no screen is currently shown.
+     */
     private void pushCurrent() {
         if (!getChildren().isEmpty()) {
             backStack.push(getChildren().get(0));
         }
     }
 
+    /**
+     * Replaces the shell's single child with the given view, making it the active screen.
+     *
+     * @param view the screen node to display
+     */
     private void show(Node view) {
         getChildren().setAll(view);
     }
@@ -200,6 +209,11 @@ public class AppShell extends StackPane {
         show(new LoginView(this));
     }
 
+    /**
+     * Reads the persisted session token from {@link SessionStore} and, if found, validates it
+     * against the server. On success the current user and token are set in memory; on failure the
+     * stale token is deleted from disk so the next startup skips validation.
+     */
     private void tryRestoreSession() {
         SessionStore.load().ifPresent(token -> {
             try {

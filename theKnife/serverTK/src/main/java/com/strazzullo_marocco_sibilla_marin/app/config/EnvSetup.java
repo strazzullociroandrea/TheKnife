@@ -81,6 +81,12 @@ public final class EnvSetup {
         System.out.println();
     }
 
+    /**
+     * Reads the current {@code .env} file into an ordered map so that already-set keys are
+     * preserved when writing the updated file back.
+     *
+     * @return a mutable, insertion-ordered map of the existing key/value pairs
+     */
     private static Map<String, String> readExistingEnv() {
         Map<String, String> map = new LinkedHashMap<>();
         Path path = Path.of(".env");
@@ -105,6 +111,12 @@ public final class EnvSetup {
         return map;
     }
 
+    /**
+     * Writes all key/value pairs to {@code .env}, ordering the known {@link #KEYS} first and
+     * appending any extra keys that were already present in the file afterwards.
+     *
+     * @param values the complete set of key/value pairs to write
+     */
     private static void writeEnv(Map<String, String> values) {
         try (PrintWriter pw = new PrintWriter(Files.newBufferedWriter(Path.of(".env")))) {
             Set<String> written = new LinkedHashSet<>();

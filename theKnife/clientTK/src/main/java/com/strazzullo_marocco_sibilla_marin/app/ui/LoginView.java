@@ -23,36 +23,35 @@ import org.kordamp.ikonli.javafx.FontIcon;
 import strazzullo.*;
 
 /**
- * Login page where the user can log in or, if they do not have credentials, proceed
- * with his registration.
+ * Login page where the user can authenticate or, if they do not have credentials yet, proceed
+ * to the registration screen. Uses the same two-panel layout as {@link RegistrationView}: a black
+ * left branding panel and a white right form panel.
+ * After a successful login the session token is persisted to disk via {@link SessionStore} so the
+ * app can restore the session on the next start without prompting the user again.
  *
- * @version 1.0
+ * @version 2.0
  * @Author Strazzullo Ciro Andrea, 763603, VA
- * @Author Marocco Stefano, 762192, VA
+ * @Author Marocco Stefano, 762192, VA - author of this revision
  * @Author Sibilla Ginevra, 761114, VA
  * @Author Marin Marco, 760622, VA
  */
 public class LoginView extends HBox {
 
-    /**
-     * Private data used for user login
-     */
+    /** Email input field. */
     private final TextField emailField;
+
+    /** Password input field. */
     private final PasswordField passwordField;
 
-    /**
-     * Variable to show  message
-     */
+    /** Feedback label, hidden until a login attempt completes. */
     private final Label showMessage;
 
     /**
-     * Login view constructor
+     * LoginView constructor.
      *
-     * @param shell the app shell to navigate through once the search is submitted
+     * @param shell the app shell used for navigation and to store the authenticated session
      */
     public LoginView(AppShell shell) {
-
-        //Left panel - Introduction
         VBox leftPanel = new VBox(20);
         leftPanel.setStyle("-fx-background-color: #000000;");
         leftPanel.setPrefWidth(500);
@@ -83,13 +82,10 @@ public class LoginView extends HBox {
         subtitle.setWrapText(true);
         leftPanel.getChildren().addAll(topRow, spacer, title, subtitle);
 
-        //Right panel - login form
         VBox rightPanel = new VBox(10);
         rightPanel.setStyle("-fx-background-color: #ffffff;");
         rightPanel.setPadding(new Insets(0, 100, 0, 100));
         rightPanel.setAlignment(Pos.CENTER_LEFT);
-
-        VBox formContent = rightPanel;
 
         Label greet = new Label("Bentornato");
         greet.getStyleClass().add(Styles.TITLE_1);
@@ -98,7 +94,6 @@ public class LoginView extends HBox {
         info.getStyleClass().add(Styles.TEXT_CAPTION);
         info.setStyle("-fx-text-fill: grey;");
 
-        //Message row invisible - input form login
         showMessage = new Label();
         showMessage.setMaxWidth(Double.MAX_VALUE);
         showMessage.setVisible(false);
@@ -120,7 +115,6 @@ public class LoginView extends HBox {
         login.getStyleClass().add(Styles.TEXT_NORMAL);
         login.setStyle("-fx-background-color: #000000; -fx-text-fill: white; ");
         login.setCursor(Cursor.HAND);
-
         login.setOnMouseClicked(e -> this.handleLoginUser(shell));
 
         Text labelReg = new Text("Non hai un account? ");
@@ -134,24 +128,23 @@ public class LoginView extends HBox {
         HBox registerContainer = new HBox(gotoRegisterPage);
         registerContainer.setAlignment(Pos.CENTER);
 
-        formContent.getChildren().addAll(greet, info, showMessage, email, emailField, password, passwordField, login, registerContainer);
-
+        rightPanel.getChildren().addAll(greet, info, showMessage, email, emailField, password, passwordField, login, registerContainer);
         HBox.setHgrow(rightPanel, Priority.ALWAYS);
 
         getChildren().addAll(leftPanel, rightPanel);
-
-
     }
 
     /**
-     * Private function that allows user login
+     * Validates the form inputs, performs the RMI login call, persists the session token on
+     * success, and delegates navigation back to the shell. Shows an inline error message on any
+     * failure without navigating away.
      *
-     * @param shell the app shell to set the user id
+     * @param shell the app shell used to store the authenticated session and navigate back
      */
     private void handleLoginUser(AppShell shell) {
         try {
-            String email = emailField.getText(),
-                    password = passwordField.getText();
+            String email    = emailField.getText();
+            String password = passwordField.getText();
 
             if (email.isEmpty() || password.isEmpty()) {
                 showMessage.setText("Attenzione. Tutti i campi sono obbligatori.");
@@ -170,7 +163,7 @@ public class LoginView extends HBox {
                 }
             }
         } catch (Exception e) {
-            showMessage.setText("Attenzione." + e.getMessage());
+            showMessage.setText("Attenzione. " + e.getMessage());
             showMessage.setStyle("-fx-text-fill: red;");
             showMessage.setVisible(true);
         } finally {

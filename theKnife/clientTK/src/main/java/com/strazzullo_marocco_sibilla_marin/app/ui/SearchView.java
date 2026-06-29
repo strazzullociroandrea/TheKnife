@@ -72,7 +72,7 @@ public class SearchView extends StackPane {
      */
     public SearchView(AppShell shell, String city, String query) {
         this.shell = shell;
-        searchToolbar = new SearchToolbar(city, query, shell::showHome, this::runSearch, shell::showLogin);
+        searchToolbar = new SearchToolbar(city, query, shell::showHome, this::runSearch, shell::showAccountOrLogin);
         cuisineFilterRow = new CuisineFilterRow(this::onCuisineChanged, this::openFilterPanel);
         distanceFilterRow = new DistanceFilterRow(this::runSearch, this::openLocationPrompt);
 

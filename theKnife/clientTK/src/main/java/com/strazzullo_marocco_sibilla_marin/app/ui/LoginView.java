@@ -162,7 +162,7 @@ public class LoginView extends HBox {
                     showMessage.setStyle("-fx-text-fill: red;");
                     showMessage.setVisible(true);
                 } else {
-                    shell.setCurrentUserId(u.getId());
+                    shell.setCurrentUser(u);
                     shell.goBack();
                 }
             }

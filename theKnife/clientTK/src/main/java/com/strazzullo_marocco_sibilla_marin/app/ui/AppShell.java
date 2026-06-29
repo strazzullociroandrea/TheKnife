@@ -3,6 +3,7 @@ package com.strazzullo_marocco_sibilla_marin.app.ui;
 import javafx.scene.Node;
 import javafx.scene.layout.StackPane;
 import sibilla.LocationSearchResult;
+import strazzullo.User;
 
 import java.util.ArrayDeque;
 import java.util.Deque;
@@ -13,7 +14,7 @@ import java.util.Deque;
  * location detail, login, and registration screens) push onto a small back-stack instead, so
  * {@link #goBack()} always returns to wherever the user came from.
  *
- * @version 3.0
+ * @version 4.0
  * @Author Strazzullo Ciro Andrea, 763603, VA
  * @Author Marocco Stefano, 762192, VA - author of this revision
  * @Author Sibilla Ginevra, 761114, VA
@@ -22,7 +23,7 @@ import java.util.Deque;
 public class AppShell extends StackPane {
 
     private final Deque<Node> backStack = new ArrayDeque<>();
-    private String currentUserId = null;
+    private User currentUser = null;
 
     /**
      * AppShell constructor. Starts on the home screen.
@@ -37,7 +38,7 @@ public class AppShell extends StackPane {
      * @return true if a user is logged in, false otherwise
      */
     public boolean isLoggedIn() {
-        return currentUserId != null;
+        return currentUser != null;
     }
 
     /**
@@ -47,16 +48,34 @@ public class AppShell extends StackPane {
      * @return the current user's id, or {@code null} if not logged in
      */
     public String getCurrentUserId() {
-        return currentUserId;
+        return currentUser != null ? currentUser.getId() : null;
+    }
+
+    /**
+     * Function to resolve the currently logged-in user. Returns {@code null} when no user is
+     * logged in.
+     *
+     * @return the current user, or {@code null} if not logged in
+     */
+    public User getCurrentUser() {
+        return currentUser;
     }
 
     /**
      * Function to record which user just logged in.
      *
-     * @param id the logged-in user's id
+     * @param user the logged-in user
      */
-    public void setCurrentUserId(String id) {
-        this.currentUserId = id;
+    public void setCurrentUser(User user) {
+        this.currentUser = user;
+    }
+
+    /**
+     * Function to log out the current user and return to the home screen.
+     */
+    public void logout() {
+        currentUser = null;
+        showHome();
     }
 
     /**
@@ -108,7 +127,6 @@ public class AppShell extends StackPane {
         }
     }
 
-
     private void show(Node view) {
         getChildren().setAll(view);
     }
@@ -123,6 +141,19 @@ public class AppShell extends StackPane {
     }
 
     /**
+     * Function to navigate to the account screen if logged in, or the login screen otherwise,
+     * pushing the current screen onto the back-stack.
+     */
+    public void showAccountOrLogin() {
+        if (isLoggedIn()) {
+            pushCurrent();
+            show(new AccountView(this));
+        } else {
+            showLogin();
+        }
+    }
+
+    /**
      * Function to navigate to the registration screen, pushing the current screen onto the
      * back-stack so {@link #goBack()} returns to it.
      */
@@ -132,10 +163,12 @@ public class AppShell extends StackPane {
     }
 
     /**
-     * Function to replace the current screen with the login screen without touching the back-stack.
-     * Used after registration so the pre-registration back-stack entry is preserved for after login.
+     * Function to replace the current screen with the login screen, popping one level from the
+     * back-stack first. Used after registration so {@link #goBack()} after login returns to the
+     * screen that was showing before the whole auth flow started.
      */
     public void switchToLogin() {
+        if (!backStack.isEmpty()) backStack.pop();
         show(new LoginView(this));
     }
 }

@@ -18,7 +18,7 @@ import strazzullo.User;
  * Shares the same two-panel layout as {@link LoginView}: a black left branding panel and a
  * white right content panel.
  *
- * @version 1.0
+ * @version 2.0
  * @Author Marocco Stefano, 762192, VA
  */
 public class AccountView extends HBox {
@@ -30,7 +30,9 @@ public class AccountView extends HBox {
      */
     public AccountView(AppShell shell) {
         User user = shell.getCurrentUser();
+        String roleLabel = "manager".equals(user.getRole()) ? "Ristoratore" : "Cliente";
 
+        // Left panel
         VBox leftPanel = new VBox(20);
         leftPanel.setStyle("-fx-background-color: #000000;");
         leftPanel.setPrefWidth(500);
@@ -51,33 +53,32 @@ public class AccountView extends HBox {
         Region spacer = new Region();
         VBox.setVgrow(spacer, Priority.ALWAYS);
 
-        Label title = new Label("Bentornato, " + user.getName() + "!");
+        Label title = new Label(user.getName() + " " + user.getSurname());
         title.getStyleClass().add(Styles.TITLE_1);
         title.setStyle("-fx-text-fill: white;");
         title.setWrapText(true);
 
-        String roleLabel = "manager".equals(user.getRole()) ? "Ristoratore" : "Cliente";
-        Label subtitle = new Label(roleLabel + " · " + user.getEmail());
+        Label subtitle = new Label(roleLabel);
         subtitle.getStyleClass().add(Styles.TEXT_CAPTION);
         subtitle.setStyle("-fx-text-fill: white;");
-        subtitle.setWrapText(true);
 
         leftPanel.getChildren().addAll(topRow, spacer, title, subtitle);
 
-        VBox rightPanel = new VBox(14);
+        // Right panel — vertically centered like LoginView
+        VBox rightPanel = new VBox(12);
         rightPanel.setStyle("-fx-background-color: #ffffff;");
         rightPanel.setPadding(new Insets(0, 100, 0, 100));
         rightPanel.setAlignment(Pos.CENTER_LEFT);
 
-        Label heading = new Label("Il tuo account");
-        heading.getStyleClass().add(Styles.TITLE_1);
+        Label heading = new Label("Il tuo profilo");
+        heading.getStyleClass().add(Styles.TITLE_2);
 
-        Label subheading = new Label("I tuoi dati personali.");
-        subheading.getStyleClass().add(Styles.TEXT_CAPTION);
-        subheading.setStyle("-fx-text-fill: grey;");
+        Separator sep = new Separator();
+        sep.setMaxWidth(Double.MAX_VALUE);
 
-        rightPanel.getChildren().addAll(heading, subheading, new Separator());
         rightPanel.getChildren().addAll(
+                heading,
+                sep,
                 buildField("Nome", user.getName()),
                 buildField("Cognome", user.getSurname()),
                 buildField("Email", user.getEmail()),
@@ -89,18 +90,14 @@ public class AccountView extends HBox {
             rightPanel.getChildren().add(buildField("Data di nascita", user.getDateOfBirth()));
         }
 
-        Region bottomSpacer = new Region();
-        VBox.setVgrow(bottomSpacer, Priority.ALWAYS);
-
-        Button logoutButton = new Button("Esci dall'account");
+        Button logoutButton = new Button("Esci da TheKnife");
         logoutButton.setMaxWidth(Double.MAX_VALUE);
         logoutButton.setPrefHeight(40);
-        logoutButton.getStyleClass().add(Styles.TEXT_NORMAL);
-        logoutButton.setStyle("-fx-background-color: #000000; -fx-text-fill: white;");
+        logoutButton.getStyleClass().addAll(Styles.TEXT_NORMAL, Styles.DANGER);
         logoutButton.setCursor(Cursor.HAND);
         logoutButton.setOnAction(e -> shell.logout());
 
-        rightPanel.getChildren().addAll(bottomSpacer, logoutButton);
+        rightPanel.getChildren().add(logoutButton);
         HBox.setHgrow(rightPanel, Priority.ALWAYS);
 
         getChildren().addAll(leftPanel, rightPanel);

@@ -156,9 +156,6 @@ public class LoginView extends HBox {
                 showMessage.setStyle("-fx-text-fill: red;");
                 showMessage.setVisible(true);
             } else {
-                showMessage.setText("Login avvenuto con successo");
-                showMessage.setStyle("-fx-text-fill: green;");
-                showMessage.setVisible(true);
                 User u = ServiceLocator.getInstance().getAuthService().login(email, password);
                 if (u == null) {
                     showMessage.setText("Attenzione. Non è stato trovato nessun account con le credenziali inserite.");

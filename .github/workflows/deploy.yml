@@ -1,0 +1,99 @@
+name: Build and Deploy
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  build:
+    name: Build fat JARs
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Java 21
+        uses: actions/setup-java@v4
+        with:
+          java-version: '21'
+          distribution: 'temurin'
+          cache: 'maven'
+
+      - name: Build all modules
+        working-directory: theKnife
+        run: mvn package -DskipTests -q
+
+      - name: Upload ServerTK artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: ServerTK
+          path: theKnife/serverTK/target/ServerTK.jar
+          retention-days: 30
+
+      - name: Upload ClientTK artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: ClientTK
+          path: theKnife/clientTK/target/ClientTK.jar
+          retention-days: 30
+
+  deploy:
+    name: Deploy server to production
+    needs: build
+    runs-on: ubuntu-latest
+    if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+
+    steps:
+      - name: Download server JAR
+        uses: actions/download-artifact@v4
+        with:
+          name: ServerTK
+
+      - name: Write runtime .env from secrets
+        env:
+          DATABASE_URL:             ${{ secrets.DATABASE_URL }}
+          USER_DB:                  ${{ secrets.USER_DB }}
+          PASS_DB:                  ${{ secrets.PASS_DB }}
+          PHOTO_S3_ENDPOINT:        ${{ secrets.PHOTO_S3_ENDPOINT }}
+          PHOTO_S3_REGION:          ${{ secrets.PHOTO_S3_REGION }}
+          PHOTO_S3_BUCKET:          ${{ secrets.PHOTO_S3_BUCKET }}
+          PHOTO_S3_ACCESS_KEY:      ${{ secrets.PHOTO_S3_ACCESS_KEY }}
+          PHOTO_S3_SECRET_KEY:      ${{ secrets.PHOTO_S3_SECRET_KEY }}
+          PHOTO_S3_PUBLIC_BASE_URL: ${{ secrets.PHOTO_S3_PUBLIC_BASE_URL }}
+          GOOGLE_MAPS_API_KEY:      ${{ secrets.GOOGLE_MAPS_API_KEY }}
+        run: |
+          printenv DATABASE_URL             | xargs -I{} echo "DATABASE_URL={}"             >> .env
+          printenv USER_DB                  | xargs -I{} echo "USER_DB={}"                  >> .env
+          printenv PASS_DB                  | xargs -I{} echo "PASS_DB={}"                  >> .env
+          printenv PHOTO_S3_ENDPOINT        | xargs -I{} echo "PHOTO_S3_ENDPOINT={}"        >> .env
+          printenv PHOTO_S3_REGION          | xargs -I{} echo "PHOTO_S3_REGION={}"          >> .env
+          printenv PHOTO_S3_BUCKET          | xargs -I{} echo "PHOTO_S3_BUCKET={}"          >> .env
+          printenv PHOTO_S3_ACCESS_KEY      | xargs -I{} echo "PHOTO_S3_ACCESS_KEY={}"      >> .env
+          printenv PHOTO_S3_SECRET_KEY      | xargs -I{} echo "PHOTO_S3_SECRET_KEY={}"      >> .env
+          printenv PHOTO_S3_PUBLIC_BASE_URL | xargs -I{} echo "PHOTO_S3_PUBLIC_BASE_URL={}" >> .env
+          printenv GOOGLE_MAPS_API_KEY      | xargs -I{} echo "GOOGLE_MAPS_API_KEY={}"      >> .env
+
+      - name: Copy JAR and .env to server
+        uses: appleboy/scp-action@v0.1.7
+        with:
+          host:     ${{ secrets.SERVER_HOST }}
+          username: ${{ secrets.SERVER_USER }}
+          key:      ${{ secrets.SERVER_SSH_KEY }}
+          source:   "ServerTK.jar,.env"
+          target:   ${{ secrets.SERVER_DEPLOY_PATH }}
+
+      - name: Restart server process
+        uses: appleboy/ssh-action@v1.0.3
+        with:
+          host:     ${{ secrets.SERVER_HOST }}
+          username: ${{ secrets.SERVER_USER }}
+          key:      ${{ secrets.SERVER_SSH_KEY }}
+          script: |
+            set -e
+            cd ${{ secrets.SERVER_DEPLOY_PATH }}
+            pkill -f ServerTK.jar || true
+            sleep 2
+            nohup env $(grep -v '^#' .env | xargs) java -jar ServerTK.jar >> server.log 2>&1 &
+            echo "Deployed ServerTK.jar (PID $!)"

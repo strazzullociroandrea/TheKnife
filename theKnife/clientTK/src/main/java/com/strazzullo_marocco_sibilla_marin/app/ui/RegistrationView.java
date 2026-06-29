@@ -1,7 +1,9 @@
 package com.strazzullo_marocco_sibilla_marin.app.ui;
 
-import com.strazzullo_marocco_sibilla_marin.app.ui.components.RoleCard;
+import com.strazzullo_marocco_sibilla_marin.app.geo.AddressAutocomplete;
 import com.strazzullo_marocco_sibilla_marin.app.rmi.ServiceLocator;
+import com.strazzullo_marocco_sibilla_marin.app.ui.components.DateSelector;
+import com.strazzullo_marocco_sibilla_marin.app.ui.components.RoleCard;
 import atlantafx.base.theme.Styles;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
@@ -23,35 +25,30 @@ import java.time.format.DateTimeFormatter;
 
 /**
  * Registration page where the user can register or, if they already have an account, log in.
+ * The address field uses {@link AddressAutocomplete} for live Google/Photon suggestions, and the
+ * date-of-birth field uses the brand-styled {@link DateSelector} instead of the native
+ * {@code javafx.scene.control.DatePicker}.
  *
- * @version 1.0
+ * @version 2.0
  * @Author Strazzullo Ciro Andrea, 763603, VA
- * @Author Marocco Stefano, 762192, VA
+ * @Author Marocco Stefano, 762192, VA - author of this revision
  * @Author Sibilla Ginevra, 761114, VA
  * @Author Marin Marco, 760622, VA
  */
 public class RegistrationView extends HBox {
 
-    /**
-     * Private data used for user registration
-     */
     private final RoleCard client, manager;
     private final TextField nameField, surnameField, emailField, placeField;
     private final PasswordField passwordField, confirmField;
-    private final DatePicker dateBirthField;
-
-    /**
-     * Variable to show  message
-     */
+    private final DateSelector dateBirthField;
     private final Label showMessage;
 
     /**
-     * Registration view constructor
+     * Registration view constructor.
      *
      * @param shell the app shell to navigate through once the search is submitted
      */
     public RegistrationView(AppShell shell) {
-        //Left panel - Introduction
         VBox leftPanel = new VBox(20);
         leftPanel.setStyle("-fx-background-color: #000000;");
         leftPanel.setPrefWidth(500);
@@ -82,28 +79,22 @@ public class RegistrationView extends HBox {
         subtitle.setWrapText(true);
         leftPanel.getChildren().addAll(topRow, spacer, title, subtitle);
 
-        //Right panel - register form
         VBox rightPanel = new VBox(10);
         rightPanel.setStyle("-fx-background-color: #ffffff;");
         rightPanel.setPadding(new Insets(0, 100, 0, 100));
         rightPanel.setAlignment(Pos.CENTER_LEFT);
 
-        VBox formContent = rightPanel;
-
         Label greet = new Label("Crea il tuo account");
         greet.getStyleClass().add(Styles.TITLE_1);
-
 
         Label info = new Label("Scegli come vuoi usare TheKnife.");
         info.getStyleClass().add(Styles.TEXT_CAPTION);
         info.setStyle("-fx-text-fill: grey;");
 
-        //Message row invisible - input form register
         showMessage = new Label();
         showMessage.setMaxWidth(Double.MAX_VALUE);
         showMessage.setVisible(false);
 
-        //Role row - input form register
         HBox rowCard = new HBox(20);
         this.client = new RoleCard("Sono un cliente", "Prenota e recensisci", "fas-user");
         this.manager = new RoleCard("Sono un ristoratore", "Gestisci il tuo locale", "fas-store");
@@ -114,9 +105,7 @@ public class RegistrationView extends HBox {
                 client.setSelected(true);
                 manager.setSelected(false);
             }
-
         });
-
         manager.setOnMouseClicked(e -> {
             if (!manager.getIsSelected()) {
                 client.setSelected(false);
@@ -124,8 +113,6 @@ public class RegistrationView extends HBox {
             }
         });
 
-
-        //First row - input form register
         HBox nominativo = new HBox(20);
         Label name = new Label("Nome *");
         name.setStyle("-fx-text-fill: grey;");
@@ -143,10 +130,7 @@ public class RegistrationView extends HBox {
         VBox surnameBox = new VBox(surname, surnameField);
         nominativo.setMaxWidth(Double.MAX_VALUE);
         nominativo.getChildren().addAll(nameBox, surnameBox);
-        nominativo.setMaxWidth(Double.MAX_VALUE);
 
-
-        //Second row - input form register
         Label email = new Label("Email *");
         email.getStyleClass().add(Styles.TEXT_SMALL);
         email.setStyle("-fx-text-fill: grey;");
@@ -154,23 +138,20 @@ public class RegistrationView extends HBox {
         emailField.setPromptText("mario.rossi@gmail.com");
         emailField.setMaxWidth(Double.MAX_VALUE);
 
-        //Third row - input form register
-        Label place = new Label("Indirizzo  *");
+        Label place = new Label("Indirizzo *");
         place.setStyle("-fx-text-fill: grey;");
         place.getStyleClass().add(Styles.TEXT_SMALL);
         placeField = new TextField();
         placeField.setPromptText("Via Rossi 10, Milano");
         placeField.setMaxWidth(Double.MAX_VALUE);
+        AddressAutocomplete.attach(placeField);
 
-        //Fourth row - input form register
-        Label dateBirth = new Label("Data di nascita (opzionale)");
+        Label dateBirth = new Label("Data di nascita");
         dateBirth.setStyle("-fx-text-fill: grey;");
         dateBirth.getStyleClass().add(Styles.TEXT_SMALL);
-        dateBirthField = new DatePicker();
-        dateBirthField.setPromptText("yyyy-MM-dd");
+        dateBirthField = new DateSelector(LocalDate.now().minusYears(18));
         dateBirthField.setMaxWidth(Double.MAX_VALUE);
 
-        //fifth row - input form register
         HBox passwords = new HBox(20);
         Label password = new Label("Password *");
         password.setStyle("-fx-text-fill: grey;");
@@ -188,8 +169,6 @@ public class RegistrationView extends HBox {
         VBox confirmBox = new VBox(confirm, confirmField);
         passwords.setMaxWidth(Double.MAX_VALUE);
         passwords.getChildren().addAll(passwordBox, confirmBox);
-        passwords.setMaxWidth(Double.MAX_VALUE);
-
 
         Button addUser = new Button("Crea account");
         addUser.setMaxWidth(Double.MAX_VALUE);
@@ -197,10 +176,7 @@ public class RegistrationView extends HBox {
         addUser.getStyleClass().add(Styles.TEXT_NORMAL);
         addUser.setStyle("-fx-background-color: #000000; -fx-text-fill: white; ");
         addUser.setCursor(Cursor.HAND);
-
-        addUser.setOnMouseClicked(e -> {
-            this.handleRegistrationUser();
-        });
+        addUser.setOnMouseClicked(e -> this.handleRegistrationUser());
 
         Text labelReg = new Text("Hai già un account? ");
         labelReg.getStyleClass().add(Styles.TEXT);
@@ -209,15 +185,15 @@ public class RegistrationView extends HBox {
         reg.setCursor(Cursor.HAND);
         reg.setOnMouseClicked(event -> shell.switchToLogin());
 
-        TextFlow gotoRegisterPage = new TextFlow(
-                labelReg,
-                reg
-        );
-        HBox registerContainer = new HBox(gotoRegisterPage);
+        HBox registerContainer = new HBox(new TextFlow(labelReg, reg));
         registerContainer.setAlignment(Pos.CENTER);
 
-
-        formContent.getChildren().addAll(greet, info, showMessage, rowCard, nominativo, email, emailField, place, placeField, dateBirth, dateBirthField, passwords, addUser, registerContainer);
+        rightPanel.getChildren().addAll(
+                greet, info, showMessage, rowCard, nominativo,
+                email, emailField,
+                place, placeField,
+                dateBirth, dateBirthField,
+                passwords, addUser, registerContainer);
 
         HBox.setHgrow(rightPanel, Priority.ALWAYS);
         HBox.setHgrow(nameBox, Priority.ALWAYS);
@@ -230,22 +206,23 @@ public class RegistrationView extends HBox {
     }
 
     /**
-     * Private function that allows user registration
+     * Function to handle user registration: validates the form, creates the appropriate
+     * {@link strazzullo.User} subtype, and calls the remote auth service.
      */
     private void handleRegistrationUser() {
-
         try {
-            String name = nameField.getText(),
-                    surname = surnameField.getText(),
-                    email = emailField.getText(),
-                    password = passwordField.getText(),
-                    confirm = confirmField.getText(),
-                    role = client.getIsSelected() ? "customer" : (manager.getIsSelected() ? "manager" : "").toString(),
-                    place = placeField.getText();
+            String name     = nameField.getText(),
+                   surname  = surnameField.getText(),
+                   email    = emailField.getText(),
+                   password = passwordField.getText(),
+                   confirm  = confirmField.getText(),
+                   role     = client.getIsSelected() ? "customer" : (manager.getIsSelected() ? "manager" : ""),
+                   place    = placeField.getText();
 
             LocalDate dateOfBirth = dateBirthField.getValue();
 
-            if (place.isEmpty() || role.isEmpty() || name.isEmpty() || surname.isEmpty() || email.isEmpty() || password.isEmpty() || confirm.isEmpty()) {
+            if (place.isEmpty() || role.isEmpty() || name.isEmpty() || surname.isEmpty()
+                    || email.isEmpty() || password.isEmpty() || confirm.isEmpty()) {
                 showMessage.setText("Attenzione. Tutti i dati obbligatori devono essere compilati");
                 showMessage.setStyle("-fx-text-fill: red;");
                 showMessage.setVisible(true);
@@ -254,30 +231,17 @@ public class RegistrationView extends HBox {
                 showMessage.setStyle("-fx-text-fill: red;");
                 showMessage.setVisible(true);
             } else {
-                User u;
-                if (role.equals("customer")) {
-                    if (dateOfBirth != null) {
-                        u = new Client(null, name, surname, email, password, place, formatDate(dateOfBirth));
-                    } else {
-                        u = new Client(null, name, surname, email, password, place);
-                    }
-                } else {
-                    if (dateOfBirth != null) {
-                        u = new Manager(null, name, surname, email, password, place, formatDate(dateOfBirth));
-                    } else {
-                        u = new Manager(null, name, surname, email, password, place);
-                    }
-                }
+                User u = role.equals("customer")
+                        ? new Client(null, name, surname, email, password, place, formatDate(dateOfBirth))
+                        : new Manager(null, name, surname, email, password, place, formatDate(dateOfBirth));
 
                 ServiceLocator.getInstance().getAuthService().register(u, password);
                 showMessage.setText("Registrazione avvenuta con successo");
                 showMessage.setStyle("-fx-text-fill: green;");
                 showMessage.setVisible(true);
             }
-
-
         } catch (Exception e) {
-            showMessage.setText("Attenzione." + e.getMessage());
+            showMessage.setText("Attenzione. " + e.getMessage());
             showMessage.setStyle("-fx-text-fill: red;");
             showMessage.setVisible(true);
         } finally {
@@ -287,21 +251,18 @@ public class RegistrationView extends HBox {
             placeField.clear();
             passwordField.clear();
             confirmField.clear();
-            dateBirthField.setValue(null);
             client.setSelected(false);
             manager.setSelected(false);
         }
     }
 
     /**
-     * Private function to format a LocalDate object in yyyy-MM-dd
+     * Function to format a {@link LocalDate} as {@code yyyy-MM-dd} for persistence.
      *
-     * @param dateOfBirth LocalDate object
-     * @return a formatted string that represent the date of birth
+     * @param date the date to format
+     * @return the formatted date string
      */
-    private String formatDate(LocalDate dateOfBirth) {
-        String pattern = "yyyy-MM-dd";
-        DateTimeFormatter dateFormatter = DateTimeFormatter.ofPattern(pattern);
-        return dateFormatter.format(dateOfBirth);
+    private String formatDate(LocalDate date) {
+        return DateTimeFormatter.ofPattern("yyyy-MM-dd").format(date);
     }
 }

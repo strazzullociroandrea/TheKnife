@@ -139,6 +139,17 @@ public class AppShell extends StackPane {
     }
 
     /**
+     * Function to navigate to a create restaurant screen, pushing the current screen onto the
+     * back-stack so {@link #goBack()} returns to it.
+     *
+     */
+    public void showCreateRestaurantView() {
+        pushCurrent();
+        show(new CreateRestaurantView(this));
+    }
+
+
+    /**
      * Function to return to whichever screen was showing before the current one was pushed onto
      * the back-stack, or the home screen if the stack is empty.
      */
@@ -190,6 +201,7 @@ public class AppShell extends StackPane {
             showLogin();
         }
     }
+
 
     /**
      * Function to navigate to the registration screen, pushing the current screen onto the

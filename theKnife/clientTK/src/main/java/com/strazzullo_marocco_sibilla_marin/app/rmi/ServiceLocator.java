@@ -6,6 +6,8 @@ import com.strazzullo_marocco_sibilla_marin.app.remote.LocationService;
 import com.strazzullo_marocco_sibilla_marin.app.remote.PhotoService;
 import com.strazzullo_marocco_sibilla_marin.app.remote.ReviewService;
 import com.strazzullo_marocco_sibilla_marin.app.remote.AuthService;
+import com.strazzullo_marocco_sibilla_marin.app.remote.RestaurantService;
+
 
 import java.rmi.NotBoundException;
 import java.rmi.RemoteException;
@@ -30,6 +32,7 @@ public final class ServiceLocator {
     private static final String PHOTO_SERVICE_NAME = "PhotoService";
     private static final String REVIEW_SERVICE_NAME = "ReviewService";
     private static final String AUTH_SERVICE_NAME = "AuthService";
+    private static final String RESTAURANT_SERVICE_NAME = "RestaurantService";
 
     private static ServiceLocator instance;
 
@@ -39,15 +42,17 @@ public final class ServiceLocator {
     private final PhotoService photoService;
     private final ReviewService reviewService;
     private final AuthService authService;
+    private final RestaurantService restaurantService;
 
     private ServiceLocator(CustomerService customerService, LocationService locationService,
-                           BookingService bookingService, PhotoService photoService, ReviewService reviewService, AuthService authService) {
+                           BookingService bookingService, PhotoService photoService, ReviewService reviewService, AuthService authService, RestaurantService restaurantService) {
         this.customerService = customerService;
         this.locationService = locationService;
         this.bookingService = bookingService;
         this.photoService = photoService;
         this.reviewService = reviewService;
         this.authService = authService;
+        this.restaurantService = restaurantService;
     }
 
     /**
@@ -68,8 +73,9 @@ public final class ServiceLocator {
         PhotoService photoService = (PhotoService) registry.lookup(PHOTO_SERVICE_NAME);
         ReviewService reviewService = (ReviewService) registry.lookup(REVIEW_SERVICE_NAME);
         AuthService authService = (AuthService) registry.lookup(AUTH_SERVICE_NAME);
+        RestaurantService restaurantService = (RestaurantService) registry.lookup(RESTAURANT_SERVICE_NAME);
 
-        instance = new ServiceLocator(customerService, locationService, bookingService, photoService, reviewService, authService);
+        instance = new ServiceLocator(customerService, locationService, bookingService, photoService, reviewService, authService, restaurantService);
         return instance;
     }
 
@@ -93,6 +99,15 @@ public final class ServiceLocator {
      */
     public AuthService getAuthService() {
         return authService;
+    }
+
+    /**
+     * Returns the restaurant service stub
+     *
+     * @return the restaurant service stub
+     */
+    public RestaurantService getRestaurantService() {
+        return restaurantService;
     }
 
     /**

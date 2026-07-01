@@ -98,7 +98,8 @@ public class AppShell extends StackPane {
         if (currentSessionToken != null) {
             try {
                 ServiceLocator.getInstance().getAuthService().logout(currentSessionToken);
-            } catch (Exception ignored) {}
+            } catch (Exception ignored) {
+            }
             SessionStore.clear();
             currentSessionToken = null;
         }

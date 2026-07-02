@@ -35,15 +35,11 @@ public class SearchResultsPanel extends VBox {
     private final ObservableList<LocationSearchResult> results;
 
     /**
-     * @param results the shared, mutable results list to display and sort
-     * @param onSelected called with the newly selected result, e.g. to focus its map pin
-     * @param onViewDetails called with a result when its card is clicked
-     * @param isCustomer supplier returning whether the current user is a logged-in customer
-     * @param onFavouriteAuthRequired called when a non-customer clicks the heart button on any card
+     * SearchResultsPanel constructor.
      */
-    public SearchResultsPanel(ObservableList<LocationSearchResult> results,
+    public SearchResultsPanel(com.strazzullo_marocco_sibilla_marin.app.ui.AppShell shell, ObservableList<LocationSearchResult> results,
                                Consumer<LocationSearchResult> onSelected, Consumer<LocationSearchResult> onViewDetails,
-                               BooleanSupplier isCustomer, Runnable onFavouriteAuthRequired) {
+                               Runnable onFavouriteAuthRequired) {
         this.results = results;
 
         for (ResultsSortOption option : ResultsSortOption.values()) {
@@ -67,7 +63,7 @@ public class SearchResultsPanel extends VBox {
                 setText(null);
                 getStyleClass().add("transparent-cell");
                 setGraphic(empty || item == null ? null
-                        : new ResultCard(item, () -> onViewDetails.accept(item), isCustomer, onFavouriteAuthRequired));
+                        : new ResultCard(shell, item, () -> onViewDetails.accept(item), onFavouriteAuthRequired));
                 setPadding(new Insets(6, 10, 6, 10));
             }
         });

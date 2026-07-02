@@ -43,8 +43,8 @@ public class ResultCard extends VBox {
      * @param isCustomer supplier returning whether the current user is a logged-in customer
      * @param onFavouriteAuthRequired callback invoked when a non-customer clicks the heart button
      */
-    public ResultCard(LocationSearchResult result, Runnable onViewDetails,
-                      BooleanSupplier isCustomer, Runnable onFavouriteAuthRequired) {
+    public ResultCard(com.strazzullo_marocco_sibilla_marin.app.ui.AppShell shell, LocationSearchResult result, Runnable onViewDetails,
+                      Runnable onFavouriteAuthRequired) {
         Location location = result.location();
 
         getStyleClass().add("tk-card");
@@ -65,10 +65,48 @@ public class ResultCard extends VBox {
         ToggleButton favourite = new ToggleButton();
         favourite.setGraphic(new FontIcon(Feather.HEART));
         favourite.getStyleClass().addAll(Styles.BUTTON_ICON, Styles.FLAT, "tk-favourite");
+
+        boolean isFav = false;
+        if (shell.isCustomer()) {
+            strazzullo.Client client = (strazzullo.Client) shell.getCurrentUser();
+            for (sibilla.Restaurant rFav : client.getFavoriteRestaurants()) {
+                if (rFav.getName().equalsIgnoreCase(result.restaurantName())) {
+                    isFav = true;
+                    break;
+                }
+            }
+        }
+        favourite.setSelected(isFav);
+
         favourite.addEventFilter(MouseEvent.MOUSE_CLICKED, e -> {
-            if (!isCustomer.getAsBoolean()) {
+            if (!shell.isCustomer()) {
                 e.consume();
                 onFavouriteAuthRequired.run();
+            }
+        });
+
+        favourite.setOnAction(e -> {
+            if (shell.isCustomer()) {
+                strazzullo.Client client = (strazzullo.Client) shell.getCurrentUser();
+                if (favourite.isSelected()) {
+                    boolean exists = false;
+                    for (sibilla.Restaurant rFav : client.getFavoriteRestaurants()) {
+                        if (rFav.getName().equalsIgnoreCase(result.restaurantName())) {
+                            exists = true;
+                            break;
+                        }
+                    }
+                    if (!exists) {
+                        sibilla.Restaurant newFav = new sibilla.Restaurant();
+                        newFav.setName(result.restaurantName());
+                        try {
+                            newFav.setCuisine(sibilla.Cuisine.valueOf(result.restaurantCuisine().toLowerCase(Locale.ROOT)));
+                        } catch (Exception ignored) {}
+                        client.addFavoriteRestaurant(newFav);
+                    }
+                } else {
+                    client.getFavoriteRestaurants().removeIf(rFav -> rFav.getName().equalsIgnoreCase(result.restaurantName()));
+                }
             }
         });
 

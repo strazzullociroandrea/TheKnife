@@ -99,6 +99,11 @@
     -fx-border-radius: 999px;
 }
 
+.tk-cuisine-toggle:selected {
+    -fx-text-fill: -color-fg-default;
+    -fx-background-color: transparent;
+}
+
 .tk-photo-gallery {
     -fx-background-color: transparent;
     -fx-padding: 0;

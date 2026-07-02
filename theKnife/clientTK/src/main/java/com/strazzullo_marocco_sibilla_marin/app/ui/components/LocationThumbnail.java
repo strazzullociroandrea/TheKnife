@@ -27,21 +27,42 @@ import java.util.logging.Logger;
 public class LocationThumbnail extends StackPane {
 
     private static final Logger LOGGER = Logger.getLogger(LocationThumbnail.class.getName());
-    private static final double SIZE = 88;
+    private static final double DEFAULT_SIZE = 88;
+
+    private final double width;
+    private final double height;
 
     /**
+     * Default constructor with size 88x88.
+     *
      * @param locationId the location whose first photo to show
      * @param cuisine the restaurant's cuisine type, used for the placeholder icon
      */
     public LocationThumbnail(String locationId, String cuisine) {
-        getStyleClass().addAll("tk-thumbnail", "tk-thumbnail-placeholder");
-        setPrefSize(SIZE, SIZE);
-        setMinSize(SIZE, SIZE);
-        setMaxSize(SIZE, SIZE);
+        this(locationId, cuisine, DEFAULT_SIZE, DEFAULT_SIZE, 16);
+    }
 
-        Rectangle clip = new Rectangle(SIZE, SIZE);
-        clip.setArcWidth(16);
-        clip.setArcHeight(16);
+    /**
+     * Constructor supporting custom width, height, and corner radius.
+     *
+     * @param locationId the location whose first photo to show
+     * @param cuisine the restaurant's cuisine type, used for the placeholder icon
+     * @param width the thumbnail width
+     * @param height the thumbnail height
+     * @param arc the corner border radius
+     */
+    public LocationThumbnail(String locationId, String cuisine, double width, double height, double arc) {
+        this.width = width;
+        this.height = height;
+
+        getStyleClass().addAll("tk-thumbnail", "tk-thumbnail-placeholder");
+        setPrefSize(width, height);
+        setMinSize(width, height);
+        setMaxSize(width, height);
+
+        Rectangle clip = new Rectangle(width, height);
+        clip.setArcWidth(arc);
+        clip.setArcHeight(arc);
         setClip(clip);
 
         getChildren().add(placeholderIcon(cuisine));
@@ -73,8 +94,8 @@ public class LocationThumbnail extends StackPane {
             return new FontIcon(Feather.IMAGE);
         }
         ImageView icon = new ImageView(new Image(stream));
-        icon.setFitWidth(40);
-        icon.setFitHeight(40);
+        icon.setFitWidth(width * 0.45);
+        icon.setFitHeight(height * 0.45);
         icon.setPreserveRatio(true);
         icon.setSmooth(true);
         return icon;
@@ -82,9 +103,9 @@ public class LocationThumbnail extends StackPane {
 
     private void showPhoto(Photo photo) {
         getStyleClass().remove("tk-thumbnail-placeholder");
-        ImageView imageView = new ImageView(new Image(photo.getUrl(), SIZE, SIZE, false, true, true));
-        imageView.setFitWidth(SIZE);
-        imageView.setFitHeight(SIZE);
+        ImageView imageView = new ImageView(new Image(photo.getUrl(), width, height, false, true, true));
+        imageView.setFitWidth(width);
+        imageView.setFitHeight(height);
         imageView.setPreserveRatio(false);
         imageView.setSmooth(true);
         getChildren().setAll(imageView);

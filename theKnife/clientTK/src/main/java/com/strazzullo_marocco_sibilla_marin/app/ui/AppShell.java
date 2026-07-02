@@ -31,6 +31,10 @@ public class AppShell extends StackPane {
     private User currentUser = null;
     private String currentSessionToken = null;
 
+    private LocationSearchResult lastDetailResult = null;
+    private String lastSearchCity = null;
+    private String lastSearchQuery = null;
+
     /**
      * AppShell constructor. Attempts to restore a previous session, then shows the home screen.
      */
@@ -123,6 +127,8 @@ public class AppShell extends StackPane {
      * @param query the free-text restaurant name query, may be blank
      */
     public void showSearch(String city, String query) {
+        this.lastSearchCity = city;
+        this.lastSearchQuery = query;
         backStack.clear();
         show(new SearchView(this, city, query));
     }
@@ -134,6 +140,7 @@ public class AppShell extends StackPane {
      * @param result the location (plus its restaurant/rating info) to show
      */
     public void showLocationDetail(LocationSearchResult result) {
+        this.lastDetailResult = result;
         pushCurrent();
         show(new LocationDetailView(this, result));
     }
@@ -157,7 +164,18 @@ public class AppShell extends StackPane {
         if (backStack.isEmpty()) {
             showHome();
         } else {
-            show(backStack.pop());
+            Node previous = backStack.pop();
+            if (previous instanceof HomeView) {
+                showHome();
+            } else if (previous instanceof LocationDetailView && lastDetailResult != null) {
+                show(new LocationDetailView(this, lastDetailResult));
+            } else if (previous instanceof SearchView) {
+                show(new SearchView(this, lastSearchCity, lastSearchQuery));
+            } else if (previous instanceof AccountView) {
+                show(new AccountView(this));
+            } else {
+                show(previous);
+            }
         }
     }
 

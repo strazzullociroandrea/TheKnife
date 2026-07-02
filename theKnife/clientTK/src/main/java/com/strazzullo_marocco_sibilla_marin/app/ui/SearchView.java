@@ -148,9 +148,8 @@ public class SearchView extends StackPane {
      * @return the content split pane
      */
     private SplitPane buildContent() {
-        resultsPanel = new SearchResultsPanel(results,
+        resultsPanel = new SearchResultsPanel(shell, results,
                 newItem -> mapView.focusPin(newItem.location().getId()), shell::showLocationDetail,
-                shell::isCustomer,
                 () -> {
                     if (shell.isLoggedIn()) {
                         centeredModalPane.show(new AuthPromptCard(

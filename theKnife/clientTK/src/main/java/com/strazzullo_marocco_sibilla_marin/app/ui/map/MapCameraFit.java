@@ -10,7 +10,10 @@ import static com.strazzullo_marocco_sibilla_marin.app.ui.map.WebMercatorProject
  * points on screen with some padding, for {@link MapCamera#fitToPointsInstant} and {@link
  * MapCamera#fitToPointsAnimated}.
  *
- * @Author Marocco Stefano, 762192, VA - author of this file
+ * @Author Strazzullo Ciro Andrea, 763603, VA
+ * @Author Marocco Stefano, 762192, VA
+ * @Author Sibilla Ginevra, 761114, VA
+ * @Author Marin Marco, 760622, VA
  */
 final class MapCameraFit {
 

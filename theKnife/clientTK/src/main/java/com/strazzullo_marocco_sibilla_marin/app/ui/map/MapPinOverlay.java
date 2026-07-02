@@ -25,7 +25,10 @@ import java.util.function.Consumer;
  * Screen positions depend on {@link MapView}'s camera, so every pin/popup is projected via the
  * {@code projector} callback rather than this class knowing about the camera itself.
  *
- * @Author Marocco Stefano, 762192, VA - author of this file
+ * @Author Strazzullo Ciro Andrea, 763603, VA
+ * @Author Marocco Stefano, 762192, VA
+ * @Author Sibilla Ginevra, 761114, VA
+ * @Author Marin Marco, 760622, VA
  */
 final class MapPinOverlay {
 
@@ -136,6 +139,12 @@ final class MapPinOverlay {
         onPinsChanged.accept(points);
     }
 
+    /**
+     * Function to build a pin's circle node, wiring its click to toggle its popup.
+     *
+     * @param pin the pin to build a node for
+     * @return the pin's circle node
+     */
     private Circle buildPinNode(MapPin pin) {
         Circle node = new Circle(7);
         node.getStyleClass().add("tk-map-pin");
@@ -163,6 +172,11 @@ final class MapPinOverlay {
         showPopupFor(pinId);
     }
 
+    /**
+     * Function to focus a pin, populate and show its popup, and reposition everything.
+     *
+     * @param pinId the id of the pin to show the popup for; a no-op if unknown
+     */
     private void showPopupFor(String pinId) {
         MapPin pin = pins.get(pinId);
         if (pin == null) {
@@ -176,6 +190,9 @@ final class MapPinOverlay {
         reposition();
     }
 
+    /**
+     * Function to restyle every pin node, highlighting the currently focused one.
+     */
     private void refreshPinStyles() {
         pinNodes.forEach((id, node) -> {
             node.getStyleClass().setAll(id.equals(focusedPinId) ? "tk-map-pin-focused" : "tk-map-pin");

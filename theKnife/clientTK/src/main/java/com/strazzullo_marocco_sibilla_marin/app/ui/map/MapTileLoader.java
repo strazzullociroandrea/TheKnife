@@ -20,7 +20,10 @@ import java.util.logging.Logger;
  * data) on {@link MapView}'s behalf, so its own redraw logic doesn't have to also deal with
  * HTTP requests, in-flight de-duplication, or caching.
  *
- * @Author Marocco Stefano, 762192, VA - author of this file
+ * @Author Strazzullo Ciro Andrea, 763603, VA
+ * @Author Marocco Stefano, 762192, VA
+ * @Author Sibilla Ginevra, 761114, VA
+ * @Author Marin Marco, 760622, VA
  */
 final class MapTileLoader {
 
@@ -77,6 +80,14 @@ final class MapTileLoader {
                 .whenComplete((response, ex) -> tilesInFlight.remove(key));
     }
 
+    /**
+     * Function to build a tile's cache/in-flight key from its coordinates.
+     *
+     * @param zoom the tile's zoom level
+     * @param x the tile's x coordinate
+     * @param y the tile's y coordinate
+     * @return the key
+     */
     private static String key(int zoom, int x, int y) {
         return zoom + "/" + x + "/" + y;
     }

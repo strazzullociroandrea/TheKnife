@@ -15,7 +15,10 @@ import static com.strazzullo_marocco_sibilla_marin.app.ui.map.WebMercatorProject
  * so every marker is projected via the {@code projector} callback rather than this class knowing
  * about the camera itself.
  *
- * @Author Marocco Stefano, 762192, VA - author of this file
+ * @Author Strazzullo Ciro Andrea, 763603, VA
+ * @Author Marocco Stefano, 762192, VA
+ * @Author Sibilla Ginevra, 761114, VA
+ * @Author Marin Marco, 760622, VA
  */
 final class MapMarkerLayer {
 

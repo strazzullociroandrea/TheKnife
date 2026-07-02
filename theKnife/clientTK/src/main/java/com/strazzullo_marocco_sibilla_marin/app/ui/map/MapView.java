@@ -21,7 +21,7 @@ import java.util.function.Consumer;
  *
  * @version 4.0
  * @Author Strazzullo Ciro Andrea, 763603, VA
- * @Author Marocco Stefano, 762192, VA - author of this revision
+ * @Author Marocco Stefano, 762192, VA
  * @Author Sibilla Ginevra, 761114, VA
  * @Author Marin Marco, 760622, VA
  */
@@ -135,6 +135,10 @@ public class MapView extends StackPane {
         fitToPointsAnimated(points);
     }
 
+    /**
+     * Function to resize the canvas to match this view's current size, and, once a real size is
+     * finally available, resolve any pending initial pin-fit.
+     */
     private void onSizeChanged() {
         canvas.setWidth(getWidth());
         canvas.setHeight(getHeight());

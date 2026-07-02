@@ -21,7 +21,10 @@ import static com.strazzullo_marocco_sibilla_marin.app.ui.map.WebMercatorProject
  * geographic/screen coordinate conversions that depend on that state, since they're meaningless
  * without it.
  *
- * @Author Marocco Stefano, 762192, VA - author of this file
+ * @Author Strazzullo Ciro Andrea, 763603, VA
+ * @Author Marocco Stefano, 762192, VA
+ * @Author Sibilla Ginevra, 761114, VA
+ * @Author Marin Marco, 760622, VA
  */
 final class MapCamera {
 
@@ -183,6 +186,13 @@ final class MapCamera {
         finalizeTo(animatingToLat, animatingToLng, animatingToZoom);
     }
 
+    /**
+     * Function to snap the camera directly to a state, clearing any in-flight animation.
+     *
+     * @param lat the final latitude
+     * @param lng the final longitude
+     * @param targetZoom the final zoom level
+     */
     private void finalizeTo(double lat, double lng, int targetZoom) {
         centerLat = lat;
         centerLng = lng;
@@ -240,6 +250,14 @@ final class MapCamera {
         }
     }
 
+    /**
+     * Function to clamp a value into a range.
+     *
+     * @param value the value to clamp
+     * @param min the range's minimum
+     * @param max the range's maximum
+     * @return the clamped value
+     */
     private static int clamp(int value, int min, int max) {
         return Math.max(min, Math.min(max, value));
     }

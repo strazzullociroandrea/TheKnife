@@ -11,7 +11,10 @@ import org.kordamp.ikonli.javafx.FontIcon;
 /**
  * The floating zoom in/out, locate-me and recenter buttons stacked in {@link MapView}'s corner.
  *
- * @Author Marocco Stefano, 762192, VA - author of this file
+ * @Author Strazzullo Ciro Andrea, 763603, VA
+ * @Author Marocco Stefano, 762192, VA
+ * @Author Sibilla Ginevra, 761114, VA
+ * @Author Marin Marco, 760622, VA
  */
 final class MapControls extends VBox {
 

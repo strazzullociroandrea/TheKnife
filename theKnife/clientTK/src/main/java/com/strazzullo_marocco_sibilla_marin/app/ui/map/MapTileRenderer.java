@@ -11,7 +11,10 @@ import static com.strazzullo_marocco_sibilla_marin.app.ui.map.WebMercatorProject
  * Paints the visible raster tiles for the current camera state onto {@link MapView}'s canvas,
  * requesting any tile not yet in {@link MapTileLoader}'s cache.
  *
- * @Author Marocco Stefano, 762192, VA - author of this file
+ * @Author Strazzullo Ciro Andrea, 763603, VA
+ * @Author Marocco Stefano, 762192, VA
+ * @Author Sibilla Ginevra, 761114, VA
+ * @Author Marin Marco, 760622, VA
  */
 final class MapTileRenderer {
 

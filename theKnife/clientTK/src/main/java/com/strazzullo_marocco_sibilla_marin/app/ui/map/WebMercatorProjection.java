@@ -5,7 +5,10 @@ package com.strazzullo_marocco_sibilla_marin.app.ui.map;
  * coordinates (latitude/longitude) and the "world pixel" space tiles are addressed in at a given
  * zoom level, plus the distance-to-pixel conversion the search radius circle needs.
  *
- * @Author Marocco Stefano, 762192, VA - author of this file
+ * @Author Strazzullo Ciro Andrea, 763603, VA
+ * @Author Marocco Stefano, 762192, VA
+ * @Author Sibilla Ginevra, 761114, VA
+ * @Author Marin Marco, 760622, VA
  */
 final class WebMercatorProjection {
 

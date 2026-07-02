@@ -8,7 +8,10 @@ import javafx.scene.input.ScrollEvent;
  * double-click zoom, and dismissing the pin popup on a plain click. Pure event plumbing, kept out
  * of {@link MapView} itself.
  *
- * @Author Marocco Stefano, 762192, VA - author of this file
+ * @Author Strazzullo Ciro Andrea, 763603, VA
+ * @Author Marocco Stefano, 762192, VA
+ * @Author Sibilla Ginevra, 761114, VA
+ * @Author Marin Marco, 760622, VA
  */
 final class MapInputHandler {
 
@@ -54,6 +57,13 @@ final class MapInputHandler {
         });
     }
 
+    /**
+     * Function to zoom by one level per scroll "notch", dropping inertia events and events
+     * arriving faster than {@link #SCROLL_ZOOM_COOLDOWN_NANOS}.
+     *
+     * @param event the scroll event
+     * @param camera the camera to zoom
+     */
     private void handleScroll(ScrollEvent event, MapCamera camera) {
         event.consume();
         if (event.isInertia() || event.getDeltaY() == 0) {

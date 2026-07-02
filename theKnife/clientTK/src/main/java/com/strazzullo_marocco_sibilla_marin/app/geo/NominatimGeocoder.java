@@ -24,7 +24,10 @@ import java.util.logging.Logger;
  * same one the server uses for server-side address distance filtering), on {@link
  * AddressGeocoder}'s behalf when no {@code GOOGLE_MAPS_API_KEY} is configured.
  *
- * @Author Marocco Stefano, 762192, VA - author of this file
+ * @Author Strazzullo Ciro Andrea, 763603, VA
+ * @Author Marocco Stefano, 762192, VA
+ * @Author Sibilla Ginevra, 761114, VA
+ * @Author Marin Marco, 760622, VA
  */
 final class NominatimGeocoder {
 

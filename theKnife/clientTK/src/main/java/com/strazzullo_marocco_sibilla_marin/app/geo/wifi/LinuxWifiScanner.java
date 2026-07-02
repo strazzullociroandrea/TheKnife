@@ -8,10 +8,20 @@ import java.util.List;
  * present by default on most desktop Linux distributions. Terse output is requested so each
  * access point is a single, machine-parsable line.
  *
- * @Author Marocco Stefano, 762192, VA - author of this file
+ * @Author Strazzullo Ciro Andrea, 763603, VA
+ * @Author Marocco Stefano, 762192, VA
+ * @Author Sibilla Ginevra, 761114, VA
+ * @Author Marin Marco, 760622, VA
  */
 final class LinuxWifiScanner implements WifiScanner {
 
+    /**
+     * Function to list the Wi-Fi access points currently visible to this machine, via
+     * {@code nmcli}'s terse output mode.
+     *
+     * @return the observed access points; never null, but may be empty
+     * @throws WifiScanException if the scan could not be run or its output could not be parsed
+     */
     @Override
     public List<WifiNetwork> scan() throws WifiScanException {
         String output = ScanCommand.run("nmcli", "-t", "-f", "BSSID,SIGNAL,CHAN", "dev", "wifi", "list");
@@ -50,6 +60,12 @@ final class LinuxWifiScanner implements WifiScanner {
         return fields;
     }
 
+    /**
+     * Function to parse a trimmed integer, swallowing any format error.
+     *
+     * @param value the string to parse
+     * @return the parsed integer, or null if it wasn't a valid integer
+     */
     private Integer parseIntOrNull(String value) {
         try {
             return Integer.parseInt(value.trim());

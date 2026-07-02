@@ -21,7 +21,10 @@ import java.util.logging.Logger;
  * Resolves addresses to/from coordinates via Google's Geocoding API, on {@link
  * AddressGeocoder}'s behalf when a {@code GOOGLE_MAPS_API_KEY} is configured.
  *
- * @Author Marocco Stefano, 762192, VA - author of this file
+ * @Author Strazzullo Ciro Andrea, 763603, VA
+ * @Author Marocco Stefano, 762192, VA
+ * @Author Sibilla Ginevra, 761114, VA
+ * @Author Marin Marco, 760622, VA
  */
 final class GoogleGeocoder {
 

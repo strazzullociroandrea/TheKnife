@@ -9,7 +9,10 @@ import java.util.concurrent.TimeUnit;
  * Shared process-running helper for the OS-specific {@link WifiScanner} implementations, all of
  * which work by shelling out to a platform scanning tool and parsing its stdout.
  *
- * @Author Marocco Stefano, 762192, VA - author of this file
+ * @Author Strazzullo Ciro Andrea, 763603, VA
+ * @Author Marocco Stefano, 762192, VA
+ * @Author Sibilla Ginevra, 761114, VA
+ * @Author Marin Marco, 760622, VA
  */
 final class ScanCommand {
 

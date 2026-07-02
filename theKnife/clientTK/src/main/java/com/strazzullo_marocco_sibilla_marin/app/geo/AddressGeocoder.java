@@ -26,7 +26,10 @@ import java.util.logging.Logger;
  * when it isn't, so this class works out of the box even without a Google key.
  *
  * @version 3.0
- * @Author Marocco Stefano, 762192, VA - author of this file
+ * @Author Strazzullo Ciro Andrea, 763603, VA
+ * @Author Marocco Stefano, 762192, VA
+ * @Author Sibilla Ginevra, 761114, VA
+ * @Author Marin Marco, 760622, VA
  */
 public class AddressGeocoder {
 

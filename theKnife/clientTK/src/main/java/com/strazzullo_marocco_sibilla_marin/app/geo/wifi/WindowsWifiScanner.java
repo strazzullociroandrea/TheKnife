@@ -13,7 +13,10 @@ import java.util.regex.Pattern;
  * quality figure and, where present, a bare channel number — both look the same in any
  * Windows locale.
  *
- * @Author Marocco Stefano, 762192, VA - author of this file
+ * @Author Strazzullo Ciro Andrea, 763603, VA
+ * @Author Marocco Stefano, 762192, VA
+ * @Author Sibilla Ginevra, 761114, VA
+ * @Author Marin Marco, 760622, VA
  */
 final class WindowsWifiScanner implements WifiScanner {
 
@@ -22,6 +25,13 @@ final class WindowsWifiScanner implements WifiScanner {
     private static final Pattern CHANNEL_PATTERN = Pattern.compile("^\\s*(\\d{1,3})\\s*$");
     private static final int LOOKAHEAD_LINES = 5;
 
+    /**
+     * Function to list the Wi-Fi access points currently visible to this machine, via
+     * {@code netsh wlan show networks}, parsing by line shape rather than localized labels.
+     *
+     * @return the observed access points; never null, but may be empty
+     * @throws WifiScanException if the scan could not be run or its output could not be parsed
+     */
     @Override
     public List<WifiNetwork> scan() throws WifiScanException {
         List<String> lines = ScanCommand.run("netsh", "wlan", "show", "networks", "mode=bssid").lines().toList();

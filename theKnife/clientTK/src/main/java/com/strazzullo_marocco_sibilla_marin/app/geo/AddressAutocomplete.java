@@ -27,7 +27,10 @@ import java.util.logging.Logger;
  * geocoding), whose usage policy discourages exactly this kind of rapid, per-keystroke querying.
  *
  * @version 2.0
- * @Author Marocco Stefano, 762192, VA - author of this file
+ * @Author Strazzullo Ciro Andrea, 763603, VA
+ * @Author Marocco Stefano, 762192, VA
+ * @Author Sibilla Ginevra, 761114, VA
+ * @Author Marin Marco, 760622, VA
  */
 public final class AddressAutocomplete {
 
@@ -71,6 +74,14 @@ public final class AddressAutocomplete {
         });
     }
 
+    /**
+     * Function to dispatch a suggestion lookup to Google Places (if an API key is configured) or
+     * Photon otherwise.
+     *
+     * @param query the text typed so far
+     * @param field the text field to eventually show suggestions for
+     * @param suggestions the dropdown to populate
+     */
     private static void fetchSuggestions(String query, TextField field, ContextMenu suggestions) {
         String apiKey = ClientConfig.googleMapsApiKey();
         if (apiKey != null) {
@@ -80,6 +91,15 @@ public final class AddressAutocomplete {
         }
     }
 
+    /**
+     * Function to asynchronously fetch address suggestions from Google's Places Autocomplete API
+     * and show them once resolved, on the JavaFX Application Thread.
+     *
+     * @param query the text typed so far
+     * @param apiKey the configured Google Maps API key
+     * @param field the text field to show suggestions for
+     * @param suggestions the dropdown to populate
+     */
     private static void fetchGoogleSuggestions(String query, String apiKey, TextField field, ContextMenu suggestions) {
         String url = String.format(GOOGLE_SUGGEST_URL, URLEncoder.encode(query, StandardCharsets.UTF_8), apiKey);
         HttpRequest request = HttpRequest.newBuilder(URI.create(url))
@@ -109,6 +129,14 @@ public final class AddressAutocomplete {
                 });
     }
 
+    /**
+     * Function to asynchronously fetch address suggestions from Photon and show them once
+     * resolved, on the JavaFX Application Thread.
+     *
+     * @param query the text typed so far
+     * @param field the text field to show suggestions for
+     * @param suggestions the dropdown to populate
+     */
     private static void fetchPhotonSuggestions(String query, TextField field, ContextMenu suggestions) {
         String url = String.format(PHOTON_SUGGEST_URL, URLEncoder.encode(query, StandardCharsets.UTF_8));
         HttpRequest request = HttpRequest.newBuilder(URI.create(url))
@@ -138,6 +166,14 @@ public final class AddressAutocomplete {
                 });
     }
 
+    /**
+     * Function to populate and show the suggestions dropdown, or hide it if the field lost focus
+     * or there are no labels to show.
+     *
+     * @param field the text field the dropdown is attached to
+     * @param suggestions the dropdown to populate
+     * @param labels the suggestion labels to show, in order
+     */
     private static void showSuggestions(TextField field, ContextMenu suggestions, List<String> labels) {
         if (!field.isFocused() || labels.isEmpty()) {
             suggestions.hide();
@@ -158,6 +194,13 @@ public final class AddressAutocomplete {
         }
     }
 
+    /**
+     * Function to format a Photon feature into a single display label, preferring its name over
+     * its street when both are present.
+     *
+     * @param feature the Photon feature to format
+     * @return the formatted label, possibly blank if the feature has no usable properties
+     */
     private static String formatLabel(PhotonFeature feature) {
         if (feature.properties() == null) {
             return "";
@@ -171,6 +214,12 @@ public final class AddressAutocomplete {
         return label.toString();
     }
 
+    /**
+     * Function to append a comma-separated part to a label being built, skipping blank parts.
+     *
+     * @param label the label under construction
+     * @param part the part to append, possibly null or blank
+     */
     private static void appendPart(StringBuilder label, String part) {
         if (part == null || part.isBlank()) {
             return;

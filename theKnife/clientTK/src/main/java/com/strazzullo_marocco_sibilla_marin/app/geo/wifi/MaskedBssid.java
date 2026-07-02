@@ -8,7 +8,10 @@ package com.strazzullo_marocco_sibilla_marin.app.geo.wifi;
  * Geolocation API, which would otherwise silently fall back to a coarse IP-based estimate instead
  * of failing loudly.
  *
- * @Author Marocco Stefano, 762192, VA - author of this file
+ * @Author Strazzullo Ciro Andrea, 763603, VA
+ * @Author Marocco Stefano, 762192, VA
+ * @Author Sibilla Ginevra, 761114, VA
+ * @Author Marin Marco, 760622, VA
  */
 final class MaskedBssid {
 

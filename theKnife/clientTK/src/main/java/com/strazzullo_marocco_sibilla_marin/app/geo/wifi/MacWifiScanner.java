@@ -13,7 +13,10 @@ import java.util.regex.Pattern;
  * masked as {@code 00:00:00:00:00:00}, which {@link #scan()} detects and rejects rather than
  * silently returning useless access points.
  *
- * @Author Marocco Stefano, 762192, VA - author of this file
+ * @Author Strazzullo Ciro Andrea, 763603, VA
+ * @Author Marocco Stefano, 762192, VA
+ * @Author Sibilla Ginevra, 761114, VA
+ * @Author Marin Marco, 760622, VA
  */
 final class MacWifiScanner implements WifiScanner {
 
@@ -21,6 +24,15 @@ final class MacWifiScanner implements WifiScanner {
             "/System/Library/PrivateFrameworks/Apple80211.framework/Versions/Current/Resources/airport";
     private static final Pattern BSSID_PATTERN = Pattern.compile("([0-9a-fA-F]{2}:){5}[0-9a-fA-F]{2}");
 
+    /**
+     * Function to list the Wi-Fi access points currently visible to this machine, via the
+     * bundled {@code airport} tool. Throws if every observed BSSID came back masked, since that
+     * means Location Services permission is missing rather than there being no networks nearby.
+     *
+     * @return the observed access points; never null, but may be empty
+     * @throws WifiScanException if the scan could not be run, its output could not be parsed, or
+     *                           every BSSID came back masked
+     */
     @Override
     public List<WifiNetwork> scan() throws WifiScanException {
         String output = ScanCommand.run(AIRPORT_PATH, "-s");
@@ -49,6 +61,12 @@ final class MacWifiScanner implements WifiScanner {
         return networks;
     }
 
+    /**
+     * Function to parse an integer, swallowing any format error.
+     *
+     * @param value the string to parse
+     * @return the parsed integer, or null if it wasn't a valid integer
+     */
     private Integer parseIntOrNull(String value) {
         try {
             return Integer.parseInt(value);
@@ -57,6 +75,13 @@ final class MacWifiScanner implements WifiScanner {
         }
     }
 
+    /**
+     * Function to parse {@code airport}'s channel column, which sometimes appends a comma and a
+     * band suffix (e.g. {@code "36,1"}) that must be stripped before parsing.
+     *
+     * @param value the channel column's raw text
+     * @return the parsed channel number, or null if it wasn't a valid integer
+     */
     private Integer parseChannel(String value) {
         int comma = value.indexOf(',');
         return parseIntOrNull(comma >= 0 ? value.substring(0, comma) : value);

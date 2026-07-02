@@ -23,7 +23,10 @@ import java.util.logging.Logger;
  * a key: it requires a Google Cloud API key with the Geolocation API enabled (configured via
  * {@code GOOGLE_MAPS_API_KEY}), so it is only used when that key is present.
  *
- * @Author Marocco Stefano, 762192, VA - author of this file
+ * @Author Strazzullo Ciro Andrea, 763603, VA
+ * @Author Marocco Stefano, 762192, VA
+ * @Author Sibilla Ginevra, 761114, VA
+ * @Author Marin Marco, 760622, VA
  */
 public class GoogleWifiGeolocationService {
 

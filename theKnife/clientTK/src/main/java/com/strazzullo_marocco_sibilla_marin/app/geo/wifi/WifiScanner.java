@@ -7,7 +7,10 @@ import java.util.List;
  * API a list of nearby access points for WiFi-based positioning. Implementations shell out to
  * whatever scanning tool ships with the host OS, since the JDK has no portable Wi-Fi scan API.
  *
- * @Author Marocco Stefano, 762192, VA - author of this file
+ * @Author Strazzullo Ciro Andrea, 763603, VA
+ * @Author Marocco Stefano, 762192, VA
+ * @Author Sibilla Ginevra, 761114, VA
+ * @Author Marin Marco, 760622, VA
  */
 public interface WifiScanner {
 

@@ -27,8 +27,8 @@ import java.util.function.Consumer;
  * it feeds into lives in the host screen, which is told about changes via {@code onCuisineChanged}
  * and can push external changes back in via {@link #syncSelection(Cuisine)}.
  *
- * @Author Marocco Stefano, 762192, VA - author of this file
  * @Author Strazzullo Ciro Andrea, 763603, VA
+ * @Author Marocco Stefano, 762192, VA
  * @Author Sibilla Ginevra, 761114, VA
  * @Author Marin Marco, 760622, VA
  */
@@ -90,6 +90,15 @@ public class CuisineFilterRow extends HBox {
         filtersButton.setText(active ? "Filtri (attivi)" : "Filtri");
     }
 
+    /**
+     * Function to build one cuisine's toggle chip: an icon badge above a text label, reflecting
+     * its selected state via the {@code selected} pseudo-class for CSS styling.
+     *
+     * @param cuisine the cuisine this chip selects
+     * @param icon the chip's icon
+     * @param text the chip's label
+     * @return the chip
+     */
     private ToggleButton buildChip(Cuisine cuisine, Node icon, String text) {
         StackPane circle = circleBadge(icon);
         ToggleButton chip = new ToggleButton(text);
@@ -102,6 +111,12 @@ public class CuisineFilterRow extends HBox {
         return chip;
     }
 
+    /**
+     * Function to wrap an icon in the fixed-size circular badge shared by every chip.
+     *
+     * @param icon the icon to wrap
+     * @return the circular badge
+     */
     private StackPane circleBadge(Node icon) {
         StackPane circle = new StackPane(icon);
         circle.getStyleClass().add("tk-cuisine-circle");
@@ -144,15 +159,7 @@ public class CuisineFilterRow extends HBox {
      * @return the Italian label
      */
     private String label(Cuisine cuisine) {
-        return switch (cuisine) {
-            case italian -> "Italiana";
-            case chinese -> "Cinese";
-            case thai -> "Tailandese";
-            case mexican -> "Messicana";
-            case indian -> "Indiana";
-            case healthy -> "Sana";
-            case japanese -> "Giapponese";
-        };
+        return CuisineLabels.of(cuisine);
     }
 
     /**

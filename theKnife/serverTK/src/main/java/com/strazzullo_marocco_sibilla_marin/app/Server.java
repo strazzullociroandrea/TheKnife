@@ -3,6 +3,7 @@ package com.strazzullo_marocco_sibilla_marin.app;
 import com.strazzullo_marocco_sibilla_marin.app.service.BookingServiceImpl;
 import com.strazzullo_marocco_sibilla_marin.app.service.CustomerServiceImpl;
 import com.strazzullo_marocco_sibilla_marin.app.service.AuthServiceImpl;
+import com.strazzullo_marocco_sibilla_marin.app.service.FavouriteServiceImpl;
 import com.strazzullo_marocco_sibilla_marin.app.service.LocationServiceImpl;
 import com.strazzullo_marocco_sibilla_marin.app.service.PhotoServiceImpl;
 import com.strazzullo_marocco_sibilla_marin.app.service.RestaurantServiceImpl;
@@ -23,9 +24,9 @@ import java.util.logging.Logger;
  * remote service onto the RMI registry. No explicit blocking is needed after that:
  * the registry's own non-daemon threads keep the JVM alive once main() returns.
  *
- * @version 2.0
- * @Author Strazzullo Ciro Andrea, 763603, VA - author of this file
- * @Author Marocco Stefano, 762192, VA - author of this revision
+ * @version 3.0
+ * @Author Strazzullo Ciro Andrea, 763603, VA
+ * @Author Marocco Stefano, 762192, VA
  * @Author Sibilla Ginevra, 761114, VA
  * @Author Marin Marco, 760622, VA
  */
@@ -41,6 +42,7 @@ public class Server {
     public static final String BOOKING_SERVICE_NAME = "BookingService";
     public static final String PHOTO_SERVICE_NAME = "PhotoService";
     public static final String REVIEW_SERVICE_NAME = "ReviewService";
+    public static final String FAVOURITE_SERVICE_NAME = "FavouriteService";
 
     /**
      * Starts the server: runs the interactive setup wizard if any required environment variables
@@ -79,6 +81,9 @@ public class Server {
 
             registry.rebind(REVIEW_SERVICE_NAME, new ReviewServiceImpl(new ReviewDAOImpl()));
             LOGGER.info(() -> "ReviewService bound on RMI registry, port " + RMI_PORT);
+
+            registry.rebind(FAVOURITE_SERVICE_NAME, new FavouriteServiceImpl());
+            LOGGER.info(() -> "FavouriteService bound on RMI registry, port " + RMI_PORT);
 
             bindPhotoService(registry);
 

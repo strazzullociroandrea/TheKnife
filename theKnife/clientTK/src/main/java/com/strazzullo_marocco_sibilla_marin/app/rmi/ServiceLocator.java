@@ -2,6 +2,7 @@ package com.strazzullo_marocco_sibilla_marin.app.rmi;
 
 import com.strazzullo_marocco_sibilla_marin.app.remote.BookingService;
 import com.strazzullo_marocco_sibilla_marin.app.remote.CustomerService;
+import com.strazzullo_marocco_sibilla_marin.app.remote.FavouriteService;
 import com.strazzullo_marocco_sibilla_marin.app.remote.LocationService;
 import com.strazzullo_marocco_sibilla_marin.app.remote.PhotoService;
 import com.strazzullo_marocco_sibilla_marin.app.remote.ReviewService;
@@ -18,9 +19,9 @@ import java.rmi.registry.Registry;
  * Resolves and holds the RMI stubs the client UI talks to, looked up once from the registry
  * exposed by the TheKnife server.
  *
- * @version 1.0
+ * @version 2.0
  * @Author Strazzullo Ciro Andrea, 763603, VA
- * @Author Marocco Stefano, 762192, VA - author of this file
+ * @Author Marocco Stefano, 762192, VA
  * @Author Sibilla Ginevra, 761114, VA
  * @Author Marin Marco, 760622, VA
  */
@@ -33,6 +34,7 @@ public final class ServiceLocator {
     private static final String REVIEW_SERVICE_NAME = "ReviewService";
     private static final String AUTH_SERVICE_NAME = "AuthService";
     private static final String RESTAURANT_SERVICE_NAME = "RestaurantService";
+    private static final String FAVOURITE_SERVICE_NAME = "FavouriteService";
 
     private static ServiceLocator instance;
 
@@ -43,9 +45,10 @@ public final class ServiceLocator {
     private final ReviewService reviewService;
     private final AuthService authService;
     private final RestaurantService restaurantService;
+    private final FavouriteService favouriteService;
 
     private ServiceLocator(CustomerService customerService, LocationService locationService,
-                           BookingService bookingService, PhotoService photoService, ReviewService reviewService, AuthService authService, RestaurantService restaurantService) {
+                           BookingService bookingService, PhotoService photoService, ReviewService reviewService, AuthService authService, RestaurantService restaurantService, FavouriteService favouriteService) {
         this.customerService = customerService;
         this.locationService = locationService;
         this.bookingService = bookingService;
@@ -53,6 +56,7 @@ public final class ServiceLocator {
         this.reviewService = reviewService;
         this.authService = authService;
         this.restaurantService = restaurantService;
+        this.favouriteService = favouriteService;
     }
 
     /**
@@ -74,8 +78,9 @@ public final class ServiceLocator {
         ReviewService reviewService = (ReviewService) registry.lookup(REVIEW_SERVICE_NAME);
         AuthService authService = (AuthService) registry.lookup(AUTH_SERVICE_NAME);
         RestaurantService restaurantService = (RestaurantService) registry.lookup(RESTAURANT_SERVICE_NAME);
+        FavouriteService favouriteService = (FavouriteService) registry.lookup(FAVOURITE_SERVICE_NAME);
 
-        instance = new ServiceLocator(customerService, locationService, bookingService, photoService, reviewService, authService, restaurantService);
+        instance = new ServiceLocator(customerService, locationService, bookingService, photoService, reviewService, authService, restaurantService, favouriteService);
         return instance;
     }
 
@@ -153,5 +158,14 @@ public final class ServiceLocator {
      */
     public ReviewService getReviewService() {
         return reviewService;
+    }
+
+    /**
+     * Returns the favourite service stub
+     *
+     * @return the favourite service stub
+     */
+    public FavouriteService getFavouriteService() {
+        return favouriteService;
     }
 }

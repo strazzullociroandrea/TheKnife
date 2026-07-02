@@ -30,7 +30,10 @@ import java.util.function.Consumer;
  * Designed to be hosted inside an {@code atlantafx.base.controls.ModalPane}, like {@link FilterPanel}.
  *
  * @version 2.0
- * @Author Marocco Stefano, 762192, VA - author of this revision
+ * @Author Strazzullo Ciro Andrea, 763603, VA
+ * @Author Marocco Stefano, 762192, VA
+ * @Author Sibilla Ginevra, 761114, VA
+ * @Author Marin Marco, 760622, VA
  */
 public class LocationPromptPanel extends VBox {
 
@@ -120,6 +123,12 @@ public class LocationPromptPanel extends VBox {
         thread.start();
     }
 
+    /**
+     * Function to toggle the spinner and status text, on the JavaFX Application Thread.
+     *
+     * @param busy whether the spinner should be shown
+     * @param message the status text to show, or null to clear it
+     */
     private void setBusy(boolean busy, String message) {
         Platform.runLater(() -> {
             spinner.setVisible(busy);

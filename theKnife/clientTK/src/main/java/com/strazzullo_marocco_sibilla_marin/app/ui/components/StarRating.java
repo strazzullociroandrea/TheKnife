@@ -12,7 +12,10 @@ import javafx.scene.shape.Polygon;
  * ReviewCard} so every star rating in the app reads the same way; {@link StarRatingPicker} reuses
  * the same {@link #buildStar(double, boolean)} shape for its clickable rating filter.
  *
- * @Author Marocco Stefano, 762192, VA - author of this file
+ * @Author Strazzullo Ciro Andrea, 763603, VA
+ * @Author Marocco Stefano, 762192, VA
+ * @Author Sibilla Ginevra, 761114, VA
+ * @Author Marin Marco, 760622, VA
  */
 public class StarRating extends HBox {
 

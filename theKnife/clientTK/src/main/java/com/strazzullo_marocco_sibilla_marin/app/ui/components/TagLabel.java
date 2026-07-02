@@ -8,7 +8,10 @@ import javafx.scene.control.Label;
  * Small rounded pill label used for cuisine, price, and dietary tags, shared by {@link
  * ResultCard} and the location detail screen so every tag in the app reads as the same shape.
  *
- * @Author Marocco Stefano, 762192, VA - author of this file
+ * @Author Strazzullo Ciro Andrea, 763603, VA
+ * @Author Marocco Stefano, 762192, VA
+ * @Author Sibilla Ginevra, 761114, VA
+ * @Author Marin Marco, 760622, VA
  */
 public class TagLabel extends Label {
 

@@ -10,7 +10,10 @@ import java.util.Map;
  * day ({@link FilterPanel}'s day picker, the location detail screen's opening hours table),
  * keyed in calendar order.
  *
- * @Author Marocco Stefano, 762192, VA - author of this file
+ * @Author Strazzullo Ciro Andrea, 763603, VA
+ * @Author Marocco Stefano, 762192, VA
+ * @Author Sibilla Ginevra, 761114, VA
+ * @Author Marin Marco, 760622, VA
  */
 public final class DayLabels {
 

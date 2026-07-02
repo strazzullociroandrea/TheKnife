@@ -11,7 +11,10 @@ import sibilla.OpeningHours;
  * Small colored-dot-plus-label pill showing whether a {@link Location} is open right now,
  * shared by {@link ResultCard} and the location detail screen so both read as the same design.
  *
- * @Author Marocco Stefano, 762192, VA - author of this file
+ * @Author Strazzullo Ciro Andrea, 763603, VA
+ * @Author Marocco Stefano, 762192, VA
+ * @Author Sibilla Ginevra, 761114, VA
+ * @Author Marin Marco, 760622, VA
  */
 public class OpenStatusPill extends Label {
 

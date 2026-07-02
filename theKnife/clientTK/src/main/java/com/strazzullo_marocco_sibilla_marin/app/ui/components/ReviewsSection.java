@@ -28,7 +28,10 @@ import java.util.logging.Logger;
  * com.strazzullo_marocco_sibilla_marin.app.remote.ReviewService}, with the current user's already
  * -liked reviews pre-marked so {@link ReviewCard}'s like button starts in the right state.
  *
- * @Author Marocco Stefano, 762192, VA - author of this file
+ * @Author Strazzullo Ciro Andrea, 763603, VA
+ * @Author Marocco Stefano, 762192, VA
+ * @Author Sibilla Ginevra, 761114, VA
+ * @Author Marin Marco, 760622, VA
  */
 public class ReviewsSection extends VBox {
 
@@ -69,12 +72,21 @@ public class ReviewsSection extends VBox {
         loadReviews(locationId);
     }
 
+    /**
+     * Function to show a "loading" placeholder while the reviews are being fetched.
+     */
     private void showLoading() {
         Label loading = new Label("Caricamento delle recensioni...");
         loading.getStyleClass().add(Styles.TEXT_MUTED);
         list.getChildren().setAll(loading);
     }
 
+    /**
+     * Function to fetch the location's reviews and the current user's liked-review ids in the
+     * background.
+     *
+     * @param locationId the location whose reviews to fetch
+     */
     private void loadReviews(String locationId) {
         Task<ReviewsData> task = new Task<>() {
             @Override
@@ -102,6 +114,12 @@ public class ReviewsSection extends VBox {
         thread.start();
     }
 
+    /**
+     * Function to store the loaded reviews and either show the "no reviews yet" placeholder or
+     * reveal the sort picker and render the list.
+     *
+     * @param loaded the fetched reviews plus the current user's liked-review ids
+     */
     private void showReviews(ReviewsData loaded) {
         this.data = loaded;
         if (loaded.reviews.isEmpty()) {
@@ -122,6 +140,10 @@ public class ReviewsSection extends VBox {
         renderReviews();
     }
 
+    /**
+     * Function to re-sort the loaded reviews by the currently picked {@link ReviewSortOrder} and
+     * rebuild the list of {@link ReviewCard}s.
+     */
     private void renderReviews() {
         List<Review> sorted = new ArrayList<>(data.reviews);
         sorted.sort(sortPicker.getValue().comparator());
@@ -133,6 +155,13 @@ public class ReviewsSection extends VBox {
         }
     }
 
+    /**
+     * Function to persist a like toggle on a background thread. The card's own selection state
+     * has already been updated optimistically by the time this runs.
+     *
+     * @param reviewId the review whose like state changed
+     * @param liked the review's new liked state
+     */
     private void toggleLike(String reviewId, boolean liked) {
         Task<Void> task = new Task<>() {
             @Override

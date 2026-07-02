@@ -19,7 +19,10 @@ import java.util.logging.Logger;
  * com.strazzullo_marocco_sibilla_marin.app.remote.PhotoService}. Hides itself entirely if the
  * location has no photos yet, rather than showing an empty strip.
  *
- * @Author Marocco Stefano, 762192, VA - author of this file
+ * @Author Strazzullo Ciro Andrea, 763603, VA
+ * @Author Marocco Stefano, 762192, VA
+ * @Author Sibilla Ginevra, 761114, VA
+ * @Author Marin Marco, 760622, VA
  */
 public class PhotoGallery extends ScrollPane {
 
@@ -57,6 +60,12 @@ public class PhotoGallery extends ScrollPane {
         thread.start();
     }
 
+    /**
+     * Function to render every photo as a thumbnail and reveal the gallery, left hidden if there
+     * are none.
+     *
+     * @param photos the location's photos, possibly null or empty
+     */
     private void showPhotos(List<Photo> photos) {
         if (photos == null || photos.isEmpty()) {
             return;
@@ -68,6 +77,12 @@ public class PhotoGallery extends ScrollPane {
         setManaged(true);
     }
 
+    /**
+     * Function to build a single fixed-size, rounded-corner photo thumbnail.
+     *
+     * @param photo the photo to render
+     * @return the thumbnail
+     */
     private StackPane thumbnail(Photo photo) {
         ImageView imageView = new ImageView(new Image(photo.getUrl(), THUMBNAIL_SIZE, THUMBNAIL_SIZE, false, true, true));
         imageView.setFitWidth(THUMBNAIL_SIZE);

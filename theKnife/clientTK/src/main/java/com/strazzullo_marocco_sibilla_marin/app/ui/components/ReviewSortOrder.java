@@ -7,7 +7,10 @@ import java.util.Comparator;
 /**
  * Sort orders offered by {@link ReviewsSection} for a location's review list.
  *
- * @Author Marocco Stefano, 762192, VA - author of this file
+ * @Author Strazzullo Ciro Andrea, 763603, VA
+ * @Author Marocco Stefano, 762192, VA
+ * @Author Sibilla Ginevra, 761114, VA
+ * @Author Marin Marco, 760622, VA
  */
 public enum ReviewSortOrder {
 
@@ -19,6 +22,10 @@ public enum ReviewSortOrder {
     private final String label;
     private final Comparator<Review> comparator;
 
+    /**
+     * @param label the Italian display label shown in the sort picker
+     * @param comparator the comparator implementing this sort order
+     */
     ReviewSortOrder(String label, Comparator<Review> comparator) {
         this.label = label;
         this.comparator = comparator;
@@ -31,6 +38,9 @@ public enum ReviewSortOrder {
         return comparator;
     }
 
+    /**
+     * @return the Italian display label, shown directly by the sort picker's combo box
+     */
     @Override
     public String toString() {
         return label;

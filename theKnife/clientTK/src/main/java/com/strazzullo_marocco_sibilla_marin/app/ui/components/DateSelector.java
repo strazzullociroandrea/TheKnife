@@ -34,7 +34,10 @@ import java.util.function.Predicate;
  * months ahead doesn't mean clicking the day arrow over and over.
  *
  * @version 2.0
- * @Author Marocco Stefano, 762192, VA - author of this revision
+ * @Author Strazzullo Ciro Andrea, 763603, VA
+ * @Author Marocco Stefano, 762192, VA
+ * @Author Sibilla Ginevra, 761114, VA
+ * @Author Marin Marco, 760622, VA
  */
 public class DateSelector extends HBox {
 
@@ -137,6 +140,10 @@ public class DateSelector extends HBox {
         popover.setArrowIndent(0);
     }
 
+    /**
+     * Function to open the calendar popover, resetting it to the selected date's month (or the
+     * current month if none is selected) and back to the day grid.
+     */
     private void openPopover() {
         LocalDate current = getValue();
         displayedMonth = current != null ? YearMonth.from(current) : YearMonth.now();
@@ -155,6 +162,12 @@ public class DateSelector extends HBox {
         displayedMonth = showingMonthGrid ? displayedMonth.plusYears(direction) : displayedMonth.plusMonths(direction);
     }
 
+    /**
+     * Function to build the popover's content: the header (prev/next + month or year label) and
+     * the day/month grid body, clipped to the popover's rounded corners.
+     *
+     * @return the calendar content
+     */
     private VBox buildCalendar() {
         Region headerSpacer = new Region();
         HBox.setHgrow(headerSpacer, Priority.ALWAYS);
@@ -191,6 +204,10 @@ public class DateSelector extends HBox {
         node.setClip(clip);
     }
 
+    /**
+     * Function to redraw the header text and swap the calendar body between the day grid and the
+     * month grid, depending on {@link #showingMonthGrid}.
+     */
     private void refresh() {
         headerLabel.setText(showingMonthGrid
                 ? String.valueOf(displayedMonth.getYear())
@@ -201,24 +218,44 @@ public class DateSelector extends HBox {
                 : DateSelectorGrids.buildDayGrid(displayedMonth, getValue(), isDisabled, this::onDayPicked));
     }
 
+    /**
+     * Function to commit a picked day: update the value, the field text, and close the popover.
+     *
+     * @param date the picked date
+     */
     private void onDayPicked(LocalDate date) {
         value.set(date);
         updateFieldText();
         popover.hide();
     }
 
+    /**
+     * Function to commit a picked month from the month grid, switching back to the day grid for
+     * that month.
+     *
+     * @param month the picked month
+     */
     private void onMonthPicked(Month month) {
         displayedMonth = YearMonth.of(displayedMonth.getYear(), month);
         showingMonthGrid = false;
         refresh();
     }
 
+    /**
+     * Function to build a flat, circular icon-only navigation button.
+     *
+     * @param icon the icon to show
+     * @return the button
+     */
     private static Button navButton(Feather icon) {
         Button button = new Button("", new FontIcon(icon));
         button.getStyleClass().addAll(Styles.BUTTON_ICON, Styles.FLAT, Styles.BUTTON_CIRCLE);
         return button;
     }
 
+    /**
+     * Function to refresh the pill button's text to the selected date, or a placeholder if none.
+     */
     private void updateFieldText() {
         LocalDate v = getValue();
         field.setText(v != null ? v.format(FIELD_FORMAT) : "Seleziona data");

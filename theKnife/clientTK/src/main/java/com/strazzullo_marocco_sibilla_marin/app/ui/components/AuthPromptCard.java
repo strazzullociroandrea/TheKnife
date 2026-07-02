@@ -22,7 +22,10 @@ import org.kordamp.ikonli.javafx.FontIcon;
  * </ul>
  *
  * @version 3.0
- * @Author Marocco Stefano, 762192, VA - author of this file
+ * @Author Strazzullo Ciro Andrea, 763603, VA
+ * @Author Marocco Stefano, 762192, VA
+ * @Author Sibilla Ginevra, 761114, VA
+ * @Author Marin Marco, 760622, VA
  */
 public class AuthPromptCard extends VBox {
 
@@ -109,6 +112,14 @@ public class AuthPromptCard extends VBox {
         getChildren().addAll(header, messageLabel, actionRow);
     }
 
+    /**
+     * Function to build one of the guest-mode "Accedi"/"Registrati" clickable action tiles.
+     *
+     * @param label the tile's label
+     * @param icon the tile's icon
+     * @param action callback invoked when the tile is clicked
+     * @return the tile
+     */
     private VBox buildActionCard(String label, Feather icon, Runnable action) {
         FontIcon fontIcon = new FontIcon(icon);
         fontIcon.setIconSize(28);

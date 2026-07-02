@@ -13,7 +13,10 @@ import java.util.List;
  * result card, so customers pick a budget bracket rather than typing a number that doesn't mean
  * anything to them at a glance. Clicking the already-selected chip clears it back to "any price".
  *
- * @Author Marocco Stefano, 762192, VA - author of this file
+ * @Author Strazzullo Ciro Andrea, 763603, VA
+ * @Author Marocco Stefano, 762192, VA
+ * @Author Sibilla Ginevra, 761114, VA
+ * @Author Marin Marco, 760622, VA
  */
 public class PriceRangePicker extends HBox {
 
@@ -40,6 +43,12 @@ public class PriceRangePicker extends HBox {
         getChildren().addAll(chips);
     }
 
+    /**
+     * Function to enforce single-selection among the three chips: selecting one deselects the
+     * other two, and clicking the already-selected chip clears it back to "any price".
+     *
+     * @param clicked the chip that was just clicked
+     */
     private void select(ToggleButton clicked) {
         boolean nowSelected = clicked.isSelected();
         for (ToggleButton chip : chips) {

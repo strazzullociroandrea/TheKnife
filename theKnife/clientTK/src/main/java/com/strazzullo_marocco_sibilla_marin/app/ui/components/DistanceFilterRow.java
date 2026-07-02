@@ -24,8 +24,8 @@ import org.kordamp.ikonli.javafx.FontIcon;
  * field grows to fill the row rather than sitting at a fixed width.
  *
  * @version 2.0
- * @Author Marocco Stefano, 762192, VA - author of this revision
  * @Author Strazzullo Ciro Andrea, 763603, VA
+ * @Author Marocco Stefano, 762192, VA
  * @Author Sibilla Ginevra, 761114, VA
  * @Author Marin Marco, 760622, VA
  */

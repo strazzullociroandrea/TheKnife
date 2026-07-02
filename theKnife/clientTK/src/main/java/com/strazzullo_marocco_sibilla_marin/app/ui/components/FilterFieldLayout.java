@@ -13,7 +13,10 @@ import javafx.scene.layout.VBox;
  * Layout helpers shared by {@link FilterPanel}'s sections: grouping a section's content under a
  * title, laying two stretched controls side by side, and labeling a single control above itself.
  *
- * @Author Marocco Stefano, 762192, VA - author of this file
+ * @Author Strazzullo Ciro Andrea, 763603, VA
+ * @Author Marocco Stefano, 762192, VA
+ * @Author Sibilla Ginevra, 761114, VA
+ * @Author Marin Marco, 760622, VA
  */
 final class FilterFieldLayout {
 

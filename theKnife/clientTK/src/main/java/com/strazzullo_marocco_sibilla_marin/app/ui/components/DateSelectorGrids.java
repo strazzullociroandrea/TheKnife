@@ -24,7 +24,10 @@ import java.util.function.Predicate;
  * month grid used as a fast year-wide jump. Kept stateless and separate so {@link DateSelector}
  * itself is left to own the popover/navigation plumbing around them.
  *
- * @Author Marocco Stefano, 762192, VA - author of this file
+ * @Author Strazzullo Ciro Andrea, 763603, VA
+ * @Author Marocco Stefano, 762192, VA
+ * @Author Sibilla Ginevra, 761114, VA
+ * @Author Marin Marco, 760622, VA
  */
 final class DateSelectorGrids {
 
@@ -116,6 +119,14 @@ final class DateSelectorGrids {
         return grid;
     }
 
+    /**
+     * Function to build one selectable month cell.
+     *
+     * @param month the month this cell picks
+     * @param displayedMonth the year/month currently displayed, used to mark the selected cell
+     * @param onPick called with the picked month when this cell is clicked
+     * @return the cell
+     */
     private static ToggleButton buildMonthCell(Month month, YearMonth displayedMonth, Consumer<Month> onPick) {
         ToggleButton button = new ToggleButton(Capitalization.capitalize(month.getDisplayName(TextStyle.SHORT, Locale.ITALIAN)));
         button.getStyleClass().add("tk-date-cell");

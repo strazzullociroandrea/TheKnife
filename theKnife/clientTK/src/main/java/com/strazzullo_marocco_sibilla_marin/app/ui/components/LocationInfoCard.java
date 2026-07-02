@@ -20,7 +20,10 @@ import java.util.Locale;
  * The location detail screen's main info card: name, cuisine/dietary tags, open/closed status,
  * address, rating, price range, and the full week's opening hours.
  *
- * @Author Marocco Stefano, 762192, VA - author of this file
+ * @Author Strazzullo Ciro Andrea, 763603, VA
+ * @Author Marocco Stefano, 762192, VA
+ * @Author Sibilla Ginevra, 761114, VA
+ * @Author Marin Marco, 760622, VA
  */
 public class LocationInfoCard extends VBox {
 

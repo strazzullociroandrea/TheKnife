@@ -6,7 +6,10 @@ import java.util.List;
 /**
  * Builds the fixed list of 30-minute time slots used by {@link FilterPanel}'s opening time picker.
  *
- * @Author Marocco Stefano, 762192, VA - author of this file
+ * @Author Strazzullo Ciro Andrea, 763603, VA
+ * @Author Marocco Stefano, 762192, VA
+ * @Author Sibilla Ginevra, 761114, VA
+ * @Author Marin Marco, 760622, VA
  */
 final class OpeningTimeSlots {
 

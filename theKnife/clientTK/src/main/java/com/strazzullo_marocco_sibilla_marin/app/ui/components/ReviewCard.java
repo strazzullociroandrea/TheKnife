@@ -22,7 +22,10 @@ import java.util.function.Consumer;
  * like count with a toggleable like button, and the manager's reply, if any. Used by {@link
  * ReviewsSection} to render the location detail screen's review list.
  *
- * @Author Marocco Stefano, 762192, VA - author of this file
+ * @Author Strazzullo Ciro Andrea, 763603, VA
+ * @Author Marocco Stefano, 762192, VA
+ * @Author Sibilla Ginevra, 761114, VA
+ * @Author Marin Marco, 760622, VA
  */
 public class ReviewCard extends VBox {
 
@@ -85,10 +88,21 @@ public class ReviewCard extends VBox {
         }
     }
 
+    /**
+     * Function to build one "Name: N/5" per-aspect rating label.
+     *
+     * @param name the aspect's display name
+     * @param stars the aspect's star count out of 5
+     * @return the label
+     */
     private HBox aspectLabel(String name, int stars) {
         return new HBox(4, new Label(name + ":"), new Label(stars + "/5"));
     }
 
+    /**
+     * Function to redraw the like button's icon color and count to match the current
+     * {@link #liked}/{@link #likes} state.
+     */
     private void updateLikeButton() {
         FontIcon heart = new FontIcon(Feather.HEART);
         heart.getStyleClass().add(liked ? Styles.DANGER : Styles.TEXT_MUTED);
@@ -96,6 +110,12 @@ public class ReviewCard extends VBox {
         likeButton.setText(String.valueOf(Math.max(0, likes)));
     }
 
+    /**
+     * Function to build the manager's reply block, indented under the review card.
+     *
+     * @param reply the manager's reply to render
+     * @return the reply block
+     */
     private VBox buildReply(marin.ReviewReply reply) {
         Label title = new Label("Risposta del gestore", new FontIcon(Feather.CORNER_DOWN_RIGHT));
         title.getStyleClass().addAll(Styles.TEXT_BOLD, Styles.TEXT_SMALL);

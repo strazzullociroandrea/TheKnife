@@ -14,7 +14,10 @@ import javafx.scene.shape.Polygon;
  * already-selected star clears it back to 0, meaning "any rating".
  *
  * @version 2.0
- * @Author Marocco Stefano, 762192, VA - author of this file
+ * @Author Strazzullo Ciro Andrea, 763603, VA
+ * @Author Marocco Stefano, 762192, VA
+ * @Author Sibilla Ginevra, 761114, VA
+ * @Author Marin Marco, 760622, VA
  */
 public class StarRatingPicker extends HBox {
 
@@ -41,6 +44,9 @@ public class StarRatingPicker extends HBox {
         refresh();
     }
 
+    /**
+     * Function to redraw every star's fill/stroke to match the currently selected rating.
+     */
     private void refresh() {
         int selected = getValue();
         for (int i = 0; i < stars.length; i++) {

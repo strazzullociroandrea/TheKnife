@@ -4,7 +4,10 @@ package com.strazzullo_marocco_sibilla_marin.app.ui.components;
  * Renders a location's numeric price range as a euro-sign scale, shared by {@link ResultCard}
  * and the location detail screen.
  *
- * @Author Marocco Stefano, 762192, VA - author of this file
+ * @Author Strazzullo Ciro Andrea, 763603, VA
+ * @Author Marocco Stefano, 762192, VA
+ * @Author Sibilla Ginevra, 761114, VA
+ * @Author Marin Marco, 760622, VA
  */
 public final class PriceLabels {
 

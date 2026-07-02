@@ -15,7 +15,10 @@ import sibilla.OpeningHours;
  * order, with closed days shown in red ("Chiuso") rather than left blank. Used by the location
  * detail screen, and reusable wherever else a location's full week of hours needs showing.
  *
- * @Author Marocco Stefano, 762192, VA - author of this file
+ * @Author Strazzullo Ciro Andrea, 763603, VA
+ * @Author Marocco Stefano, 762192, VA
+ * @Author Sibilla Ginevra, 761114, VA
+ * @Author Marin Marco, 760622, VA
  */
 public class OpeningHoursGrid extends GridPane {
 
@@ -36,6 +39,14 @@ public class OpeningHoursGrid extends GridPane {
         }
     }
 
+    /**
+     * Function to build a single day's row: its name and either its opening hours or "Chiuso" in
+     * red if the location has no hours set for that day.
+     *
+     * @param location the location whose hours to read
+     * @param day the day this row shows
+     * @return the row
+     */
     private HBox buildRow(Location location, Day day) {
         Label dayLabel = new Label(DayLabels.of(day));
         dayLabel.getStyleClass().add(Styles.TEXT_BOLD);

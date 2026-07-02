@@ -14,6 +14,11 @@ import java.io.Serializable;
  * @param restaurantName the name of the parent restaurant brand
  * @param restaurantCuisine the cuisine type of the parent restaurant
  * @param distanceKm the distance from the search's reference point in km, or null if no distance filter was used
+ *
+ * @Author Strazzullo Ciro Andrea, 763603, VA
+ * @Author Marocco Stefano, 762192, VA
+ * @Author Sibilla Ginevra, 761114, VA
+ * @Author Marin Marco, 760622, VA
  */
 public record LocationSearchResult(
         Location location,

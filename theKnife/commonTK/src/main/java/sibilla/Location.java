@@ -5,10 +5,10 @@
  * Each location contains geographical and operational information for a
  * specific restaurant branch, including address details and capacity.
  *
- * @Author Marocco Stefano, 762192, VA
- * @Author Marin Marco, 760622, VA
- * @author Sibilla Ginevra, 76114 - author of this file
  * @Author Strazzullo Ciro Andrea, 763603, VA
+ * @Author Marocco Stefano, 762192, VA
+ * @Author Sibilla Ginevra, 761114, VA
+ * @Author Marin Marco, 760622, VA
  * @version 1.0
  */
 

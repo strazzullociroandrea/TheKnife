@@ -10,7 +10,10 @@ import java.io.Serializable;
  * login, so the client can store the token for future session restores without a second RMI call.
  *
  * @version 1.0
+ * @Author Strazzullo Ciro Andrea, 763603, VA
  * @Author Marocco Stefano, 762192, VA
+ * @Author Sibilla Ginevra, 761114, VA
+ * @Author Marin Marco, 760622, VA
  */
 public class LoginResult implements Serializable {
 

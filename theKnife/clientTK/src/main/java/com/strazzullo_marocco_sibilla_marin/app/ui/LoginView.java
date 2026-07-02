@@ -4,6 +4,7 @@ import atlantafx.base.theme.Styles;
 import com.strazzullo_marocco_sibilla_marin.app.remote.LoginResult;
 import com.strazzullo_marocco_sibilla_marin.app.rmi.ServiceLocator;
 import com.strazzullo_marocco_sibilla_marin.app.session.SessionStore;
+import com.strazzullo_marocco_sibilla_marin.app.ui.components.MessageBanner;
 import javafx.geometry.Pos;
 import javafx.scene.Cursor;
 import javafx.scene.control.Button;
@@ -27,9 +28,9 @@ import strazzullo.*;
  * After a successful login the session token is persisted to disk via {@link SessionStore} so the
  * app can restore the session on the next start without prompting the user again.
  *
- * @version 2.0
+ * @version 3.0
  * @Author Strazzullo Ciro Andrea, 763603, VA
- * @Author Marocco Stefano, 762192, VA - author of this revision
+ * @Author Marocco Stefano, 762192, VA
  * @Author Sibilla Ginevra, 761114, VA
  * @Author Marin Marco, 760622, VA
  */
@@ -46,9 +47,9 @@ public class LoginView extends HBox {
     private final PasswordField passwordField;
 
     /**
-     * Feedback label, hidden until a login attempt completes.
+     * Feedback banner, hidden until a login attempt completes.
      */
-    private final Label showMessage;
+    private final MessageBanner banner = new MessageBanner();
 
     /**
      * LoginView constructor.
@@ -98,9 +99,7 @@ public class LoginView extends HBox {
         info.getStyleClass().add(Styles.TEXT_CAPTION);
         info.setStyle("-fx-text-fill: grey;");
 
-        showMessage = new Label();
-        showMessage.setMaxWidth(Double.MAX_VALUE);
-        showMessage.setVisible(false);
+        banner.setMaxWidth(Double.MAX_VALUE);
 
         Label email = new Label("Email *");
         email.setStyle("-fx-text-fill: grey;");
@@ -120,7 +119,7 @@ public class LoginView extends HBox {
         login.setStyle("-fx-background-color: #000000; -fx-text-fill: white; ");
         login.setCursor(Cursor.HAND);
         login.setOnMouseClicked(e -> {
-            showMessage.setVisible(false);
+            banner.hide();
 
             this.handleLoginUser(shell);
         });
@@ -136,7 +135,7 @@ public class LoginView extends HBox {
         HBox registerContainer = new HBox(gotoRegisterPage);
         registerContainer.setAlignment(Pos.CENTER);
 
-        rightPanel.getChildren().addAll(greet, info, showMessage, email, emailField, password, passwordField, login, registerContainer);
+        rightPanel.getChildren().addAll(greet, info, banner, email, emailField, password, passwordField, login, registerContainer);
         HBox.setHgrow(rightPanel, Priority.ALWAYS);
 
         getChildren().addAll(leftPanel, rightPanel);
@@ -155,27 +154,21 @@ public class LoginView extends HBox {
             String password = passwordField.getText();
 
             if (email.isEmpty() || password.isEmpty()) {
-                showMessage.setText("Attenzione. Tutti i campi sono obbligatori.");
-                showMessage.setStyle("-fx-text-fill: red;");
-                showMessage.setVisible(true);
+                banner.showError("Attenzione. Tutti i campi sono obbligatori.");
             } else {
                 LoginResult result = ServiceLocator.getInstance().getAuthService().login(email, password);
                 if (result == null) {
-                    showMessage.setText("Attenzione. Verifica le credenziali inserite.");
-                    showMessage.setStyle("-fx-text-fill: red;");
-                    showMessage.setVisible(true);
+                    banner.showError("Attenzione. Verifica le credenziali inserite.");
                 } else {
                     emailField.clear();
                     passwordField.clear();
                     SessionStore.save(result.getSessionToken());
                     shell.setSession(result.getUser(), result.getSessionToken());
-                    shell.goBack();
+                    shell.goBackAfterAuthChange();
                 }
             }
         } catch (Exception e) {
-            showMessage.setText("Attenzione. Non è stato possibile proseguire con l'autenticazione.");
-            showMessage.setStyle("-fx-text-fill: red;");
-            showMessage.setVisible(true);
+            banner.showError("Attenzione. Non è stato possibile proseguire con l'autenticazione.");
         }
     }
 }

@@ -15,7 +15,7 @@ import java.time.format.DateTimeParseException;
  *
  * @version 1.1
  * @Author Strazzullo Ciro Andrea, 763603, VA
- * @Author Marocco Stefano, 762192, VA - author of this file
+ * @Author Marocco Stefano, 762192, VA
  * @Author Sibilla Ginevra, 761114, VA
  * @Author Marin Marco, 760622, VA
  */
@@ -52,6 +52,11 @@ public class SearchFilter implements Serializable {
     /** Number of results to skip, for pagination; null means no offset. */
     private final Integer offset;
 
+    /**
+     * SearchFilter constructor, copying every criterion from a validated {@link Builder}.
+     *
+     * @param builder the builder to copy criteria from
+     */
     private SearchFilter(Builder builder) {
         this.restaurantName = builder.restaurantName;
         this.locationName = builder.locationName;
@@ -77,27 +82,49 @@ public class SearchFilter implements Serializable {
         this.offset = builder.offset;
     }
 
+    /** @return the restaurant name to match, or null for any */
     public String getRestaurantName() { return restaurantName; }
+    /** @return the location name to match, or null for any */
     public String getLocationName() { return locationName; }
+    /** @return the required cuisine type, or null for any */
     public Cuisine getCuisineType() { return cuisineType; }
+    /** @return the country to match, or null for any */
     public String getCountry() { return country; }
+    /** @return the city to match, or null for any */
     public String getCity() { return city; }
+    /** @return the address substring to match, or null for any */
     public String getAddress() { return address; }
+    /** @return the maximum price the customer is willing to pay, or null for any */
     public Double getMaxPriceRange() { return maxPriceRange; }
+    /** @return whether delivery must be available, or null to not filter on it */
     public Boolean getDelivery() { return delivery; }
+    /** @return whether takeaway must be available, or null to not filter on it */
     public Boolean getTakeaway() { return takeaway; }
+    /** @return the minimum seating capacity required, or null for any */
     public Integer getMaxCapacity() { return maxCapacity; }
+    /** @return whether a vegetarian menu is required, or null to not filter on it */
     public Boolean getVegetarianMenu() { return vegetarianMenu; }
+    /** @return whether a vegan menu is required, or null to not filter on it */
     public Boolean getVeganMenu() { return veganMenu; }
+    /** @return whether a gluten-free menu is required, or null to not filter on it */
     public Boolean getGlutenFreeMenu() { return glutenFreeMenu; }
+    /** @return the day the location must be open on, or null for any */
     public Day getOpenDay() { return openDay; }
+    /** @return the time of day (HH:mm) the location must be open at, or null for any */
     public String getOpenTime() { return openTime; }
+    /** @return the reference latitude for distance search, or null if unset */
     public Double getLatRef() { return latRef; }
+    /** @return the reference longitude for distance search, or null if unset */
     public Double getLonRef() { return lonRef; }
+    /** @return the search radius in km, or null if unset */
     public Double getRadiusKm() { return radiusKm; }
+    /** @return the address to geocode for distance search, or null if unset */
     public String getAddressRef() { return addressRef; }
+    /** @return the minimum average rating required, or null for any */
     public Double getMinRating() { return minRating; }
+    /** @return the maximum number of results to return, or null for no limit */
     public Integer getLimit() { return limit; }
+    /** @return the number of results to skip, for pagination, or null for none */
     public Integer getOffset() { return offset; }
 
     /**
@@ -122,6 +149,9 @@ public class SearchFilter implements Serializable {
         return limit != null || offset != null;
     }
 
+    /**
+     * @return a debug-friendly string listing every criterion's value
+     */
     @Override
     public String toString() {
         return "SearchFilter{" +
@@ -177,33 +207,52 @@ public class SearchFilter implements Serializable {
         private Integer limit;
         private Integer offset;
 
+        /** Builder constructor, starting with every criterion unset. */
         public Builder() {}
 
+        /**
+         * @param restaurantName the restaurant name to match, or null for any
+         */
         public Builder restaurantName(String restaurantName) {
             this.restaurantName = restaurantName;
             return this;
         }
 
+        /**
+         * @param locationName the location name to match, or null for any
+         */
         public Builder locationName(String locationName) {
             this.locationName = locationName;
             return this;
         }
 
+        /**
+         * @param cuisineType the required cuisine type, or null for any
+         */
         public Builder cuisineType(Cuisine cuisineType) {
             this.cuisineType = cuisineType;
             return this;
         }
 
+        /**
+         * @param country the country to match, or null for any
+         */
         public Builder country(String country) {
             this.country = country;
             return this;
         }
 
+        /**
+         * @param city the city to match, or null for any
+         */
         public Builder city(String city) {
             this.city = city;
             return this;
         }
 
+        /**
+         * @param address the address substring to match, or null for any
+         */
         public Builder address(String address) {
             this.address = address;
             return this;
@@ -217,11 +266,17 @@ public class SearchFilter implements Serializable {
             return this;
         }
 
+        /**
+         * @param delivery whether delivery must be available, or null to not filter on it
+         */
         public Builder delivery(Boolean delivery) {
             this.delivery = delivery;
             return this;
         }
 
+        /**
+         * @param takeaway whether takeaway must be available, or null to not filter on it
+         */
         public Builder takeaway(Boolean takeaway) {
             this.takeaway = takeaway;
             return this;
@@ -235,21 +290,33 @@ public class SearchFilter implements Serializable {
             return this;
         }
 
+        /**
+         * @param vegetarianMenu whether a vegetarian menu is required, or null to not filter on it
+         */
         public Builder vegetarianMenu(Boolean vegetarianMenu) {
             this.vegetarianMenu = vegetarianMenu;
             return this;
         }
 
+        /**
+         * @param veganMenu whether a vegan menu is required, or null to not filter on it
+         */
         public Builder veganMenu(Boolean veganMenu) {
             this.veganMenu = veganMenu;
             return this;
         }
 
+        /**
+         * @param glutenFreeMenu whether a gluten-free menu is required, or null to not filter on it
+         */
         public Builder glutenFreeMenu(Boolean glutenFreeMenu) {
             this.glutenFreeMenu = glutenFreeMenu;
             return this;
         }
 
+        /**
+         * @param openDay the day the location must be open on, or null for any
+         */
         public Builder openDay(Day openDay) {
             this.openDay = openDay;
             return this;
@@ -290,6 +357,9 @@ public class SearchFilter implements Serializable {
             return this;
         }
 
+        /**
+         * @param minRating the minimum average rating required, or null for any
+         */
         public Builder minRating(Double minRating) {
             this.minRating = minRating;
             return this;
@@ -315,6 +385,12 @@ public class SearchFilter implements Serializable {
             return new SearchFilter(this);
         }
 
+        /**
+         * Function to validate the assembled criteria, checking value ranges and that mutually
+         * dependent criteria (e.g. {@code openTime} requiring {@code openDay}) are set together.
+         *
+         * @throws IllegalArgumentException if any criteria is out of its valid range
+         */
         private void validate() {
             if (minRating != null && (minRating < 0 || minRating > 5)) {
                 throw new IllegalArgumentException("minRating must be between 0 and 5, got " + minRating);

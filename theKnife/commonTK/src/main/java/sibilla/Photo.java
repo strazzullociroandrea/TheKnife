@@ -5,10 +5,10 @@
  * Photos are stored in an S3-compatible object store (Garage) and only the
  * resulting public URL is kept in the relational database.
  *
- * @Author Marocco Stefano, 762192, VA - author of this file
- * @Author Marin Marco, 760622, VA
- * @Author Sibilla Ginevra, 761114, VA
  * @Author Strazzullo Ciro Andrea, 763603, VA
+ * @Author Marocco Stefano, 762192, VA
+ * @Author Sibilla Ginevra, 761114, VA
+ * @Author Marin Marco, 760622, VA
  * @version 1.0
  */
 
@@ -142,6 +142,9 @@ public class Photo implements Serializable {
         this.uploadedAt = uploadedAt;
     }
 
+    /**
+     * @return a debug-friendly string listing every field's value
+     */
     @Override
     public String toString() {
         return "Photo{" +

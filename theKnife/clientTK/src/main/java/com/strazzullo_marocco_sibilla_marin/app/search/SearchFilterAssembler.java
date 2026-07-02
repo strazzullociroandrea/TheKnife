@@ -7,7 +7,11 @@ import marocco.SearchFilter;
  * sent over RMI. Kept separate from {@link com.strazzullo_marocco_sibilla_marin.app.ui.SearchView}
  * so this mapping can be reasoned about (and changed) without touching any JavaFX wiring.
  *
- * @Author Marocco Stefano, 762192, VA - author of this file
+ * @version 2.0
+ * @Author Strazzullo Ciro Andrea, 763603, VA
+ * @Author Marocco Stefano, 762192, VA
+ * @Author Sibilla Ginevra, 761114, VA
+ * @Author Marin Marco, 760622, VA
  */
 public final class SearchFilterAssembler {
 
@@ -16,13 +20,16 @@ public final class SearchFilterAssembler {
 
     /**
      * Function to assemble a {@link SearchFilter}, leaving out any criterion left blank/unset
-     * in the given {@link SearchCriteria}.
+     * in the given {@link SearchCriteria}, paginated to a single page of results.
      *
      * @param criteria the search screen's current criteria
+     * @param pageNumber zero-based page index
+     * @param pageSize number of results per page
      * @return the assembled filter
      */
-    public static SearchFilter assemble(SearchCriteria criteria) {
+    public static SearchFilter assemble(SearchCriteria criteria, int pageNumber, int pageSize) {
         SearchFilter.Builder builder = new SearchFilter.Builder();
+        builder.page(pageNumber, pageSize);
         var filters = criteria.advancedFilters();
 
         if (criteria.city() != null && !criteria.city().isBlank()) {

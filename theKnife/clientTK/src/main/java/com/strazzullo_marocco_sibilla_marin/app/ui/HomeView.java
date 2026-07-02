@@ -19,7 +19,6 @@ import javafx.scene.control.ContentDisplay;
 import javafx.scene.control.Hyperlink;
 import javafx.scene.control.Label;
 import javafx.scene.control.ScrollPane;
-import javafx.scene.control.TextInputDialog;
 import javafx.scene.control.ToggleButton;
 import javafx.scene.control.ToggleGroup;
 import javafx.scene.image.Image;
@@ -326,7 +325,7 @@ public class HomeView extends StackPane {
 
             Hyperlink cambiaLink = new Hyperlink("cambia");
             cambiaLink.setStyle("-fx-text-fill: -color-accent-fg; -fx-padding: 0;");
-            cambiaLink.setOnAction(e -> promptChangeDomicile(user));
+            cambiaLink.setOnAction(e -> shell.showAccountOrLogin());
 
             locationRow.getChildren().addAll(pinIcon, domicileLabel, cambiaLink);
             greetingBox.getChildren().addAll(greetingLabel, locationRow);
@@ -335,23 +334,6 @@ public class HomeView extends StackPane {
             greetingBox.getChildren().add(greetingLabel);
         }
         return greetingBox;
-    }
-
-    /**
-     * Function to prompt for a new domicile and, once confirmed, update it and refresh the home
-     * screen so the "Vicini a te"/"Consigliati per te" sections re-match against it.
-     *
-     * @param user the logged-in user whose domicile to change
-     */
-    private void promptChangeDomicile(User user) {
-        TextInputDialog dialog = new TextInputDialog(user.getDomicile());
-        dialog.setTitle("Cambia Domicilio");
-        dialog.setHeaderText("Modifica il tuo domicilio");
-        dialog.setContentText("Domicilio:");
-        dialog.showAndWait().ifPresent(newDomicile -> {
-            user.setDomicile(newDomicile);
-            shell.showHome();
-        });
     }
 
     /**

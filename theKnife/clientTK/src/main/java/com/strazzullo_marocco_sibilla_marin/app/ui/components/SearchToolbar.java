@@ -6,23 +6,22 @@ import javafx.geometry.Pos;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.control.TextField;
-import javafx.scene.control.Tooltip;
 import javafx.scene.input.KeyCode;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.Priority;
 import javafx.scene.layout.Region;
-import javafx.util.Duration;
 import org.kordamp.ikonli.feather.Feather;
 import org.kordamp.ikonli.javafx.FontIcon;
 
 /**
  * The search screen's top toolbar: the "TheKnife" logo (which navigates home), a single unified
- * search pill (city + free-text query), the search button, and the account button that opens the
- * login screen.
+ * search pill (city + free-text query), the search button, and the {@link AccountButton} —
+ * shared with {@link HomeToolbar} so both toolbars' account entry point reads and behaves
+ * identically.
  *
- * @version 2.0
- * @Author Marocco Stefano, 762192, VA - author of this revision
+ * @version 3.0
  * @Author Strazzullo Ciro Andrea, 763603, VA
+ * @Author Marocco Stefano, 762192, VA
  * @Author Sibilla Ginevra, 761114, VA
  * @Author Marin Marco, 760622, VA
  */
@@ -39,8 +38,11 @@ public class SearchToolbar extends HBox {
      * @param onLogoClick callback invoked when the logo is clicked
      * @param onSearch callback invoked when the search button is pressed, or Enter in either field
      * @param onAccountClick callback invoked when the account button is pressed
+     * @param loggedIn whether a user is currently logged in, switching the account button between
+     *                 a labeled "Accedi" button and an icon-only avatar
      */
-    public SearchToolbar(String initialCity, String initialQuery, Runnable onLogoClick, Runnable onSearch, Runnable onAccountClick) {
+    public SearchToolbar(String initialCity, String initialQuery, Runnable onLogoClick, Runnable onSearch,
+                          Runnable onAccountClick, boolean loggedIn) {
         setSpacing(14);
         setAlignment(Pos.CENTER_LEFT);
         setPadding(new Insets(16, 24, 12, 24));
@@ -82,14 +84,7 @@ public class SearchToolbar extends HBox {
         searchButton.getStyleClass().addAll(Styles.BUTTON_ICON, Styles.BUTTON_CIRCLE, "tk-toolbar-search-button");
         searchButton.setOnAction(e -> onSearch.run());
 
-        Button accountButton = new Button("", new FontIcon(Feather.USER));
-        accountButton.getStyleClass().addAll(Styles.BUTTON_ICON, Styles.BUTTON_CIRCLE, Styles.BUTTON_OUTLINED, "tk-account-button");
-        Tooltip accountTooltip = new Tooltip("Accedi");
-        accountTooltip.setShowDelay(Duration.millis(150));
-        accountButton.setTooltip(accountTooltip);
-        accountButton.setOnAction(e -> onAccountClick.run());
-
-        getChildren().addAll(logo, pill, searchButton, accountButton);
+        getChildren().addAll(logo, pill, searchButton, new AccountButton(loggedIn, onAccountClick));
     }
 
     /**

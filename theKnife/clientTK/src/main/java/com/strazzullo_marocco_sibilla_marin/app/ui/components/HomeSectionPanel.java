@@ -13,12 +13,20 @@ import org.kordamp.ikonli.javafx.FontIcon;
 import sibilla.LocationSearchResult;
 
 import java.util.List;
+import java.util.Set;
+import java.util.function.BiConsumer;
 
 /**
  * A custom component representing a paginated section of location cards on the Home view.
- * Handles display title, pagination state, and updates list items dynamically.
+ * Handles display title, pagination state, and updates list items dynamically. Favourite state
+ * for every card comes from a shared, DB-backed id set supplied by the host screen (loaded once
+ * via {@code FavouriteService}), rather than each card resolving it on its own.
  *
- * @version 1.0
+ * @version 2.0
+ * @Author Strazzullo Ciro Andrea, 763603, VA
+ * @Author Marocco Stefano, 762192, VA
+ * @Author Sibilla Ginevra, 761114, VA
+ * @Author Marin Marco, 760622, VA
  */
 public class HomeSectionPanel extends VBox {
 
@@ -29,11 +37,14 @@ public class HomeSectionPanel extends VBox {
      * @param title the title of the section
      * @param items the list of locations to display
      * @param emptyMessage message shown when the list of items is empty
+     * @param favouriteIds the ids of the locations the current customer has favourited
      * @param onFavouriteAuthRequired callback invoked when a non-customer clicks the heart button
-     * @param onFavoriteToggled callback invoked when a customer toggles the favorite status
+     * @param onFavouriteToggle callback invoked with a result and its new favourite state when a
+     *                          customer toggles its heart, so the host screen can persist it
      */
     public HomeSectionPanel(AppShell shell, String title, List<LocationSearchResult> items, String emptyMessage,
-                            Runnable onFavouriteAuthRequired, Runnable onFavoriteToggled) {
+                            Set<String> favouriteIds, Runnable onFavouriteAuthRequired,
+                            BiConsumer<LocationSearchResult, Boolean> onFavouriteToggle) {
         super(12);
 
         HBox headerRow = new HBox(8);
@@ -80,7 +91,9 @@ public class HomeSectionPanel extends VBox {
             int end = Math.min(start + pageSize, totalItems);
             for (int i = start; i < end; i++) {
                 LocationSearchResult item = items.get(i);
-                VerticalLocationCard card = new VerticalLocationCard(shell, item, onFavouriteAuthRequired, onFavoriteToggled);
+                boolean isFavourite = favouriteIds.contains(item.location().getId());
+                VerticalLocationCard card = new VerticalLocationCard(shell, item, onFavouriteAuthRequired,
+                        isFavourite, nowFavourite -> onFavouriteToggle.accept(item, nowFavourite));
                 cardRow.getChildren().add(card);
             }
             pageLabel.setText(String.format("Pagina %d di %d", currentPage[0] + 1, totalPages));

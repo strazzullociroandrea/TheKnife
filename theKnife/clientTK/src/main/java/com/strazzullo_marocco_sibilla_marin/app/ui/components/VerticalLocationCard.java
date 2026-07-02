@@ -17,14 +17,21 @@ import org.kordamp.ikonli.javafx.FontIcon;
 import sibilla.Location;
 import sibilla.LocationSearchResult;
 
-import java.util.Locale;
+import java.util.function.Consumer;
 
 /**
  * A premium vertical card for locations shown on the Home screen.
  * Displays a large image thumbnail at the top, followed by the restaurant details,
- * ratings, open status, and a heart button for favorites.
+ * ratings, open status, and a heart button for favorites. Favourite state is passed in rather
+ * than read off the logged-in user, so it stays in sync with the DB-backed {@code
+ * FavouriteService} that every other favourite-toggling card in the app (e.g. {@link ResultCard})
+ * also goes through.
  *
- * @version 1.0
+ * @version 2.0
+ * @Author Strazzullo Ciro Andrea, 763603, VA
+ * @Author Marocco Stefano, 762192, VA
+ * @Author Sibilla Ginevra, 761114, VA
+ * @Author Marin Marco, 760622, VA
  */
 public class VerticalLocationCard extends VBox {
 
@@ -34,8 +41,11 @@ public class VerticalLocationCard extends VBox {
      * @param shell the AppShell for navigation
      * @param result the search result representing the location
      * @param onFavouriteAuthRequired callback invoked when a non-customer clicks the heart button
+     * @param initiallyFavourite whether this location is already one of the current user's favourites
+     * @param onFavouriteToggle callback invoked with the heart's new state when a customer toggles it
      */
-    public VerticalLocationCard(AppShell shell, LocationSearchResult result, Runnable onFavouriteAuthRequired, Runnable onFavoriteToggled) {
+    public VerticalLocationCard(AppShell shell, LocationSearchResult result, Runnable onFavouriteAuthRequired,
+                                 boolean initiallyFavourite, Consumer<Boolean> onFavouriteToggle) {
         Location location = result.location();
         String restaurantName = location.getName() == null || location.getName().isBlank()
                 ? result.restaurantName() : location.getName();
@@ -49,10 +59,8 @@ public class VerticalLocationCard extends VBox {
         setMaxWidth(240);
         setOnMouseClicked(e -> shell.showLocationDetail(result));
 
-        /** Thumbnail image */
         LocationThumbnail thumbnail = new LocationThumbnail(location.getId(), result.restaurantCuisine(), 216, 120, 12);
 
-        /** Header containing name and heart button */
         Label nameLabel = new Label(restaurantName);
         nameLabel.getStyleClass().add(Styles.TITLE_4);
         nameLabel.setWrapText(false);
@@ -60,64 +68,23 @@ public class VerticalLocationCard extends VBox {
         HBox.setHgrow(nameLabel, Priority.ALWAYS);
 
         ToggleButton favourite = new ToggleButton();
+        favourite.setSelected(initiallyFavourite);
         favourite.setGraphic(new FontIcon(Feather.HEART));
         favourite.getStyleClass().addAll(Styles.BUTTON_ICON, Styles.FLAT, "tk-favourite");
-
-        boolean isFav = false;
-        if (shell.isCustomer()) {
-            strazzullo.Client client = (strazzullo.Client) shell.getCurrentUser();
-            for (sibilla.Restaurant rFav : client.getFavoriteRestaurants()) {
-                if (rFav.getName().equalsIgnoreCase(result.restaurantName())) {
-                    isFav = true;
-                    break;
-                }
-            }
-        }
-        favourite.setSelected(isFav);
-
-        favourite.addEventFilter(MouseEvent.MOUSE_CLICKED, e -> {
-            e.consume(); /** Prevents card selection */
+        favourite.addEventFilter(MouseEvent.MOUSE_PRESSED, e -> {
             if (!shell.isCustomer()) {
+                e.consume();
                 onFavouriteAuthRequired.run();
             }
         });
-
-        favourite.setOnAction(e -> {
-            if (shell.isCustomer()) {
-                strazzullo.Client client = (strazzullo.Client) shell.getCurrentUser();
-                if (favourite.isSelected()) {
-                    boolean exists = false;
-                    for (sibilla.Restaurant rFav : client.getFavoriteRestaurants()) {
-                        if (rFav.getName().equalsIgnoreCase(result.restaurantName())) {
-                            exists = true;
-                            break;
-                        }
-                    }
-                    if (!exists) {
-                        sibilla.Restaurant newFav = new sibilla.Restaurant();
-                        newFav.setName(result.restaurantName());
-                        try {
-                            newFav.setCuisine(sibilla.Cuisine.valueOf(result.restaurantCuisine().toLowerCase(Locale.ROOT)));
-                        } catch (Exception ignored) {}
-                        client.addFavoriteRestaurant(newFav);
-                    }
-                } else {
-                    client.getFavoriteRestaurants().removeIf(rFav -> rFav.getName().equalsIgnoreCase(result.restaurantName()));
-                }
-                if (onFavoriteToggled != null) {
-                    onFavoriteToggled.run();
-                }
-            }
-        });
+        favourite.setOnAction(e -> onFavouriteToggle.accept(favourite.isSelected()));
 
         HBox titleRow = new HBox(8, nameLabel, favourite);
         titleRow.setAlignment(Pos.CENTER_LEFT);
 
-        /** Tags row (Cuisine and Price range) */
         HBox tagsRow = new HBox(6, new TagLabel(result.restaurantCuisine()), new TagLabel(PriceLabels.of(location.getPriceRange())));
         tagsRow.setAlignment(Pos.CENTER_LEFT);
 
-        /** Open status and rating row */
         OpenStatusPill statusPill = new OpenStatusPill(location);
 
         double rating = result.averageRating() == null ? 0.0 : result.averageRating();

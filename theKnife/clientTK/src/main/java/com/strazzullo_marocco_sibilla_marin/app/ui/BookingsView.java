@@ -81,7 +81,7 @@ public class BookingsView extends StackPane {
 
         emptyState = new EmptyState(Feather.CALENDAR, "Nessuna prenotazione",
                 "Non hai ancora prenotato nessun tavolo. Trova un ristorante e prenota il tuo primo posto.",
-                "Cerca un ristorante", () -> shell.showSearch("", ""));
+                "Cerca un ristorante", () -> shell.showSearch(""));
         emptyState.setVisible(false);
         emptyState.setManaged(false);
 

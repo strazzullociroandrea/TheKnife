@@ -60,7 +60,7 @@ public class FavouritesView extends StackPane {
 
         emptyState = new EmptyState(Feather.HEART, "Nessun preferito ancora",
                 "Tocca il cuore su un ristorante per salvarlo qui e ritrovarlo velocemente.",
-                "Esplora i ristoranti", () -> shell.showSearch("", ""));
+                "Esplora i ristoranti", () -> shell.showSearch(""));
         emptyState.setVisible(false);
         emptyState.setManaged(false);
 

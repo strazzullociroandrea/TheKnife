@@ -43,13 +43,13 @@ public class HomeGuestBody extends VBox {
         tagline.getStyleClass().add(Styles.TEXT_MUTED);
 
         CuisineFilterRow cuisineRow = new CuisineFilterRow(
-                cuisine -> shell.showSearch("", "", cuisine),
-                () -> shell.showSearch("", ""));
+                cuisine -> shell.showSearch("", cuisine),
+                () -> shell.showSearch(""));
 
         VBox categoriesBox = new VBox(28);
         for (Cuisine cuisine : Cuisine.values()) {
             categoriesBox.getChildren().add(new CategoryRow(cuisine, CATEGORY_ROW_SIZE,
-                    shell::showLocationDetail, () -> shell.showSearch("", "", cuisine),
+                    shell::showLocationDetail, () -> shell.showSearch("", cuisine),
                     shell::isCustomer, Collections::emptySet, (result, nowFavourite) -> { }, onFavouriteAuthRequired));
         }
 

@@ -120,11 +120,10 @@ public class AppShell extends StackPane {
      * Function to navigate to the search results screen, running an initial search and resetting
      * any back-stack built up so far.
      *
-     * @param city  the city to search in, may be blank
-     * @param query the free-text restaurant name query, may be blank
+     * @param query the free-text query, may be blank
      */
-    public void showSearch(String city, String query) {
-        showSearch(city, query, null);
+    public void showSearch(String query) {
+        showSearch(query, null);
     }
 
     /**
@@ -132,13 +131,27 @@ public class AppShell extends StackPane {
      * an initial search and resetting any back-stack built up so far. Used by the home screen's
      * cuisine quick-filter chips.
      *
-     * @param city  the city to search in, may be blank
-     * @param query the free-text restaurant name query, may be blank
+     * @param query the free-text query, may be blank
      * @param cuisine the cuisine to pre-select, or null for none
      */
-    public void showSearch(String city, String query, Cuisine cuisine) {
+    public void showSearch(String query, Cuisine cuisine) {
+        showSearch(query, cuisine, null);
+    }
+
+    /**
+     * Function to navigate to the search results screen with a cuisine and/or a "Distanza da un
+     * indirizzo" reference address already applied, running an initial search and resetting any
+     * back-stack built up so far. Used by the home screen's customer dashboard, whose resolved
+     * position (from "cambia") belongs in the distance filter rather than the plain search field.
+     *
+     * @param query the free-text query, may be blank
+     * @param cuisine the cuisine to pre-select, or null for none
+     * @param distanceAddress the "Distanza da un indirizzo" reference address to pre-fill, or
+     *                        null/blank for none
+     */
+    public void showSearch(String query, Cuisine cuisine, String distanceAddress) {
         backStack.clear();
-        show(new SearchView(this, city, query, cuisine));
+        show(new SearchView(this, query, cuisine, distanceAddress));
     }
 
     /**

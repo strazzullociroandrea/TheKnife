@@ -1,6 +1,7 @@
 package com.strazzullo_marocco_sibilla_marin.app.ui.components;
 
 import atlantafx.base.theme.Styles;
+import javafx.beans.binding.Bindings;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.control.Button;
@@ -9,17 +10,18 @@ import javafx.scene.control.TextField;
 import javafx.scene.input.KeyCode;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.Priority;
-import javafx.scene.layout.Region;
 import org.kordamp.ikonli.feather.Feather;
 import org.kordamp.ikonli.javafx.FontIcon;
 
 /**
- * The search screen's top toolbar: the "TheKnife" logo (which navigates home), a single unified
- * search pill (city + free-text query), the search button, and the {@link AccountButton} —
- * shared with {@link HomeToolbar} so both toolbars' account entry point reads and behaves
- * identically.
+ * The search screen's top toolbar: the "TheKnife" logo (which navigates home), a single big
+ * free-text search field (clearable via its trailing "x" button once it has text), the search
+ * button, and the {@link AccountButton} — shared with {@link HomeToolbar} so both toolbars'
+ * account entry point reads and behaves identically. This field matches restaurant name, location
+ * name, city, and address at once; searching near a specific resolved position is a separate
+ * concern, handled by the results screen's own "Distanza da un indirizzo" row instead.
  *
- * @version 3.0
+ * @version 5.0
  * @Author Strazzullo Ciro Andrea, 763603, VA
  * @Author Marocco Stefano, 762192, VA
  * @Author Sibilla Ginevra, 761114, VA
@@ -27,33 +29,26 @@ import org.kordamp.ikonli.javafx.FontIcon;
  */
 public class SearchToolbar extends HBox {
 
-    private final TextField cityField = new TextField();
     private final TextField queryField = new TextField();
 
     /**
      * SearchToolbar constructor.
      *
-     * @param initialCity the city to pre-fill the city field with, may be blank
-     * @param initialQuery the free-text query to pre-fill the query field with, may be blank
+     * @param initialQuery the free-text query to pre-fill the field with, may be blank
      * @param onLogoClick callback invoked when the logo is clicked
-     * @param onSearch callback invoked when the search button is pressed, or Enter in either field
+     * @param onSearch callback invoked when the search button is pressed, or Enter in the field
      * @param onAccountClick callback invoked when the account button is pressed
      * @param loggedIn whether a user is currently logged in, switching the account button between
      *                 a labeled "Accedi" button and an icon-only avatar
      */
-    public SearchToolbar(String initialCity, String initialQuery, Runnable onLogoClick, Runnable onSearch,
+    public SearchToolbar(String initialQuery, Runnable onLogoClick, Runnable onSearch,
                           Runnable onAccountClick, boolean loggedIn) {
         setSpacing(14);
         setAlignment(Pos.CENTER_LEFT);
         setPadding(new Insets(16, 24, 12, 24));
 
-        cityField.setText(initialCity == null ? "" : initialCity);
-        cityField.setPromptText("Città");
-        cityField.setPrefWidth(140);
-        cityField.setMinWidth(100);
-
         queryField.setText(initialQuery == null ? "" : initialQuery);
-        queryField.setPromptText("Cerca per nome del ristorante...");
+        queryField.setPromptText("Cerca ristorante, cucina, città, zona...");
         queryField.setOnKeyPressed(e -> {
             if (e.getCode() == KeyCode.ENTER) {
                 onSearch.run();
@@ -65,15 +60,16 @@ public class SearchToolbar extends HBox {
         logo.setOnMouseClicked(e -> onLogoClick.run());
         logo.setCursor(javafx.scene.Cursor.HAND);
 
-        Region divider = new Region();
-        divider.getStyleClass().add("tk-search-divider");
-        divider.setMinSize(1, 22);
-        divider.setMaxSize(1, 22);
+        Button clearButton = new Button("", new FontIcon(Feather.X));
+        clearButton.getStyleClass().addAll(Styles.BUTTON_ICON, Styles.FLAT, Styles.BUTTON_CIRCLE);
+        clearButton.visibleProperty().bind(Bindings.isNotEmpty(queryField.textProperty()));
+        clearButton.managedProperty().bind(clearButton.visibleProperty());
+        clearButton.setOnAction(e -> {
+            queryField.clear();
+            onSearch.run();
+        });
 
-        HBox pill = new HBox(10,
-                new FontIcon(Feather.MAP_PIN), cityField,
-                divider,
-                new FontIcon(Feather.SEARCH), queryField);
+        HBox pill = new HBox(10, new FontIcon(Feather.SEARCH), queryField, clearButton);
         pill.getStyleClass().add("tk-search-pill");
         pill.setAlignment(Pos.CENTER_LEFT);
         pill.setPadding(new Insets(10, 18, 10, 18));
@@ -88,14 +84,7 @@ public class SearchToolbar extends HBox {
     }
 
     /**
-     * @return the city field's current text
-     */
-    public String getCity() {
-        return cityField.getText();
-    }
-
-    /**
-     * @return the query field's current text
+     * @return the search field's current text
      */
     public String getQuery() {
         return queryField.getText();

@@ -67,11 +67,10 @@ public class HomeView extends StackPane {
     }
 
     /**
-     * Function to navigate to the search results screen with the toolbar's currently typed city
-     * and query.
+     * Function to navigate to the search results screen with the toolbar's currently typed query.
      */
     private void onSearchFromToolbar() {
-        shell.showSearch(toolbar.getCity(), toolbar.getQuery());
+        shell.showSearch(toolbar.getQuery());
     }
 
     /**

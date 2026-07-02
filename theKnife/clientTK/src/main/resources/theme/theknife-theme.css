@@ -45,10 +45,6 @@
     -fx-background-insets: 0;
 }
 
-.tk-search-divider {
-    -fx-background-color: -color-border-subtle;
-}
-
 .tk-toolbar-search-button {
     -fx-background-color: -color-accent-emphasis;
     -fx-text-fill: white;
@@ -81,10 +77,16 @@
     -fx-border-width: 0;
     -fx-background-radius: 16px;
     -fx-padding: 8px 10px;
+    -fx-text-fill: -color-fg-default;
 }
 
 .tk-cuisine-toggle:hover {
     -fx-background-color: -color-bg-subtle;
+}
+
+.tk-cuisine-toggle:selected {
+    -fx-background-color: transparent;
+    -fx-text-fill: -color-accent-fg;
 }
 
 .tk-cuisine-circle {

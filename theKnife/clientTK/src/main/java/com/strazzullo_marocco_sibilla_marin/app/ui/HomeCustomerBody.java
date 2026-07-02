@@ -84,8 +84,8 @@ public class HomeCustomerBody extends VBox {
         VBox greetingBox = buildGreetingBox(user, modalPane);
 
         CuisineFilterRow cuisineRow = new CuisineFilterRow(
-                cuisine -> shell.showSearch(resolvedAddress, "", cuisine),
-                () -> shell.showSearch(resolvedAddress, ""));
+                cuisine -> shell.showSearch("", cuisine, resolvedAddress),
+                () -> shell.showSearch("", null, resolvedAddress));
 
         NextBookingBanner banner = new NextBookingBanner(userId, modalPane, ids -> bookedLocationIds = ids);
         FavouritesPreviewSection favouritesPreview = new FavouritesPreviewSection(
@@ -311,7 +311,7 @@ public class HomeCustomerBody extends VBox {
         fallbackCategoriesBuilt = true;
         for (Cuisine cuisine : Cuisine.values()) {
             recommendedEmptyBox.getChildren().add(new CategoryRow(cuisine, CATEGORY_ROW_SIZE,
-                    shell::showLocationDetail, () -> shell.showSearch(resolvedAddress, "", cuisine),
+                    shell::showLocationDetail, () -> shell.showSearch("", cuisine, resolvedAddress),
                     shell::isCustomer, () -> favouriteIds, this::toggleFavourite, () -> { }));
         }
     }

@@ -76,11 +76,10 @@ public class SearchView extends StackPane {
      * SearchView constructor. Builds the screen and runs an initial search.
      *
      * @param shell the app shell, used to navigate back to the home screen
-     * @param city the initial city to search in, may be blank
-     * @param query the initial free-text restaurant name query, may be blank
+     * @param query the initial free-text query, may be blank
      */
-    public SearchView(AppShell shell, String city, String query) {
-        this(shell, city, query, null);
+    public SearchView(AppShell shell, String query) {
+        this(shell, query, null);
     }
 
     /**
@@ -88,13 +87,28 @@ public class SearchView extends StackPane {
      * quick-filter chips to jump straight into a filtered search.
      *
      * @param shell the app shell, used to navigate back to the home screen
-     * @param city the initial city to search in, may be blank
-     * @param query the initial free-text restaurant name query, may be blank
+     * @param query the initial free-text query, may be blank
      * @param initialCuisine the cuisine to pre-select, or null for none
      */
-    public SearchView(AppShell shell, String city, String query, Cuisine initialCuisine) {
+    public SearchView(AppShell shell, String query, Cuisine initialCuisine) {
+        this(shell, query, initialCuisine, null);
+    }
+
+    /**
+     * SearchView constructor with a cuisine and/or a "Distanza da un indirizzo" reference address
+     * already applied, used by the home screen's customer dashboard so its resolved position
+     * (from "cambia") feeds the distance filter rather than the plain free-text search field,
+     * which is a separate, general name/city/address query.
+     *
+     * @param shell the app shell, used to navigate back to the home screen
+     * @param query the initial free-text query, may be blank
+     * @param initialCuisine the cuisine to pre-select, or null for none
+     * @param initialDistanceAddress the "Distanza da un indirizzo" reference address to pre-fill,
+     *                               or null/blank for none
+     */
+    public SearchView(AppShell shell, String query, Cuisine initialCuisine, String initialDistanceAddress) {
         this.shell = shell;
-        searchToolbar = new SearchToolbar(city, query, shell::showHome, this::runSearchResetPage,
+        searchToolbar = new SearchToolbar(query, shell::showHome, this::runSearchResetPage,
                 shell::showAccountOrLogin, shell.isLoggedIn());
         cuisineFilterRow = new CuisineFilterRow(this::onCuisineChanged, this::openFilterPanel);
         distanceFilterRow = new DistanceFilterRow(this::runSearchResetPage, this::openLocationPrompt);
@@ -102,6 +116,9 @@ public class SearchView extends StackPane {
         if (initialCuisine != null) {
             advancedFilters = advancedFilters.withCuisineType(initialCuisine);
             cuisineFilterRow.syncSelection(initialCuisine);
+        }
+        if (initialDistanceAddress != null && !initialDistanceAddress.isBlank()) {
+            distanceFilterRow.setAddress(initialDistanceAddress);
         }
 
         BorderPane content = new BorderPane();
@@ -315,7 +332,6 @@ public class SearchView extends StackPane {
      */
     private SearchCriteria currentCriteria() {
         return new SearchCriteria(
-                searchToolbar.getCity(),
                 searchToolbar.getQuery(),
                 advancedFilters,
                 distanceFilterRow.getAddress(),

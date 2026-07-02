@@ -1,6 +1,7 @@
 package com.strazzullo_marocco_sibilla_marin.app.ui;
 
 import atlantafx.base.theme.Styles;
+import com.strazzullo_marocco_sibilla_marin.app.geo.AddressAutocomplete;
 import com.strazzullo_marocco_sibilla_marin.app.rmi.ServiceLocator;
 import com.strazzullo_marocco_sibilla_marin.app.ui.components.DateSelector;
 import com.strazzullo_marocco_sibilla_marin.app.ui.components.MessageBanner;
@@ -17,6 +18,8 @@ import javafx.scene.layout.HBox;
 import javafx.scene.layout.Priority;
 import javafx.scene.layout.Region;
 import javafx.scene.layout.VBox;
+import org.kordamp.ikonli.feather.Feather;
+import org.kordamp.ikonli.javafx.FontIcon;
 import strazzullo.User;
 
 import java.time.LocalDate;
@@ -24,14 +27,16 @@ import java.time.format.DateTimeFormatter;
 
 /**
  * Account screen showing the logged-in user's editable profile data (name, surname, email,
- * domicile, and date of birth) and a logout button. Editing a field and pressing "Salva
- * modifiche" persists the change via {@code AuthService#updateProfile} and refreshes both this
- * screen's header and {@link AppShell}'s cached user. Also the destination of the home screen's
- * "cambia" domicile link, so changing where a customer lives happens on the same profile screen
- * as every other editable field, rather than a one-off dialog. Shares the same two-panel layout as
- * {@link LoginView}: a black left branding panel and a white right content panel.
+ * domicile, and date of birth) and a logout button. The domicile field uses {@link
+ * AddressAutocomplete} for live Google/Photon suggestions, same as the registration form. Editing
+ * a field and pressing "Salva modifiche" persists the change via {@code AuthService#updateProfile}
+ * and refreshes both this screen's header and {@link AppShell}'s cached user. Also the destination
+ * of the home screen's "cambia" domicile link, so changing where a customer lives happens on the
+ * same profile screen as every other editable field, rather than a one-off dialog. Shares the same
+ * two-panel layout as {@link LoginView}: a black left branding panel and a white right content
+ * panel.
  *
- * @version 3.0
+ * @version 4.0
  * @Author Strazzullo Ciro Andrea, 763603, VA
  * @Author Marocco Stefano, 762192, VA
  * @Author Sibilla Ginevra, 761114, VA
@@ -106,22 +111,26 @@ public class AccountView extends HBox {
         surnameField.setText(user.getSurname());
         emailField.setText(user.getEmail());
         domicileField.setText(user.getDomicile());
+        AddressAutocomplete.attach(domicileField);
         dateOfBirthField = new DateSelector(parseDate(user.getDateOfBirth()), date -> date.isAfter(LocalDate.now()));
         dateOfBirthField.setMaxWidth(Double.MAX_VALUE);
 
         Button saveButton = new Button("Salva modifiche");
+        HBox.setHgrow(saveButton, Priority.ALWAYS);
         saveButton.setMaxWidth(Double.MAX_VALUE);
         saveButton.setPrefHeight(40);
         saveButton.getStyleClass().add(Styles.ACCENT);
         saveButton.setCursor(Cursor.HAND);
         saveButton.setOnAction(e -> saveChanges());
 
-        Button logoutButton = new Button("Esci da TheKnife");
-        logoutButton.setMaxWidth(Double.MAX_VALUE);
+        Button logoutButton = new Button("Esci", new FontIcon(Feather.LOG_OUT));
         logoutButton.setPrefHeight(40);
-        logoutButton.getStyleClass().addAll(Styles.TEXT_NORMAL, Styles.DANGER);
+        logoutButton.getStyleClass().addAll(Styles.TEXT_NORMAL, Styles.DANGER, Styles.BUTTON_OUTLINED);
         logoutButton.setCursor(Cursor.HAND);
         logoutButton.setOnAction(e -> shell.logout());
+
+        HBox actionsRow = new HBox(10, saveButton, logoutButton);
+        actionsRow.setAlignment(Pos.CENTER_LEFT);
 
         rightPanel.getChildren().addAll(
                 heading,
@@ -133,8 +142,7 @@ public class AccountView extends HBox {
                 buildField("Indirizzo", domicileField),
                 buildField("Data di nascita", dateOfBirthField),
                 buildField("Ruolo", roleLabel),
-                saveButton,
-                logoutButton
+                actionsRow
         );
         HBox.setHgrow(rightPanel, Priority.ALWAYS);
 

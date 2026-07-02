@@ -236,12 +236,12 @@
     -fx-text-fill: -color-danger-fg;
 }
 
-.tk-favourite {
-    -fx-text-fill: -color-fg-muted;
+.tk-favourite .ikonli-font-icon {
+    -fx-icon-color: -color-fg-muted;
 }
 
-.tk-favourite:selected {
-    -fx-text-fill: -color-accent-emphasis;
+.tk-favourite:selected .ikonli-font-icon {
+    -fx-icon-color: -color-accent-emphasis;
 }
 
 .tk-map-pin {
@@ -363,5 +363,72 @@
 .tk-modal-card {
     -fx-background-radius: 16px;
     -fx-effect: dropshadow(gaussian, rgba(0, 0, 0, 0.28), 24, 0, 0, 8);
+}
+
+.tk-next-booking-banner {
+    -fx-background-color: -color-accent-subtle;
+    -fx-background-radius: 12px;
+    -fx-border-color: -color-accent-emphasis;
+    -fx-border-width: 1px;
+    -fx-border-radius: 12px;
+}
+
+.tk-link {
+    -fx-text-fill: -color-accent-fg;
+    -fx-font-weight: bold;
+}
+
+.tk-link:hover {
+    -fx-underline: true;
+}
+
+.tk-tile-favourite {
+    -fx-background-color: rgba(255, 255, 255, 0.92);
+    -fx-min-width: 32px;
+    -fx-min-height: 32px;
+    -fx-max-width: 32px;
+    -fx-max-height: 32px;
+    -fx-effect: dropshadow(gaussian, rgba(0, 0, 0, 0.25), 6, 0, 0, 1);
+}
+
+.tk-tile-favourite:hover {
+    -fx-background-color: rgba(255, 255, 255, 1.0);
+}
+
+.tk-banner {
+    -fx-background-radius: 10px;
+}
+
+.tk-banner-success {
+    -fx-background-color: -color-accent-subtle;
+}
+
+.tk-banner-success .label {
+    -fx-text-fill: -color-accent-fg;
+}
+
+.tk-banner-success .ikonli-font-icon {
+    -fx-icon-color: -color-accent-fg;
+}
+
+.tk-banner-danger {
+    -fx-background-color: derive(-color-danger-emphasis, 85%);
+}
+
+.tk-banner-danger .label {
+    -fx-text-fill: -color-danger-fg;
+}
+
+.tk-banner-danger .ikonli-font-icon {
+    -fx-icon-color: -color-danger-fg;
+}
+
+.tk-empty-state-icon {
+    -fx-background-color: -color-accent-subtle;
+    -fx-background-radius: 999px;
+}
+
+.tk-empty-state-icon .ikonli-font-icon {
+    -fx-icon-color: -color-accent-fg;
 }
 

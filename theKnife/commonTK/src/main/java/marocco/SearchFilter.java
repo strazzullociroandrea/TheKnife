@@ -23,6 +23,8 @@ public class SearchFilter implements Serializable {
     @Serial
     private static final long serialVersionUID = 1L;
 
+    /** Free-text query matched against restaurant name, location name, city, and address at once. */
+    private final String generalQuery;
     private final String restaurantName;
     private final String locationName;
     private final Cuisine cuisineType;
@@ -58,6 +60,7 @@ public class SearchFilter implements Serializable {
      * @param builder the builder to copy criteria from
      */
     private SearchFilter(Builder builder) {
+        this.generalQuery = builder.generalQuery;
         this.restaurantName = builder.restaurantName;
         this.locationName = builder.locationName;
         this.cuisineType = builder.cuisineType;
@@ -82,6 +85,8 @@ public class SearchFilter implements Serializable {
         this.offset = builder.offset;
     }
 
+    /** @return the free-text query matched against name/city/address at once, or null for any */
+    public String getGeneralQuery() { return generalQuery; }
     /** @return the restaurant name to match, or null for any */
     public String getRestaurantName() { return restaurantName; }
     /** @return the location name to match, or null for any */
@@ -155,7 +160,8 @@ public class SearchFilter implements Serializable {
     @Override
     public String toString() {
         return "SearchFilter{" +
-                "restaurantName='" + restaurantName + '\'' +
+                "generalQuery='" + generalQuery + '\'' +
+                ", restaurantName='" + restaurantName + '\'' +
                 ", locationName='" + locationName + '\'' +
                 ", cuisineType=" + cuisineType +
                 ", country='" + country + '\'' +
@@ -184,6 +190,7 @@ public class SearchFilter implements Serializable {
      * Builder for {@link SearchFilter}. Validates the assembled criteria in {@link #build()}.
      */
     public static class Builder {
+        private String generalQuery;
         private String restaurantName;
         private String locationName;
         private Cuisine cuisineType;
@@ -209,6 +216,19 @@ public class SearchFilter implements Serializable {
 
         /** Builder constructor, starting with every criterion unset. */
         public Builder() {}
+
+        /**
+         * Sets a single free-text query matched against restaurant name, location name, city, and
+         * address at once, so a customer typing "Milano" or "Bangkok Street" finds it either way,
+         * unlike the narrower {@link #restaurantName(String)}/{@link #city(String)} single-field
+         * filters.
+         *
+         * @param generalQuery the free-text query to match, or null for any
+         */
+        public Builder generalQuery(String generalQuery) {
+            this.generalQuery = generalQuery;
+            return this;
+        }
 
         /**
          * @param restaurantName the restaurant name to match, or null for any

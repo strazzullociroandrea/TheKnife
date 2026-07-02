@@ -7,8 +7,8 @@ import com.strazzullo_marocco_sibilla_marin.app.ui.AdvancedFilters;
  * be assembled into a {@link marocco.SearchFilter} (via {@link SearchFilterAssembler}) without
  * the assembling code depending on the UI controls it was read from.
  *
- * @param city the city to search in, or null/blank for any
- * @param restaurantQuery the free-text restaurant name query, or null/blank for any
+ * @param query the free-text query matched against restaurant name, location name, city, and
+ *              address at once, or null/blank for any
  * @param advancedFilters the cuisine, price, dietary, opening-hours, and rating criteria
  * @param distanceAddress the address to search around, or null/blank to not filter by distance
  * @param distanceRadiusKm the search radius in km, only meaningful together with {@link #distanceAddress}
@@ -19,8 +19,7 @@ import com.strazzullo_marocco_sibilla_marin.app.ui.AdvancedFilters;
  * @Author Marin Marco, 760622, VA
  */
 public record SearchCriteria(
-        String city,
-        String restaurantQuery,
+        String query,
         AdvancedFilters advancedFilters,
         String distanceAddress,
         double distanceRadiusKm) {

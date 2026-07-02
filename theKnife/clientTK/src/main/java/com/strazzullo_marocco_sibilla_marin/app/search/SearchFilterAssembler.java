@@ -32,11 +32,8 @@ public final class SearchFilterAssembler {
         builder.page(pageNumber, pageSize);
         var filters = criteria.advancedFilters();
 
-        if (criteria.city() != null && !criteria.city().isBlank()) {
-            builder.city(criteria.city().trim());
-        }
-        if (criteria.restaurantQuery() != null && !criteria.restaurantQuery().isBlank()) {
-            builder.restaurantName(criteria.restaurantQuery().trim());
+        if (criteria.query() != null && !criteria.query().isBlank()) {
+            builder.generalQuery(criteria.query().trim());
         }
         if (filters.cuisineType() != null) {
             builder.cuisineType(filters.cuisineType());

@@ -124,6 +124,16 @@ public class LocationDAOImpl implements LocationDAO {
                  .append("LEFT JOIN view_location_rating v ON l.location_id = v.location_id) ")
                  .append("SELECT * FROM search_base WHERE 1=1 ");
 
+            if (filter.getGeneralQuery() != null && !filter.getGeneralQuery().trim().isEmpty()) {
+                query.append("AND (LOWER(restaurant_name) LIKE ? OR LOWER(name) LIKE ? ")
+                     .append("OR LOWER(city) LIKE ? OR LOWER(address) LIKE ?) ");
+                String pattern = "%" + filter.getGeneralQuery().trim().toLowerCase() + "%";
+                params.add(pattern);
+                params.add(pattern);
+                params.add(pattern);
+                params.add(pattern);
+            }
+
             if (filter.getRestaurantName() != null && !filter.getRestaurantName().trim().isEmpty()) {
                 query.append("AND LOWER(restaurant_name) LIKE ? ");
                 params.add("%" + filter.getRestaurantName().trim().toLowerCase() + "%");

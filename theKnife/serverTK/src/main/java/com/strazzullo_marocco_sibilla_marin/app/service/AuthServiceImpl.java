@@ -13,6 +13,8 @@ import java.rmi.server.UnicastRemoteObject;
 import java.security.MessageDigest;
 import java.sql.SQLException;
 import java.util.UUID;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  * RMI implementation of {@link AuthService}. Sessions are stored in the {@code session} DB table
@@ -27,6 +29,8 @@ import java.util.UUID;
 public class AuthServiceImpl extends UnicastRemoteObject implements AuthService {
 
     private static final long serialVersionUID = 1L;
+
+    private static final Logger LOGGER = Logger.getLogger(AuthServiceImpl.class.getName());
 
     private final UserDAO userDAO;
     private final SessionDAO sessionDAO;
@@ -146,6 +150,7 @@ public class AuthServiceImpl extends UnicastRemoteObject implements AuthService 
         } catch (RemoteException e) {
             throw e;
         } catch (Exception e) {
+            LOGGER.log(Level.SEVERE, "Exception encountered in updateProfile service method", e);
             throw new RemoteException("Non è stato possibile aggiornare il profilo. Riprova più tardi.", e);
         }
     }

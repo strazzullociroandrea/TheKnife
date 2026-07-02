@@ -78,7 +78,7 @@ public class UserDAOImpl implements UserDAO {
             throw new SQLException("id is null or empty");
         }
 
-        String query = "SELECT * FROM app_user WHERE id = ?;";
+        String query = "SELECT * FROM app_user WHERE user_id = ?;";
         User u = null;
 
         try (Connection conn = DBConnectionPool.getInstance().getConnection();

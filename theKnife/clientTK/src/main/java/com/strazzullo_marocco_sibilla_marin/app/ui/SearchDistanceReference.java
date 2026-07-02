@@ -11,7 +11,10 @@ import java.util.Optional;
  * its "you are here" pin and search radius circle on {@link MapView}, caching the last resolved
  * address so re-running a search with an unchanged address doesn't re-geocode it.
  *
- * @Author Marocco Stefano, 762192, VA - author of this file
+ * @Author Strazzullo Ciro Andrea, 763603, VA
+ * @Author Marocco Stefano, 762192, VA
+ * @Author Sibilla Ginevra, 761114, VA
+ * @Author Marin Marco, 760622, VA
  */
 final class SearchDistanceReference {
 

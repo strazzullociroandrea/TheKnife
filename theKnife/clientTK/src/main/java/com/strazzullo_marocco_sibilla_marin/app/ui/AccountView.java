@@ -19,7 +19,10 @@ import strazzullo.User;
  * white right content panel.
  *
  * @version 2.0
+ * @Author Strazzullo Ciro Andrea, 763603, VA
  * @Author Marocco Stefano, 762192, VA
+ * @Author Sibilla Ginevra, 761114, VA
+ * @Author Marin Marco, 760622, VA
  */
 public class AccountView extends HBox {
 

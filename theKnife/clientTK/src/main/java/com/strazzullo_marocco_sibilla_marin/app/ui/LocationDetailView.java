@@ -40,8 +40,8 @@ import java.util.List;
  * restriction notice, and guests see a prompt with links to log in or register.
  *
  * @version 5.0
- * @Author Marocco Stefano, 762192, VA - author of this revision
  * @Author Strazzullo Ciro Andrea, 763603, VA
+ * @Author Marocco Stefano, 762192, VA
  * @Author Sibilla Ginevra, 761114, VA
  * @Author Marin Marco, 760622, VA
  */

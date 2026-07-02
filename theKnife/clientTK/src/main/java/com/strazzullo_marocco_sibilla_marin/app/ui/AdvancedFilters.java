@@ -20,10 +20,10 @@ import sibilla.Day;
  * @param openTime the time of day (HH:mm) the location must be open at, or null for any
  * @param minRating the minimum average rating required, or null for any
  *
- * @Author Marocco Stefano, 762192, VA - author of this file
- * @Author Marin Marco, 760622, VA
- * @author Sibilla Ginevra, 76114
  * @Author Strazzullo Ciro Andrea, 763603, VA
+ * @Author Marocco Stefano, 762192, VA
+ * @Author Sibilla Ginevra, 761114, VA
+ * @Author Marin Marco, 760622, VA
  * @version 2.0
  */
 public record AdvancedFilters(

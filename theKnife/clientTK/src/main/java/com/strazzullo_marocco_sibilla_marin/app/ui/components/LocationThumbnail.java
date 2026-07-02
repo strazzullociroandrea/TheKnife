@@ -2,6 +2,7 @@ package com.strazzullo_marocco_sibilla_marin.app.ui.components;
 
 import com.strazzullo_marocco_sibilla_marin.app.rmi.ServiceLocator;
 import javafx.concurrent.Task;
+import javafx.scene.Node;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.layout.StackPane;
@@ -22,24 +23,44 @@ import java.util.logging.Logger;
  * every location with no uploaded photos yet, so no card on the search results is ever a blank
  * tile. Used by {@link ResultCard}.
  *
- * @Author Marocco Stefano, 762192, VA - author of this file
+ * @version 2.0
+ * @Author Strazzullo Ciro Andrea, 763603, VA
+ * @Author Marocco Stefano, 762192, VA
+ * @Author Sibilla Ginevra, 761114, VA
+ * @Author Marin Marco, 760622, VA
  */
 public class LocationThumbnail extends StackPane {
 
     private static final Logger LOGGER = Logger.getLogger(LocationThumbnail.class.getName());
     private static final double SIZE = 88;
 
+    private final double width;
+    private final double height;
+
     /**
      * @param locationId the location whose first photo to show
      * @param cuisine the restaurant's cuisine type, used for the placeholder icon
      */
     public LocationThumbnail(String locationId, String cuisine) {
-        getStyleClass().addAll("tk-thumbnail", "tk-thumbnail-placeholder");
-        setPrefSize(SIZE, SIZE);
-        setMinSize(SIZE, SIZE);
-        setMaxSize(SIZE, SIZE);
+        this(locationId, cuisine, SIZE, SIZE);
+    }
 
-        Rectangle clip = new Rectangle(SIZE, SIZE);
+    /**
+     * @param locationId the location whose first photo to show
+     * @param cuisine the restaurant's cuisine type, used for the placeholder icon
+     * @param width the thumbnail's width, in pixels
+     * @param height the thumbnail's height, in pixels
+     */
+    public LocationThumbnail(String locationId, String cuisine, double width, double height) {
+        this.width = width;
+        this.height = height;
+
+        getStyleClass().addAll("tk-thumbnail", "tk-thumbnail-placeholder");
+        setPrefSize(width, height);
+        setMinSize(width, height);
+        setMaxSize(width, height);
+
+        Rectangle clip = new Rectangle(width, height);
         clip.setArcWidth(16);
         clip.setArcHeight(16);
         setClip(clip);
@@ -66,7 +87,14 @@ public class LocationThumbnail extends StackPane {
         thread.start();
     }
 
-    private javafx.scene.Node placeholderIcon(String cuisine) {
+    /**
+     * Function to build the placeholder shown while loading and for locations with no photos:
+     * the cuisine's icon if one is bundled, or a generic image icon otherwise.
+     *
+     * @param cuisine the restaurant's cuisine type, or null
+     * @return the placeholder node
+     */
+    private Node placeholderIcon(String cuisine) {
         var stream = cuisine == null ? null
                 : getClass().getResourceAsStream("/icons/cuisine/" + cuisine.toLowerCase(Locale.ROOT) + ".png");
         if (stream == null) {
@@ -80,11 +108,16 @@ public class LocationThumbnail extends StackPane {
         return icon;
     }
 
+    /**
+     * Function to replace the placeholder with the location's first gallery photo.
+     *
+     * @param photo the photo to show
+     */
     private void showPhoto(Photo photo) {
         getStyleClass().remove("tk-thumbnail-placeholder");
-        ImageView imageView = new ImageView(new Image(photo.getUrl(), SIZE, SIZE, false, true, true));
-        imageView.setFitWidth(SIZE);
-        imageView.setFitHeight(SIZE);
+        ImageView imageView = new ImageView(new Image(photo.getUrl(), width, height, false, true, true));
+        imageView.setFitWidth(width);
+        imageView.setFitHeight(height);
         imageView.setPreserveRatio(false);
         imageView.setSmooth(true);
         getChildren().setAll(imageView);

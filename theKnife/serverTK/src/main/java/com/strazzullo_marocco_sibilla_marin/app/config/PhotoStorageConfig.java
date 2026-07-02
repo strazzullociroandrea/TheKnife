@@ -19,7 +19,7 @@ package com.strazzullo_marocco_sibilla_marin.app.config;
  *
  * @version 1.0
  * @Author Strazzullo Ciro Andrea, 763603, VA
- * @Author Marocco Stefano, 762192, VA - author of this file
+ * @Author Marocco Stefano, 762192, VA
  * @Author Sibilla Ginevra, 761114, VA
  * @Author Marin Marco, 760622, VA
  */
@@ -46,6 +46,13 @@ public class PhotoStorageConfig {
         this.publicBaseUrl = stripTrailingSlash(require("PHOTO_S3_PUBLIC_BASE_URL"));
     }
 
+    /**
+     * Function to resolve a required environment variable, failing fast if it's missing.
+     *
+     * @param key the variable name
+     * @return the resolved value
+     * @throws IllegalStateException if the variable is missing or blank
+     */
     private static String require(String key) {
         String value = DotEnv.get(key);
         if (value == null || value.isBlank()) {
@@ -54,6 +61,13 @@ public class PhotoStorageConfig {
         return value;
     }
 
+    /**
+     * Function to strip a single trailing slash, so base URLs can be safely concatenated with a
+     * leading-slash path.
+     *
+     * @param value the value to strip
+     * @return the value without a trailing slash
+     */
     private static String stripTrailingSlash(String value) {
         return value.endsWith("/") ? value.substring(0, value.length() - 1) : value;
     }

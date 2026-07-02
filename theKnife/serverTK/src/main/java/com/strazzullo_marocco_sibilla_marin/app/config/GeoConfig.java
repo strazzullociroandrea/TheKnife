@@ -5,7 +5,10 @@ package com.strazzullo_marocco_sibilla_marin.app.config;
  * read via {@link DotEnv}. Absence is a valid, expected state: callers must fall back to the
  * equivalent free, key-less service ({@code NominatimGeocodingService}) rather than fail.
  *
- * @Author Marocco Stefano, 762192, VA - author of this file
+ * @Author Strazzullo Ciro Andrea, 763603, VA
+ * @Author Marocco Stefano, 762192, VA
+ * @Author Sibilla Ginevra, 761114, VA
+ * @Author Marin Marco, 760622, VA
  */
 public final class GeoConfig {
 

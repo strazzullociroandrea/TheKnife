@@ -11,7 +11,10 @@ import java.util.Map;
  * are not exported as real OS environment variables (e.g. local development).
  * Real environment variables (set via System.getenv) always take precedence.
  *
- * @Author Marocco Stefano, 762192, VA - author of this file
+ * @Author Strazzullo Ciro Andrea, 763603, VA
+ * @Author Marocco Stefano, 762192, VA
+ * @Author Sibilla Ginevra, 761114, VA
+ * @Author Marin Marco, 760622, VA
  */
 public final class DotEnv {
 
@@ -34,6 +37,12 @@ public final class DotEnv {
         return FILE_VALUES.get(key);
     }
 
+    /**
+     * Function to parse the {@code .env} file in the working directory into a key/value map,
+     * stripping surrounding quotes from values and skipping blank lines and {@code #} comments.
+     *
+     * @return the parsed values, empty if the file doesn't exist or isn't readable
+     */
     private static Map<String, String> load() {
         Map<String, String> values = new HashMap<>();
         Path path = Path.of(".env");

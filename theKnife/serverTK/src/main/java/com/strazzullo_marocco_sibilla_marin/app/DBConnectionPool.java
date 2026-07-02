@@ -15,7 +15,7 @@ import java.sql.SQLException;
  *
  * @version 2.0
  * @Author Strazzullo Ciro Andrea, 763603, VA
- * @Author Marocco Stefano, 762192, VA - author of this revision
+ * @Author Marocco Stefano, 762192, VA
  * @Author Sibilla Ginevra, 761114, VA
  * @Author Marin Marco, 760622, VA
  */
@@ -24,6 +24,13 @@ public class DBConnectionPool {
     private static DBConnectionPool instance;
     private final HikariDataSource dataSource;
 
+    /**
+     * DBConnectionPool constructor, configuring and starting the underlying Hikari pool.
+     *
+     * @param url the JDBC connection URL
+     * @param username the database username
+     * @param password the database password
+     */
     private DBConnectionPool(String url, String username, String password) {
         HikariConfig config = new HikariConfig();
         config.setJdbcUrl(url);

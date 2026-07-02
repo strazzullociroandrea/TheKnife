@@ -25,7 +25,7 @@ import java.util.UUID;
  *
  * @version 1.0
  * @Author Strazzullo Ciro Andrea, 763603, VA
- * @Author Marocco Stefano, 762192, VA - author of this file
+ * @Author Marocco Stefano, 762192, VA
  * @Author Sibilla Ginevra, 761114, VA
  * @Author Marin Marco, 760622, VA
  */
@@ -99,6 +99,13 @@ public class S3PhotoStorage implements PhotoStorage {
         }
     }
 
+    /**
+     * Function to recover an object's storage key from its public URL.
+     *
+     * @param url the photo's public URL
+     * @return the object's storage key
+     * @throws PhotoStorageException if the URL doesn't belong to the configured public base URL
+     */
     private String keyFromUrl(String url) throws PhotoStorageException {
         String prefix = config.getPublicBaseUrl() + "/";
         if (!url.startsWith(prefix)) {
@@ -107,6 +114,14 @@ public class S3PhotoStorage implements PhotoStorage {
         return url.substring(prefix.length());
     }
 
+    /**
+     * Function to build a fresh, collision-free storage key for a new upload, preserving the
+     * original file's extension.
+     *
+     * @param locationId the location the photo belongs to
+     * @param fileName the uploaded file's original name, used only for its extension
+     * @return the new object's storage key
+     */
     private String buildKey(String locationId, String fileName) {
         String extension = "";
         int dot = fileName.lastIndexOf('.');
@@ -116,6 +131,12 @@ public class S3PhotoStorage implements PhotoStorage {
         return "locations/" + locationId + "/" + UUID.randomUUID() + extension;
     }
 
+    /**
+     * Function to guess an upload's MIME type from its file extension.
+     *
+     * @param fileName the uploaded file's original name
+     * @return the guessed content type, or {@code application/octet-stream} if unrecognized
+     */
     private String guessContentType(String fileName) {
         String lower = fileName.toLowerCase();
         if (lower.endsWith(".png")) {

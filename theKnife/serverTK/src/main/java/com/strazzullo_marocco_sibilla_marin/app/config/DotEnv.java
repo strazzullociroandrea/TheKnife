@@ -13,7 +13,7 @@ import java.util.Map;
  *
  * @version 1.0
  * @Author Strazzullo Ciro Andrea, 763603, VA
- * @Author Marocco Stefano, 762192, VA - author of this file
+ * @Author Marocco Stefano, 762192, VA
  * @Author Sibilla Ginevra, 761114, VA
  * @Author Marin Marco, 760622, VA
  */
@@ -24,19 +24,19 @@ public final class DotEnv {
     private DotEnv() {}
 
     /**
-     * Function to resolve a configuration value, looking first at real OS
-     * environment variables and then at a ".env" file in the working directory.
-     *
-     * @param key the variable name
-     * @return the resolved value, or {@code null} if not found anywhere
-     */
-    /**
      * Reloads the {@code .env} file from disk, picking up values written by {@link EnvSetup}.
      */
     public static void reload() {
         FILE_VALUES = load();
     }
 
+    /**
+     * Function to resolve a configuration value, looking first at real OS
+     * environment variables and then at a ".env" file in the working directory.
+     *
+     * @param key the variable name
+     * @return the resolved value, or {@code null} if not found anywhere
+     */
     public static String get(String key) {
         String value = System.getenv(key);
         if (value != null && !value.isEmpty()) {
@@ -45,6 +45,12 @@ public final class DotEnv {
         return FILE_VALUES.get(key);
     }
 
+    /**
+     * Function to parse the {@code .env} file in the working directory into a key/value map,
+     * stripping surrounding quotes from values and skipping blank lines and {@code #} comments.
+     *
+     * @return the parsed values, empty if the file doesn't exist or isn't readable
+     */
     private static Map<String, String> load() {
         Map<String, String> values = new HashMap<>();
         Path path = Path.of(".env");

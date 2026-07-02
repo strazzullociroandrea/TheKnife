@@ -19,7 +19,7 @@ import java.util.Optional;
  *
  * @version 1.0
  * @Author Strazzullo Ciro Andrea, 763603, VA
- * @Author Marocco Stefano, 762192, VA - author of this file
+ * @Author Marocco Stefano, 762192, VA
  * @Author Sibilla Ginevra, 761114, VA
  * @Author Marin Marco, 760622, VA
  */
@@ -142,6 +142,13 @@ public class PhotoDAOImpl implements PhotoDAO {
         }
     }
 
+    /**
+     * Function to map a row of ResultSet to a {@link Photo} entity object.
+     *
+     * @param rs the ResultSet containing a photo table row
+     * @return the constructed Photo entity
+     * @throws SQLException if a database mapping error occurs
+     */
     private Photo mapRow(ResultSet rs) throws SQLException {
         return new Photo(
                 rs.getString("photo_id"),

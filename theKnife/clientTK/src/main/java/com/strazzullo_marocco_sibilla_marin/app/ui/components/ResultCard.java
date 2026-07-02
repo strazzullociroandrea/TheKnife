@@ -18,6 +18,7 @@ import sibilla.LocationSearchResult;
 
 import java.util.Locale;
 import java.util.function.BooleanSupplier;
+import java.util.function.Consumer;
 
 /**
  * A single result row in the search results list: restaurant/location summary, cuisine and
@@ -27,9 +28,9 @@ import java.util.function.BooleanSupplier;
  * trailing chevron hinting at it. The favourite heart button is gated: only customers can toggle
  * it; guests and managers are intercepted and shown an appropriate prompt instead.
  *
- * @version 4.0
+ * @version 5.0
  * @Author Strazzullo Ciro Andrea, 763603, VA
- * @Author Marocco Stefano, 762192, VA - author of this revision
+ * @Author Marocco Stefano, 762192, VA
  * @Author Sibilla Ginevra, 761114, VA
  * @Author Marin Marco, 760622, VA
  */
@@ -42,9 +43,12 @@ public class ResultCard extends VBox {
      * @param onViewDetails callback invoked when the card is clicked
      * @param isCustomer supplier returning whether the current user is a logged-in customer
      * @param onFavouriteAuthRequired callback invoked when a non-customer clicks the heart button
+     * @param initiallyFavourite whether this location is already one of the current user's favourites
+     * @param onFavouriteToggle callback invoked with the heart's new state when a customer toggles it
      */
     public ResultCard(LocationSearchResult result, Runnable onViewDetails,
-                      BooleanSupplier isCustomer, Runnable onFavouriteAuthRequired) {
+                      BooleanSupplier isCustomer, Runnable onFavouriteAuthRequired,
+                      boolean initiallyFavourite, Consumer<Boolean> onFavouriteToggle) {
         Location location = result.location();
 
         getStyleClass().add("tk-card");
@@ -63,14 +67,16 @@ public class ResultCard extends VBox {
         OpenStatusPill statusPill = new OpenStatusPill(location);
 
         ToggleButton favourite = new ToggleButton();
+        favourite.setSelected(initiallyFavourite);
         favourite.setGraphic(new FontIcon(Feather.HEART));
         favourite.getStyleClass().addAll(Styles.BUTTON_ICON, Styles.FLAT, "tk-favourite");
-        favourite.addEventFilter(MouseEvent.MOUSE_CLICKED, e -> {
+        favourite.addEventFilter(MouseEvent.MOUSE_PRESSED, e -> {
             if (!isCustomer.getAsBoolean()) {
                 e.consume();
                 onFavouriteAuthRequired.run();
             }
         });
+        favourite.setOnAction(e -> onFavouriteToggle.accept(favourite.isSelected()));
 
         HBox headerRow = new HBox(12, nameLabel, spacer, statusPill, favourite);
         headerRow.setAlignment(Pos.CENTER_LEFT);

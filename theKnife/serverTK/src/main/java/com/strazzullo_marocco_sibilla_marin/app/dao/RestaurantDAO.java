@@ -16,7 +16,7 @@ import java.util.UUID;
  * @version 1.0
  * @Author Strazzullo Ciro Andrea, 763603, VA
  * @Author Marocco Stefano, 762192, VA
- * @Author Sibilla Ginevra, 761114, VA - author of this file
+ * @Author Sibilla Ginevra, 761114, VA
  * @Author Marin Marco, 760622, VA
  */
 public interface RestaurantDAO {

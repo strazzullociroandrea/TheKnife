@@ -21,7 +21,7 @@ import java.util.logging.Logger;
  *
  * @version 1.1
  * @Author Strazzullo Ciro Andrea, 763603, VA
- * @Author Marocco Stefano, 762192, VA - author of this file
+ * @Author Marocco Stefano, 762192, VA
  * @Author Sibilla Ginevra, 761114, VA
  * @Author Marin Marco, 760622, VA
  */

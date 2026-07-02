@@ -20,7 +20,10 @@ import java.util.Set;
  * subsequent runs skip the wizard automatically.
  *
  * @version 1.0
- * @Author Marocco Stefano, 762192, VA - author of this file
+ * @Author Strazzullo Ciro Andrea, 763603, VA
+ * @Author Marocco Stefano, 762192, VA
+ * @Author Sibilla Ginevra, 761114, VA
+ * @Author Marin Marco, 760622, VA
  */
 public final class EnvSetup {
 

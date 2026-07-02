@@ -18,7 +18,10 @@ import java.util.List;
  * {@link NominatimGeocodingService} when a {@code GOOGLE_MAPS_API_KEY} is configured, so the
  * "Distanza" filter resolves addresses with the same provider as the client's map preview.
  *
- * @Author Marocco Stefano, 762192, VA - author of this file
+ * @Author Strazzullo Ciro Andrea, 763603, VA
+ * @Author Marocco Stefano, 762192, VA
+ * @Author Sibilla Ginevra, 761114, VA
+ * @Author Marin Marco, 760622, VA
  */
 public class GoogleGeocodingService implements GeocodingService {
 

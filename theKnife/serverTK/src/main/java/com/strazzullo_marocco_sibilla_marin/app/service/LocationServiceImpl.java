@@ -9,6 +9,7 @@ import sibilla.Location;
 import sibilla.LocationSearchResult;
 import sibilla.Restaurant;
 
+import java.io.Serial;
 import java.rmi.RemoteException;
 import java.rmi.server.UnicastRemoteObject;
 import java.sql.SQLException;
@@ -32,6 +33,7 @@ import java.util.logging.Logger;
  */
 public class LocationServiceImpl extends UnicastRemoteObject implements LocationService {
 
+    @Serial
     private static final long serialVersionUID = 1L;
 
     private static final Logger LOGGER = Logger.getLogger(LocationServiceImpl.class.getName());

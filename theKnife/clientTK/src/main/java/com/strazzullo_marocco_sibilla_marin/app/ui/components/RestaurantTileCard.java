@@ -82,7 +82,7 @@ public class RestaurantTileCard extends VBox {
         setOnMouseClicked(e -> onViewDetails.run());
 
         LocationThumbnail thumbnail = new LocationThumbnail(location.getId(), result.restaurantCuisine(),
-                IMAGE_WIDTH, IMAGE_HEIGHT);
+                IMAGE_WIDTH, IMAGE_HEIGHT, 16);
 
         ToggleButton favourite = new ToggleButton();
         favourite.setSelected(initiallyFavourite);

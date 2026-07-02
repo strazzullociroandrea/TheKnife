@@ -164,7 +164,7 @@ public class LoginView extends HBox {
                     passwordField.clear();
                     SessionStore.save(result.getSessionToken());
                     shell.setSession(result.getUser(), result.getSessionToken());
-                    shell.goBackAfterAuthChange();
+                    shell.goBack();
                 }
             }
         } catch (Exception e) {

@@ -32,6 +32,9 @@ public class AppShell extends StackPane {
     private User currentUser = null;
     private String currentSessionToken = null;
 
+    private LocationSearchResult lastDetailResult = null;
+    private String lastSearchQuery = null;
+
     /**
      * AppShell constructor. Attempts to restore a previous session, then shows the home screen.
      */
@@ -150,6 +153,7 @@ public class AppShell extends StackPane {
      *                        null/blank for none
      */
     public void showSearch(String query, Cuisine cuisine, String distanceAddress) {
+        this.lastSearchQuery = query;
         backStack.clear();
         show(new SearchView(this, query, cuisine, distanceAddress));
     }
@@ -179,6 +183,7 @@ public class AppShell extends StackPane {
      * @param result the location (plus its restaurant/rating info) to show
      */
     public void showLocationDetail(LocationSearchResult result) {
+        this.lastDetailResult = result;
         pushCurrent();
         show(new LocationDetailView(this, result));
     }
@@ -202,26 +207,19 @@ public class AppShell extends StackPane {
         if (backStack.isEmpty()) {
             showHome();
         } else {
-            show(backStack.pop());
+            Node previous = backStack.pop();
+            if (previous instanceof HomeView) {
+                showHome();
+            } else if (previous instanceof LocationDetailView && lastDetailResult != null) {
+                show(new LocationDetailView(this, lastDetailResult));
+            } else if (previous instanceof SearchView) {
+                show(new SearchView(this, lastSearchQuery));
+            } else if (previous instanceof AccountView) {
+                show(new AccountView(this));
+            } else {
+                show(previous);
+            }
         }
-    }
-
-    /**
-     * Function to return to whichever screen was showing before login/logout, like {@link
-     * #goBack()}, except a {@link HomeView} on the back-stack is always rebuilt fresh rather than
-     * reused as-is. Every other cached screen (e.g. {@link SearchView}) still just gets restored:
-     * its content is unaffected by the auth change, only its own toolbar-driven navigation would
-     * pick up the new session. Used after a successful login, since the back-stack may otherwise
-     * hold a {@link HomeView} instance built while logged out, which would keep showing the guest
-     * layout even though the session has since changed.
-     */
-    public void goBackAfterAuthChange() {
-        if (backStack.isEmpty()) {
-            showHome();
-            return;
-        }
-        Node previous = backStack.pop();
-        show(previous instanceof HomeView ? new HomeView(this) : previous);
     }
 
     /**

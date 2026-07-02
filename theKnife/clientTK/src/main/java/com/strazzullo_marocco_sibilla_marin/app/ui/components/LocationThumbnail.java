@@ -21,7 +21,7 @@ import java.util.logging.Logger;
  * {@link com.strazzullo_marocco_sibilla_marin.app.remote.PhotoService}. Falls back to the same
  * cuisine icon used by the quick-filter chips on an accent-tinted backdrop while loading and for
  * every location with no uploaded photos yet, so no card on the search results is ever a blank
- * tile. Used by {@link ResultCard}.
+ * tile. Used by {@link ResultCard} and {@link VerticalLocationCard}.
  *
  * @version 2.0
  * @Author Strazzullo Ciro Andrea, 763603, VA
@@ -32,26 +32,31 @@ import java.util.logging.Logger;
 public class LocationThumbnail extends StackPane {
 
     private static final Logger LOGGER = Logger.getLogger(LocationThumbnail.class.getName());
-    private static final double SIZE = 88;
+    private static final double DEFAULT_SIZE = 88;
 
     private final double width;
     private final double height;
 
     /**
+     * Default constructor with size 88x88.
+     *
      * @param locationId the location whose first photo to show
      * @param cuisine the restaurant's cuisine type, used for the placeholder icon
      */
     public LocationThumbnail(String locationId, String cuisine) {
-        this(locationId, cuisine, SIZE, SIZE);
+        this(locationId, cuisine, DEFAULT_SIZE, DEFAULT_SIZE, 16);
     }
 
     /**
+     * Constructor supporting custom width, height, and corner radius.
+     *
      * @param locationId the location whose first photo to show
      * @param cuisine the restaurant's cuisine type, used for the placeholder icon
-     * @param width the thumbnail's width, in pixels
-     * @param height the thumbnail's height, in pixels
+     * @param width the thumbnail width
+     * @param height the thumbnail height
+     * @param arc the corner border radius
      */
-    public LocationThumbnail(String locationId, String cuisine, double width, double height) {
+    public LocationThumbnail(String locationId, String cuisine, double width, double height, double arc) {
         this.width = width;
         this.height = height;
 
@@ -61,8 +66,8 @@ public class LocationThumbnail extends StackPane {
         setMaxSize(width, height);
 
         Rectangle clip = new Rectangle(width, height);
-        clip.setArcWidth(16);
-        clip.setArcHeight(16);
+        clip.setArcWidth(arc);
+        clip.setArcHeight(arc);
         setClip(clip);
 
         getChildren().add(placeholderIcon(cuisine));
@@ -101,8 +106,8 @@ public class LocationThumbnail extends StackPane {
             return new FontIcon(Feather.IMAGE);
         }
         ImageView icon = new ImageView(new Image(stream));
-        icon.setFitWidth(40);
-        icon.setFitHeight(40);
+        icon.setFitWidth(width * 0.45);
+        icon.setFitHeight(height * 0.45);
         icon.setPreserveRatio(true);
         icon.setSmooth(true);
         return icon;

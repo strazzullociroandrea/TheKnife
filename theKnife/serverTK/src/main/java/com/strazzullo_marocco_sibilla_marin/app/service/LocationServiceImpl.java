@@ -6,6 +6,7 @@ import com.strazzullo_marocco_sibilla_marin.app.dao.impl.LocationDAOImpl;
 import com.strazzullo_marocco_sibilla_marin.app.dao.impl.RestaurantDAOImpl;
 import com.strazzullo_marocco_sibilla_marin.app.remote.LocationService;
 import sibilla.Location;
+import sibilla.LocationSearchResult;
 import sibilla.Restaurant;
 
 import java.rmi.RemoteException;
@@ -23,9 +24,9 @@ import java.util.logging.Logger;
  * the location belongs to. Decouples logic from database access via
  * {@link LocationDAO} and {@link RestaurantDAO}.
  *
- * @version 1.0
+ * @version 2.0
  * @Author Strazzullo Ciro Andrea, 763603, VA
- * @Author Marocco Stefano, 762192, VA - author of this file
+ * @Author Marocco Stefano, 762192, VA
  * @Author Sibilla Ginevra, 761114, VA
  * @Author Marin Marco, 760622, VA
  */
@@ -73,6 +74,24 @@ public class LocationServiceImpl extends UnicastRemoteObject implements Location
             return locationDAO.findById(locationId).orElse(null);
         } catch (SQLException e) {
             LOGGER.log(Level.SEVERE, "SQLException encountered in getLocation service method", e);
+            throw new RemoteException("Database access exception occurred on the server side.", e);
+        }
+    }
+
+    /**
+     * Function to retrieve a location by its unique identifier, plus its rating and parent
+     * restaurant info.
+     *
+     * @param locationId the location id
+     * @return the location's search result, or null if not found
+     * @throws RemoteException if a remote communication error occurs
+     */
+    @Override
+    public LocationSearchResult getLocationSearchResult(String locationId) throws RemoteException {
+        try {
+            return locationDAO.findSearchResultById(locationId).orElse(null);
+        } catch (SQLException e) {
+            LOGGER.log(Level.SEVERE, "SQLException encountered in getLocationSearchResult service method", e);
             throw new RemoteException("Database access exception occurred on the server side.", e);
         }
     }

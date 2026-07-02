@@ -13,10 +13,10 @@ import java.util.Optional;
  * Data Access Object (DAO) interface for performing search operations on restaurant location data.
  * Follows the Dependency Inversion Principle, decoupling business logic from JDBC implementation.
  *
- * @version 1.0
+ * @version 2.0
  * @Author Strazzullo Ciro Andrea, 763603, VA
- * @Author Marocco Stefano, 762192, VA - author of this file
- * @Author Sibilla Ginevra, 761114, VA - author of this file
+ * @Author Marocco Stefano, 762192, VA
+ * @Author Sibilla Ginevra, 761114, VA
  * @Author Marin Marco, 760622, VA
  */
 public interface LocationDAO {
@@ -39,6 +39,16 @@ public interface LocationDAO {
      * @throws SQLException if a database query error occurs
      */
     Optional<Location> findById(String id) throws SQLException;
+
+    /**
+     * Retrieves a location by its unique identifier, plus its rating and parent restaurant info,
+     * the same shape {@link #search} returns per row.
+     *
+     * @param id the unique identifier of the location
+     * @return the location's search result, or empty if not found
+     * @throws SQLException if a database query error occurs
+     */
+    Optional<LocationSearchResult> findSearchResultById(String id) throws SQLException;
 
     /**
      * Retrieves all locations associated with a specific restaurant.

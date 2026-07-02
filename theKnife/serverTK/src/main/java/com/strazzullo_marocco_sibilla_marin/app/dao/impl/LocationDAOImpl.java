@@ -30,10 +30,10 @@ import java.util.*;
  * Matches criteria against every attribute of the location (sede) and the restaurant name.
  * Connects to the PostgreSQL database via {@link DBConnectionPool}.
  *
- * @version 1.0
+ * @version 2.0
  * @Author Strazzullo Ciro Andrea, 763603, VA
- * @Author Marocco Stefano, 762192, VA - author of this file
- * @Author Sibilla Ginevra, 761114, VA - author of this file
+ * @Author Marocco Stefano, 762192, VA
+ * @Author Sibilla Ginevra, 761114, VA
  * @Author Marin Marco, 760622, VA
  */
 public class LocationDAOImpl implements LocationDAO {
@@ -56,6 +56,12 @@ public class LocationDAOImpl implements LocationDAO {
         this(defaultGeocodingService());
     }
 
+    /**
+     * Function to resolve the default geocoding service: Google when an API key is configured,
+     * Nominatim otherwise.
+     *
+     * @return the resolved geocoding service
+     */
     private static GeocodingService defaultGeocodingService() {
         String apiKey = GeoConfig.googleMapsApiKey();
         return apiKey != null ? new GoogleGeocodingService(apiKey) : new NominatimGeocodingService();
@@ -391,6 +397,36 @@ public class LocationDAOImpl implements LocationDAO {
                     return Optional.of(mapRowToLocation(rs));
                 }
                 return Optional.empty();
+            }
+        }
+    }
+
+    /**
+     * Retrieves a location by its unique identifier, plus its rating and parent restaurant info,
+     * via the same join {@link #search} uses. Borrows a connection from {@link DBConnectionPool}
+     * and returns it via try-with-resources.
+     *
+     * @param id the unique identifier of the location
+     * @return the location's search result, or empty if not found
+     * @throws SQLException if a database query error occurs or the id is null/empty
+     */
+    @Override
+    public Optional<LocationSearchResult> findSearchResultById(String id) throws SQLException {
+        if (id == null || id.isEmpty()) {
+            throw new SQLException("id is null or empty");
+        }
+        String query = "SELECT l.*, r.name AS restaurant_name, r.cuisine_type AS restaurant_cuisine, " +
+                "v.avg_rating, v.review_count " +
+                "FROM location l " +
+                "JOIN restaurant r ON l.restaurant_id = r.restaurant_id " +
+                "LEFT JOIN view_location_rating v ON l.location_id = v.location_id " +
+                "WHERE l.location_id = ?";
+
+        try (Connection conn = DBConnectionPool.getInstance().getConnection();
+             PreparedStatement stmt = conn.prepareStatement(query)) {
+            stmt.setString(1, id);
+            try (ResultSet rs = stmt.executeQuery()) {
+                return rs.next() ? Optional.of(mapRowToSearchResult(rs, false)) : Optional.empty();
             }
         }
     }

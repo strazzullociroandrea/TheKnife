@@ -1,6 +1,7 @@
 package com.strazzullo_marocco_sibilla_marin.app.remote;
 
 import sibilla.Location;
+import sibilla.LocationSearchResult;
 
 import java.rmi.Remote;
 import java.rmi.RemoteException;
@@ -11,9 +12,9 @@ import java.util.List;
  * Locations are publicly readable; creation, update, and deletion are restricted to
  * the managers owning the restaurant the location belongs to.
  *
- * @version 1.0
+ * @version 2.0
  * @Author Strazzullo Ciro Andrea, 763603, VA
- * @Author Marocco Stefano, 762192, VA - author of this file
+ * @Author Marocco Stefano, 762192, VA
  * @Author Sibilla Ginevra, 761114, VA
  * @Author Marin Marco, 760622, VA
  */
@@ -27,6 +28,18 @@ public interface LocationService extends Remote {
      * @throws RemoteException if a remote communication error occurs
      */
     Location getLocation(String locationId) throws RemoteException;
+
+    /**
+     * Function to retrieve a location by its unique identifier, plus its rating and parent
+     * restaurant info (name, cuisine), the same shape {@link CustomerService#searchLocations}
+     * returns. Used where a location is known only by id (e.g. from a {@code Booking}) but its
+     * restaurant name is needed for display.
+     *
+     * @param locationId the location id
+     * @return the location's search result, or null if not found
+     * @throws RemoteException if a remote communication error occurs
+     */
+    LocationSearchResult getLocationSearchResult(String locationId) throws RemoteException;
 
     /**
      * Function to list every location belonging to a restaurant.

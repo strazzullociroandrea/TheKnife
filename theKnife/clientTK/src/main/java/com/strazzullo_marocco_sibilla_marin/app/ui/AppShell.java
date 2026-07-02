@@ -95,6 +95,16 @@ public class AppShell extends StackPane {
     }
 
     /**
+     * Replaces the current user with an updated copy, keeping the existing session token. Called
+     * by {@link AccountView} after a successful profile edit.
+     *
+     * @param user the updated user
+     */
+    public void updateCurrentUser(User user) {
+        this.currentUser = user;
+    }
+
+    /**
      * Function to log out the current user: invalidates the session on the server, removes the
      * token from disk, and returns to the home screen.
      */

@@ -1,24 +1,37 @@
 package com.strazzullo_marocco_sibilla_marin.app.ui;
 
 import atlantafx.base.theme.Styles;
+import com.strazzullo_marocco_sibilla_marin.app.rmi.ServiceLocator;
+import com.strazzullo_marocco_sibilla_marin.app.ui.components.DateSelector;
+import com.strazzullo_marocco_sibilla_marin.app.ui.components.MessageBanner;
+import javafx.application.Platform;
+import javafx.concurrent.Task;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.Cursor;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.control.Separator;
+import javafx.scene.control.TextField;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.Priority;
 import javafx.scene.layout.Region;
 import javafx.scene.layout.VBox;
 import strazzullo.User;
 
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
+
 /**
- * Account screen showing the logged-in user's profile data and a logout button.
- * Shares the same two-panel layout as {@link LoginView}: a black left branding panel and a
- * white right content panel.
+ * Account screen showing the logged-in user's editable profile data (name, surname, email,
+ * domicile, and date of birth) and a logout button. Editing a field and pressing "Salva
+ * modifiche" persists the change via {@code AuthService#updateProfile} and refreshes both this
+ * screen's header and {@link AppShell}'s cached user. Also the destination of the home screen's
+ * "cambia" domicile link, so changing where a customer lives happens on the same profile screen
+ * as every other editable field, rather than a one-off dialog. Shares the same two-panel layout as
+ * {@link LoginView}: a black left branding panel and a white right content panel.
  *
- * @version 2.0
+ * @version 3.0
  * @Author Strazzullo Ciro Andrea, 763603, VA
  * @Author Marocco Stefano, 762192, VA
  * @Author Sibilla Ginevra, 761114, VA
@@ -26,12 +39,24 @@ import strazzullo.User;
  */
 public class AccountView extends HBox {
 
+    private static final DateTimeFormatter DATE_FORMAT = DateTimeFormatter.ofPattern("yyyy-MM-dd");
+
+    private final AppShell shell;
+    private final Label title;
+    private final TextField nameField = new TextField();
+    private final TextField surnameField = new TextField();
+    private final TextField emailField = new TextField();
+    private final TextField domicileField = new TextField();
+    private final DateSelector dateOfBirthField;
+    private final MessageBanner banner = new MessageBanner();
+
     /**
      * AccountView constructor.
      *
-     * @param shell the app shell, used for navigation and to read the current user
+     * @param shell the app shell, used for navigation and to read/update the current user
      */
     public AccountView(AppShell shell) {
+        this.shell = shell;
         User user = shell.getCurrentUser();
         String roleLabel = "manager".equals(user.getRole()) ? "Ristoratore" : "Cliente";
 
@@ -55,7 +80,7 @@ public class AccountView extends HBox {
         Region spacer = new Region();
         VBox.setVgrow(spacer, Priority.ALWAYS);
 
-        Label title = new Label(user.getName() + " " + user.getSurname());
+        title = new Label(user.getName() + " " + user.getSurname());
         title.getStyleClass().add(Styles.TITLE_1);
         title.setStyle("-fx-text-fill: white;");
         title.setWrapText(true);
@@ -77,19 +102,19 @@ public class AccountView extends HBox {
         Separator sep = new Separator();
         sep.setMaxWidth(Double.MAX_VALUE);
 
-        rightPanel.getChildren().addAll(
-                heading,
-                sep,
-                buildField("Nome", user.getName()),
-                buildField("Cognome", user.getSurname()),
-                buildField("Email", user.getEmail()),
-                buildField("Indirizzo", user.getDomicile()),
-                buildField("Ruolo", roleLabel)
-        );
+        nameField.setText(user.getName());
+        surnameField.setText(user.getSurname());
+        emailField.setText(user.getEmail());
+        domicileField.setText(user.getDomicile());
+        dateOfBirthField = new DateSelector(parseDate(user.getDateOfBirth()), date -> date.isAfter(LocalDate.now()));
+        dateOfBirthField.setMaxWidth(Double.MAX_VALUE);
 
-        if (user.getDateOfBirth() != null && !user.getDateOfBirth().isBlank()) {
-            rightPanel.getChildren().add(buildField("Data di nascita", user.getDateOfBirth()));
-        }
+        Button saveButton = new Button("Salva modifiche");
+        saveButton.setMaxWidth(Double.MAX_VALUE);
+        saveButton.setPrefHeight(40);
+        saveButton.getStyleClass().add(Styles.ACCENT);
+        saveButton.setCursor(Cursor.HAND);
+        saveButton.setOnAction(e -> saveChanges());
 
         Button logoutButton = new Button("Esci da TheKnife");
         logoutButton.setMaxWidth(Double.MAX_VALUE);
@@ -98,17 +123,96 @@ public class AccountView extends HBox {
         logoutButton.setCursor(Cursor.HAND);
         logoutButton.setOnAction(e -> shell.logout());
 
-        rightPanel.getChildren().add(logoutButton);
+        rightPanel.getChildren().addAll(
+                heading,
+                sep,
+                banner,
+                buildField("Nome", nameField),
+                buildField("Cognome", surnameField),
+                buildField("Email", emailField),
+                buildField("Indirizzo", domicileField),
+                buildField("Data di nascita", dateOfBirthField),
+                buildField("Ruolo", roleLabel),
+                saveButton,
+                logoutButton
+        );
         HBox.setHgrow(rightPanel, Priority.ALWAYS);
 
         getChildren().addAll(leftPanel, rightPanel);
     }
 
     /**
-     * Builds a two-line display field: a small grey label above the value text.
+     * Function to persist the currently typed field values via {@code AuthService#updateProfile}
+     * on a background thread, refreshing the header and {@link AppShell}'s cached user on
+     * success, or showing an error banner on failure.
+     */
+    private void saveChanges() {
+        User current = shell.getCurrentUser();
+        String userId = current.getId();
+        String name = nameField.getText().trim();
+        String surname = surnameField.getText().trim();
+        String email = emailField.getText().trim();
+        String domicile = domicileField.getText().trim();
+        LocalDate dateOfBirth = dateOfBirthField.getValue();
+        String dateOfBirthText = dateOfBirth == null ? null : DATE_FORMAT.format(dateOfBirth);
+
+        Task<User> task = new Task<>() {
+            @Override
+            protected User call() throws Exception {
+                return ServiceLocator.getInstance().getAuthService()
+                        .updateProfile(userId, name, surname, email, domicile, dateOfBirthText);
+            }
+        };
+        task.setOnSucceeded(e -> {
+            shell.updateCurrentUser(task.getValue());
+            title.setText(name + " " + surname);
+            banner.showSuccess("Profilo aggiornato con successo.");
+        });
+        task.setOnFailed(e -> Platform.runLater(() ->
+                banner.showError("Non è stato possibile aggiornare il profilo. Riprova più tardi.")));
+
+        Thread thread = new Thread(task, "account-update-worker");
+        thread.setDaemon(true);
+        thread.start();
+    }
+
+    /**
+     * Function to parse a "yyyy-MM-dd" date of birth string into a {@link LocalDate}.
+     *
+     * @param dateOfBirth the date of birth string, or null/blank
+     * @return the parsed date, or null if blank or unparsable
+     */
+    private LocalDate parseDate(String dateOfBirth) {
+        if (dateOfBirth == null || dateOfBirth.isBlank()) {
+            return null;
+        }
+        try {
+            return LocalDate.parse(dateOfBirth, DATE_FORMAT);
+        } catch (Exception e) {
+            return null;
+        }
+    }
+
+    /**
+     * Builds a two-line editable field: a small grey label above the input control.
      *
      * @param labelText the field label, e.g. "Email"
-     * @param value     the value to display; shown as "—" when {@code null}
+     * @param control the input control to show below the label
+     * @return a {@link VBox} containing the label and control
+     */
+    private VBox buildField(String labelText, javafx.scene.Node control) {
+        Label lbl = new Label(labelText);
+        lbl.getStyleClass().add(Styles.TEXT_SMALL);
+        lbl.setStyle("-fx-text-fill: grey;");
+
+        return new VBox(2, lbl, control);
+    }
+
+    /**
+     * Builds a two-line read-only field: a small grey label above the value text.
+     *
+     * @param labelText the field label, e.g. "Ruolo"
+     * @param value the value to display
      * @return a {@link VBox} containing the label and value
      */
     private VBox buildField(String labelText, String value) {

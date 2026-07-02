@@ -3,6 +3,7 @@ package com.strazzullo_marocco_sibilla_marin.app.ui;
 import com.strazzullo_marocco_sibilla_marin.app.geo.AddressAutocomplete;
 import com.strazzullo_marocco_sibilla_marin.app.rmi.ServiceLocator;
 import com.strazzullo_marocco_sibilla_marin.app.ui.components.DateSelector;
+import com.strazzullo_marocco_sibilla_marin.app.ui.components.MessageBanner;
 import com.strazzullo_marocco_sibilla_marin.app.ui.components.RoleCard;
 import atlantafx.base.theme.Styles;
 import javafx.geometry.Insets;
@@ -30,9 +31,9 @@ import java.time.format.DateTimeFormatter;
  * date-of-birth field uses the brand-styled {@link DateSelector} instead of the native
  * {@code javafx.scene.control.DatePicker}.
  *
- * @version 2.0
+ * @version 3.0
  * @Author Strazzullo Ciro Andrea, 763603, VA
- * @Author Marocco Stefano, 762192, VA - author of this revision
+ * @Author Marocco Stefano, 762192, VA
  * @Author Sibilla Ginevra, 761114, VA
  * @Author Marin Marco, 760622, VA
  */
@@ -42,7 +43,7 @@ public class RegistrationView extends HBox {
     private final TextField nameField, surnameField, emailField, placeField;
     private final PasswordField passwordField, confirmField;
     private final DateSelector dateBirthField;
-    private final Label showMessage;
+    private final MessageBanner banner = new MessageBanner();
 
 
     /**
@@ -93,9 +94,7 @@ public class RegistrationView extends HBox {
         info.getStyleClass().add(Styles.TEXT_CAPTION);
         info.setStyle("-fx-text-fill: grey;");
 
-        showMessage = new Label();
-        showMessage.setMaxWidth(Double.MAX_VALUE);
-        showMessage.setVisible(false);
+        banner.setMaxWidth(Double.MAX_VALUE);
 
         HBox rowCard = new HBox(20);
         this.client = new RoleCard("Sono un cliente", "Prenota e recensisci", "fas-user");
@@ -179,7 +178,7 @@ public class RegistrationView extends HBox {
         addUser.setStyle("-fx-background-color: #000000; -fx-text-fill: white; ");
         addUser.setCursor(Cursor.HAND);
         addUser.setOnMouseClicked(e -> {
-            showMessage.setVisible(false);
+            banner.hide();
             this.handleRegistrationUser();
         });
 
@@ -194,7 +193,7 @@ public class RegistrationView extends HBox {
         registerContainer.setAlignment(Pos.CENTER);
 
         rightPanel.getChildren().addAll(
-                greet, info, showMessage, rowCard, nominativo,
+                greet, info, banner, rowCard, nominativo,
                 email, emailField,
                 place, placeField,
                 dateBirth, dateBirthField,
@@ -228,9 +227,7 @@ public class RegistrationView extends HBox {
 
             if (place.isEmpty() || role.isEmpty() || name.isEmpty() || surname.isEmpty()
                     || email.isEmpty() || password.isEmpty() || confirm.isEmpty()) {
-                showMessage.setText("Attenzione. Tutti i dati obbligatori devono essere compilati");
-                showMessage.setStyle("-fx-text-fill: red;");
-                showMessage.setVisible(true);
+                banner.showError("Attenzione. Tutti i dati obbligatori devono essere compilati");
             } else {
                 User u;
                 if (dateOfBirth != null) {
@@ -252,14 +249,10 @@ public class RegistrationView extends HBox {
                 confirmField.clear();
                 client.setSelected(false);
                 manager.setSelected(false);
-                showMessage.setText("Registrazione avvenuta con successo");
-                showMessage.setStyle("-fx-text-fill: green;");
-                showMessage.setVisible(true);
+                banner.showSuccess("Registrazione avvenuta con successo");
             }
         } catch (RemoteException e) {
-            showMessage.setText("Attenzione. Non è stato possibile proseguire con la registrazione. Controlla i dati inseriti.");
-            showMessage.setStyle("-fx-text-fill: red;");
-            showMessage.setVisible(true);
+            banner.showError("Attenzione. Non è stato possibile proseguire con la registrazione. Controlla i dati inseriti.");
         }
     }
 

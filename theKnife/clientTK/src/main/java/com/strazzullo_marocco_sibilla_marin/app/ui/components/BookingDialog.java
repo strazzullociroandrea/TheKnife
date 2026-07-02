@@ -31,7 +31,10 @@ import java.util.logging.Logger;
  * call and swaps the ticket for its outcome (confirmed, or queued on the waiting list) in place.
  *
  * @version 2.0
- * @Author Marocco Stefano, 762192, VA - author of this revision
+ * @Author Strazzullo Ciro Andrea, 763603, VA
+ * @Author Marocco Stefano, 762192, VA
+ * @Author Sibilla Ginevra, 761114, VA
+ * @Author Marin Marco, 760622, VA
  */
 public class BookingDialog extends VBox {
 
@@ -79,6 +82,12 @@ public class BookingDialog extends VBox {
         showSummaryStep(restaurantName);
     }
 
+    /**
+     * Function to show the summary step: the ticket, the people stepper, and "Annulla"/"Conferma
+     * prenotazione" buttons.
+     *
+     * @param restaurantName the restaurant name, shown on the ticket
+     */
     private void showSummaryStep(String restaurantName) {
         Label title = new Label("La tua prenotazione");
         title.getStyleClass().add(Styles.TITLE_4);
@@ -155,6 +164,11 @@ public class BookingDialog extends VBox {
         return section;
     }
 
+    /**
+     * Function to carry out the actual {@code createBooking} RMI call on a background thread,
+     * disabling the summary step's buttons and showing a spinner while in flight, and swapping to
+     * the result step on success.
+     */
     private void confirmBooking() {
         confirmButton.setDisable(true);
         cancelButton.setDisable(true);
@@ -186,6 +200,12 @@ public class BookingDialog extends VBox {
         thread.start();
     }
 
+    /**
+     * Function to swap the ticket for the booking's outcome: confirmed, or queued on the waiting
+     * list with its position.
+     *
+     * @param booking the created booking, with its resolved status and waiting position
+     */
     private void showResultStep(Booking booking) {
         boolean confirmed = booking.getStatus() == BookingStatus.confirmed;
 

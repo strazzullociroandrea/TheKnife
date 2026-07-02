@@ -15,7 +15,10 @@ import org.kordamp.ikonli.javafx.FontIcon;
  * people count and {@link FilterPanel}'s "In quanti siete" capacity filter, rather than each
  * screen rolling its own copy of the same three controls.
  *
- * @Author Marocco Stefano, 762192, VA - author of this file
+ * @Author Strazzullo Ciro Andrea, 763603, VA
+ * @Author Marocco Stefano, 762192, VA
+ * @Author Sibilla Ginevra, 761114, VA
+ * @Author Marin Marco, 760622, VA
  */
 public class IntegerStepper extends HBox {
 

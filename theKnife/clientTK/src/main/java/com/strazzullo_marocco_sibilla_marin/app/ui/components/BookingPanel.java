@@ -27,7 +27,10 @@ import java.util.logging.Logger;
  * next, in {@link BookingDialog} — this panel is only about *when*, not *how many*.
  *
  * @version 2.0
- * @Author Marocco Stefano, 762192, VA - author of this revision
+ * @Author Strazzullo Ciro Andrea, 763603, VA
+ * @Author Marocco Stefano, 762192, VA
+ * @Author Sibilla Ginevra, 761114, VA
+ * @Author Marin Marco, 760622, VA
  */
 public class BookingPanel extends VBox {
 
@@ -109,6 +112,12 @@ public class BookingPanel extends VBox {
         thread.start();
     }
 
+    /**
+     * Function to render the available time slots as a group of selectable toggle chips,
+     * enabling the "Prenota" button once one is picked.
+     *
+     * @param slots the available time slots for the selected date, possibly empty if closed
+     */
     private void showSlots(List<LocalTime> slots) {
         if (slots.isEmpty()) {
             statusLabel.setText("Il locale è chiuso in questa data.");

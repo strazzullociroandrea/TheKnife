@@ -11,7 +11,10 @@ import java.time.LocalTime;
  * @param date the picked date
  * @param timeSlot the picked time slot
  *
- * @Author Marocco Stefano, 762192, VA - author of this file
+ * @Author Strazzullo Ciro Andrea, 763603, VA
+ * @Author Marocco Stefano, 762192, VA
+ * @Author Sibilla Ginevra, 761114, VA
+ * @Author Marin Marco, 760622, VA
  */
 public record SlotSelection(String locationId, LocalDate date, LocalTime timeSlot) {
 }

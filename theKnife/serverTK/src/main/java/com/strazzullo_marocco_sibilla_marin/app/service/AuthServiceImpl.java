@@ -18,7 +18,7 @@ import java.util.UUID;
  * RMI implementation of {@link AuthService}. Sessions are stored in the {@code session} DB table
  * so they survive server restarts and work across multiple concurrent client devices.
  *
- * @version 2.0
+ * @version 3.0
  * @Author Strazzullo Ciro Andrea, 763603, VA
  * @Author Marocco Stefano, 762192, VA
  * @Author Sibilla Ginevra, 761114, VA
@@ -116,6 +116,37 @@ public class AuthServiceImpl extends UnicastRemoteObject implements AuthService 
             return userDAO.findByEmail(email) == null;
         } catch (SQLException e) {
             throw new RemoteException("Errore database durante la validazione dell'email.", e);
+        }
+    }
+
+    /**
+     * {@inheritDoc}
+     * Fetches the current row so credentials, id, and role are carried over unchanged, checks
+     * email uniqueness only when the email actually changed, then delegates to {@link
+     * UserDAO#update}.
+     */
+    @Override
+    public User updateProfile(String userId, String name, String surname, String email, String domicile,
+                               String dateOfBirth) throws RemoteException {
+        try {
+            User user = userDAO.findById(userId);
+            if (user == null) {
+                throw new RemoteException("Utente non trovato.");
+            }
+            if (!user.getEmail().equalsIgnoreCase(email) && !validateEmail(email)) {
+                throw new RemoteException("Esiste già un account con questa email.");
+            }
+            user.setName(name);
+            user.setSurname(surname);
+            user.setEmail(email);
+            user.setDomicile(domicile);
+            user.setDateOfBirth(dateOfBirth);
+            userDAO.update(user);
+            return user;
+        } catch (RemoteException e) {
+            throw e;
+        } catch (Exception e) {
+            throw new RemoteException("Non è stato possibile aggiornare il profilo. Riprova più tardi.", e);
         }
     }
 

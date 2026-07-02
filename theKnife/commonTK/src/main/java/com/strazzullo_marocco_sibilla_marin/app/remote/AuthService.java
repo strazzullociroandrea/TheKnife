@@ -8,7 +8,7 @@ import java.rmi.RemoteException;
 /**
  * Remote service interface exposing authentication actions via RMI.
  *
- * @version 2.0
+ * @version 3.0
  * @Author Strazzullo Ciro Andrea, 763603, VA
  * @Author Marocco Stefano, 762192, VA
  * @Author Sibilla Ginevra, 761114, VA
@@ -62,4 +62,20 @@ public interface AuthService extends Remote {
      * @throws RemoteException if a remote communication error occurs
      */
     boolean validateEmail(String email) throws RemoteException;
+
+    /**
+     * Updates the editable fields of a user's profile (name, surname, email, domicile, and date
+     * of birth), leaving credentials and role untouched.
+     *
+     * @param userId the id of the user to update
+     * @param name the new first name
+     * @param surname the new last name
+     * @param email the new email
+     * @param domicile the new domicile/address, or null/blank to clear it
+     * @param dateOfBirth the new date of birth, formatted "yyyy-MM-dd", or null/blank to clear it
+     * @return the updated user
+     * @throws RemoteException if the email is already taken by another user or a DB error occurs
+     */
+    User updateProfile(String userId, String name, String surname, String email, String domicile,
+                        String dateOfBirth) throws RemoteException;
 }

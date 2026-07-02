@@ -4,6 +4,7 @@ import com.strazzullo_marocco_sibilla_marin.app.rmi.ServiceLocator;
 import com.strazzullo_marocco_sibilla_marin.app.session.SessionStore;
 import javafx.scene.Node;
 import javafx.scene.layout.StackPane;
+import sibilla.Cuisine;
 import sibilla.LocationSearchResult;
 import strazzullo.Client;
 import strazzullo.User;
@@ -19,9 +20,9 @@ import java.util.Deque;
  * On startup the shell attempts to restore a previous session from disk so the user does not have
  * to log in again after restarting the app.
  *
- * @version 5.0
+ * @version 6.0
  * @Author Strazzullo Ciro Andrea, 763603, VA
- * @Author Marocco Stefano, 762192, VA - author of this revision
+ * @Author Marocco Stefano, 762192, VA
  * @Author Sibilla Ginevra, 761114, VA
  * @Author Marin Marco, 760622, VA
  */
@@ -123,8 +124,39 @@ public class AppShell extends StackPane {
      * @param query the free-text restaurant name query, may be blank
      */
     public void showSearch(String city, String query) {
+        showSearch(city, query, null);
+    }
+
+    /**
+     * Function to navigate to the search results screen with a cuisine already applied, running
+     * an initial search and resetting any back-stack built up so far. Used by the home screen's
+     * cuisine quick-filter chips.
+     *
+     * @param city  the city to search in, may be blank
+     * @param query the free-text restaurant name query, may be blank
+     * @param cuisine the cuisine to pre-select, or null for none
+     */
+    public void showSearch(String city, String query, Cuisine cuisine) {
         backStack.clear();
-        show(new SearchView(this, city, query));
+        show(new SearchView(this, city, query, cuisine));
+    }
+
+    /**
+     * Function to navigate to the favourites screen, pushing the current screen onto the
+     * back-stack so {@link #goBack()} returns to it.
+     */
+    public void showFavourites() {
+        pushCurrent();
+        show(new FavouritesView(this));
+    }
+
+    /**
+     * Function to navigate to the bookings screen, pushing the current screen onto the
+     * back-stack so {@link #goBack()} returns to it.
+     */
+    public void showBookings() {
+        pushCurrent();
+        show(new BookingsView(this));
     }
 
     /**
@@ -159,6 +191,24 @@ public class AppShell extends StackPane {
         } else {
             show(backStack.pop());
         }
+    }
+
+    /**
+     * Function to return to whichever screen was showing before login/logout, like {@link
+     * #goBack()}, except a {@link HomeView} on the back-stack is always rebuilt fresh rather than
+     * reused as-is. Every other cached screen (e.g. {@link SearchView}) still just gets restored:
+     * its content is unaffected by the auth change, only its own toolbar-driven navigation would
+     * pick up the new session. Used after a successful login, since the back-stack may otherwise
+     * hold a {@link HomeView} instance built while logged out, which would keep showing the guest
+     * layout even though the session has since changed.
+     */
+    public void goBackAfterAuthChange() {
+        if (backStack.isEmpty()) {
+            showHome();
+            return;
+        }
+        Node previous = backStack.pop();
+        show(previous instanceof HomeView ? new HomeView(this) : previous);
     }
 
     /**
